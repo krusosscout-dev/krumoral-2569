@@ -754,27 +754,25 @@ class PhygitalFirebaseManager {
     const stations = data.stations || {};
     const completed = team.completed_stations || {};
 
-    const availableStations = Object.values(stations).filter(st => {
+    let availableStations = Object.values(stations).filter(st => {
       return st.is_vacant === true && !completed[st.id];
     });
 
+    // If all stations completed by this team, allow replay to keep earning score!
     if (availableStations.length === 0) {
-      const totalStationsCount = Object.keys(stations).length;
-      const completedCount = Object.keys(completed).length;
-      
-      if (completedCount >= totalStationsCount && totalStationsCount > 0) {
-        return {
-          success: false,
-          reason: 'all_completed',
-          message: 'กลุ่มของคุณผ่านการทำกิจกรรมครบทุกฐานแล้ว!'
-        };
-      } else {
-        return {
-          success: false,
-          reason: 'none_vacant',
-          message: 'ขณะนี้ทุกฐานกิจกรรมมีเพื่อนกลุ่มอื่นกำลังเล่นอยู่ กรุณารอสักครู่...'
-        };
-      }
+      availableStations = Object.values(stations).filter(st => st.is_vacant === true);
+    }
+    // If all stations occupied by other teams, allow parallel activity!
+    if (availableStations.length === 0) {
+      availableStations = Object.values(stations);
+    }
+
+    if (availableStations.length === 0) {
+      return {
+        success: false,
+        reason: 'no_stations',
+        message: 'ยังไม่มีฐานกิจกรรมในระบบ'
+      };
     }
 
     const chosenStation = availableStations[Math.floor(Math.random() * availableStations.length)];

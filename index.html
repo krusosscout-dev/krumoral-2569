@@ -374,14 +374,14 @@
     <!-- ================= STAGE 2: LIVE BOARD + INTERACTIVE DICE GAMEPLAY ================= -->
     <div id="stage-gameplay" class="hidden space-y-3 w-full my-auto">
       
-      <!-- 1. MAIN LIVE BOARD CANVAS (Larger & Expansive) -->
-      <div class="glass-panel p-2 sm:p-3 rounded-2xl space-y-1.5 relative">
+      <!-- 1. MAIN LIVE BOARD CANVAS (Adaptive Uncropped Square Display) -->
+      <div class="glass-panel p-2 sm:p-3 rounded-2xl space-y-1.5 relative flex flex-col items-center">
         
-        <!-- Board Container -->
-        <div id="boardCanvasContainer" class="board-container w-full aspect-[16/9] sm:aspect-[16/8.5] max-h-[62vh] rounded-xl overflow-hidden border border-white/15 relative transition-all duration-300 shadow-2xl">
+        <!-- Board Container: Square Aspect Ratio for Complete Uncropped View -->
+        <div id="boardCanvasContainer" class="board-container w-full max-w-[640px] aspect-square max-h-[66vh] rounded-2xl overflow-hidden border border-white/15 relative transition-all duration-300 shadow-2xl mx-auto bg-slate-950">
           <!-- Background Board Image -->
-          <img id="boardBgImage" src="" alt="Snakes and Ladders Board" class="w-full h-full object-cover">
-          <div class="absolute inset-0 bg-slate-950/25"></div>
+          <img id="boardBgImage" src="pirate_board_100.jpg" alt="Snakes and Ladders Board" class="w-full h-full object-contain bg-slate-950">
+          <div class="absolute inset-0 pointer-events-none"></div>
           
           <!-- Tiles Layer -->
           <div id="boardTilesOverlay" class="absolute inset-0 pointer-events-none"></div>
@@ -400,10 +400,10 @@
         </div>
 
         <!-- Board Mini Info Bar -->
-        <div class="flex items-center justify-between text-[10px] text-slate-400 px-1">
+        <div class="w-full max-w-[640px] flex items-center justify-between text-[10px] text-slate-400 px-1 pt-1">
           <div class="flex items-center space-x-3">
-            <span>🚩 เริ่ม: ช่อง 1</span>
-            <span>🏁 เส้นชัย: ช่อง <strong id="boardTotalTilesLabel" class="text-amber-400">40</strong> (+500 โบนัส)</span>
+            <span>🚩 เริ่ม: ท่าเรือ ➔ ช่อง 1</span>
+            <span>🏁 เส้นชัย: ช่อง <strong id="boardTotalTilesLabel" class="text-amber-400">100</strong> (+500 โบนัส)</span>
           </div>
           <div class="flex items-center space-x-2">
             <button type="button" onclick="toggleBoardExpand()" class="px-2.5 py-0.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white flex items-center space-x-1 text-[9px] font-semibold transition-all cursor-pointer">
@@ -1171,12 +1171,12 @@
       isBoardExpanded = !isBoardExpanded;
 
       if (isBoardExpanded) {
-        container.classList.remove('max-h-[62vh]');
-        container.classList.add('max-h-[82vh]');
+        container.classList.remove('max-h-[66vh]', 'max-w-[640px]');
+        container.classList.add('max-h-[88vh]', 'max-w-[850px]');
         label.textContent = "ย่อกระดาน";
       } else {
-        container.classList.remove('max-h-[82vh]');
-        container.classList.add('max-h-[62vh]');
+        container.classList.remove('max-h-[88vh]', 'max-w-[850px]');
+        container.classList.add('max-h-[66vh]', 'max-w-[640px]');
         label.textContent = "ขยายกระดานใหญ่";
       }
       lucide.createIcons();
@@ -1184,9 +1184,37 @@
 
     // ================= COORDINATE MAPPING (SERPENTINE MATRIX & CALIBRATION) =================
     function getTileCoordinate(tileNumber, totalTiles, config = {}) {
-      if (tileNumber <= 0) return { x: 7, y: 84 };
+      const total = parseInt(totalTiles) || 100;
+      const isPirate = (config.board_image_url && config.board_image_url.includes('pirate')) || total === 100;
 
-      const total = parseInt(totalTiles) || 40;
+      if (tileNumber <= 0) {
+        return isPirate ? { x: 7.5, y: 88.0 } : { x: 7.0, y: 84.0 };
+      }
+
+      if (isPirate && total === 100) {
+        const cols = 10;
+        const rows = 10;
+        const index = Math.min(tileNumber, 100) - 1;
+        const rowIndex = Math.floor(index / cols); // 0 = row 1 (bottom), 9 = row 10 (top)
+        const colInRow = index % cols;
+
+        // Serpentine: even rows (0, 2, 4, 6, 8) go Left->Right, odd rows (1, 3, 5, 7, 9) go Right->Left
+        const colPos = (rowIndex % 2 === 0) ? colInRow : (cols - 1 - colInRow);
+
+        // Precise Pirate Map Anchor Points on 1:1 Square
+        const xMin = 19.5;
+        const xMax = 83.5;
+        const xStep = (xMax - xMin) / (cols - 1);
+        const x = xMin + (colPos * xStep);
+
+        const yMin = 17.6; // Top row 10
+        const yMax = 90.5; // Bottom row 1
+        const yStep = (yMax - yMin) / (rows - 1);
+        const y = yMax - (rowIndex * yStep);
+
+        return { x, y };
+      }
+
       let cols = 8;
       if (config.grid_cols && config.grid_cols !== 'auto') {
         cols = parseInt(config.grid_cols) || 8;
@@ -1435,39 +1463,26 @@
             return;
           }
 
-          // 2. Dynamic Station Assignment Logic!
+          // 2. Dynamic Station Assignment Logic (Instant & Direct!)
           setTimeout(async () => {
-            Swal.fire({
-              title: 'กำลังสแกนหาฐานกิจกรรมว่าง...',
-              text: 'ระบบกำลังจัดสรรฐานว่างที่กลุ่มของคุณยังไม่เคยเล่น',
-              allowOutsideClick: false,
-              didOpen: () => Swal.showLoading()
-            });
+            try {
+              const assignRes = await PhygitalDB.assignVacantStation(currentRoomPin, currentTeamId);
 
-            const assignRes = await PhygitalDB.assignVacantStation(currentRoomPin, currentTeamId);
-            Swal.close();
-
-            if (assignRes.success && assignRes.station) {
-              confetti({ particleCount: 60, spread: 60, origin: { y: 0.5 } });
-              playBeep(700, 0.3, 'sine');
-              const myTeam = roomData?.teams?.[currentTeamId] || {};
-              setupStationMissionModal(assignRes.station, myTeam);
-              openModal('stationMissionModal');
-            } else if (assignRes.reason === 'none_vacant') {
-              openModal('queueModal');
-              watchForVacantStation();
-            } else if (assignRes.reason === 'all_completed') {
-              Swal.fire({
-                icon: 'success',
-                title: 'ยอดเยี่ยมมาก!',
-                text: 'กลุ่มของคุณผ่านกิจกรรมครบทุกฐานแล้ว สามารถทอยเต๋าเพื่อเดินต่อได้เลย!',
-                timer: 3000
-              });
+              if (assignRes && assignRes.success && assignRes.station) {
+                confetti({ particleCount: 60, spread: 60, origin: { y: 0.5 } });
+                playBeep(700, 0.3, 'sine');
+                const updatedData = PhygitalDB.getLocalRoom(currentRoomPin) || roomData;
+                const myTeam = updatedData?.teams?.[currentTeamId] || {};
+                setupStationMissionModal(assignRes.station, myTeam);
+                openModal('stationMissionModal');
+              }
+            } catch(err) {
+              console.log("Station assignment fallback:", err);
             }
 
             // Always update control dashboard so button is active and ready
             handleRoomStateChange();
-          }, 1000);
+          }, 800);
 
         } catch (e) {
           Swal.fire('เกิดข้อผิดพลาด', e.message, 'error');
