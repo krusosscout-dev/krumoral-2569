@@ -43,8 +43,18 @@
   <script src="firebase-config.js"></script>
 
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+
+    *, html, body, input, button, select, textarea, .swal2-popup, .swal2-content, .swal2-html-container, .swal2-actions button {
+      font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+    .font-heading, h1, h2, h3, h4, h5, h6, .swal2-title {
+      font-family: 'Kanit', sans-serif !important;
+    }
+    .font-mono, .swal2-timer-progress-bar {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+    }
     body {
-      font-family: 'Prompt', sans-serif;
       overflow-x: hidden;
     }
     .custom-scrollbar::-webkit-scrollbar {
@@ -68,9 +78,25 @@
     .board-tile {
       position: absolute;
       transform: translate(-50%, -50%);
-      transition: all 0.3s ease;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       user-select: none;
       filter: drop-shadow(0 4px 10px rgba(0,0,0,0.8));
+      width: 52px !important;
+      height: 36px !important;
+      min-width: 52px !important;
+      max-width: 52px !important;
+      min-height: 36px !important;
+      max-height: 36px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border-radius: 9px !important;
+      box-sizing: border-box !important;
+      font-family: 'Kanit', monospace !important;
+      font-weight: 800 !important;
+      font-size: 15px !important;
+      line-height: 1 !important;
+      padding: 0 !important;
     }
     .team-pawn {
       position: absolute;
@@ -594,22 +620,25 @@
           continue;
         }
 
+        const baseBox = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-xs sm:text-sm md:text-base shadow-md border-2 transition-all w-10 sm:w-12 h-7 sm:h-8.5';
         const tileEl = document.createElement('div');
         
         if (isFinish) {
-          tileEl.className = 'board-tile flex items-center justify-center rounded-2xl font-mono font-black text-slate-950 text-base shadow-2xl bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 border-2 border-white animate-pulse px-4 py-2 min-w-[65px]';
+          tileEl.className = `${baseBox} bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 text-slate-950 border-white ring-2 ring-amber-300 animate-pulse`;
           tileEl.innerHTML = `🏆 ${i}`;
         } else if (isStart) {
-          tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-white text-sm shadow-xl bg-indigo-600 border-2 border-indigo-300 px-3 py-1.5 min-w-[50px]';
+          tileEl.className = `${baseBox} bg-indigo-600 text-white border-indigo-300 shadow-indigo-600/40`;
           tileEl.innerHTML = `🚩 ${i}`;
         } else if (warp && warp.type === 'ladder') {
-          tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-emerald-200 text-sm shadow-xl bg-emerald-950/90 border-2 border-emerald-400 px-3 py-1.5 min-w-[55px]';
+          tileEl.className = `${baseBox} bg-emerald-950/90 text-emerald-300 border-emerald-400 shadow-emerald-950/50`;
           tileEl.innerHTML = `🧗‍♂️ ${i}`;
+          tileEl.title = `บันไดลัดไปช่อง ${warp.to}`;
         } else if (warp && warp.type === 'snake') {
-          tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-rose-200 text-sm shadow-xl bg-rose-950/90 border-2 border-rose-400 px-3 py-1.5 min-w-[55px]';
+          tileEl.className = `${baseBox} bg-rose-950/90 text-rose-300 border-rose-400 shadow-rose-950/50`;
           tileEl.innerHTML = `🐍 ${i}`;
+          tileEl.title = `งู/กับดักถอยไปช่อง ${warp.to}`;
         } else {
-          tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-white text-sm shadow-lg bg-slate-950/85 backdrop-blur-md border-2 border-white/35 px-3 py-1.5 min-w-[44px]';
+          tileEl.className = `${baseBox} bg-slate-950/85 backdrop-blur-md text-slate-100 border-white/30`;
           tileEl.innerHTML = `${i}`;
         }
 

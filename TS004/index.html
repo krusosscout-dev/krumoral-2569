@@ -42,8 +42,18 @@
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎲</text></svg>">
 
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+
+    *, html, body, input, button, select, textarea, .swal2-popup, .swal2-content, .swal2-html-container, .swal2-actions button {
+      font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+    .font-heading, h1, h2, h3, h4, h5, h6, .swal2-title {
+      font-family: 'Kanit', sans-serif !important;
+    }
+    .font-mono, .swal2-timer-progress-bar {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+    }
     body {
-      font-family: 'Prompt', sans-serif;
       touch-action: manipulation;
       background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #090d16 55%, #020617 100%);
       color: #f8fafc;
@@ -99,9 +109,37 @@
     .board-tile {
       position: absolute;
       transform: translate(-50%, -50%);
-      transition: all 0.3s ease;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       user-select: none;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.7));
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.7));
+      width: 44px !important;
+      height: 30px !important;
+      min-width: 44px !important;
+      max-width: 44px !important;
+      min-height: 30px !important;
+      max-height: 30px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border-radius: 8px !important;
+      box-sizing: border-box !important;
+      font-family: 'Kanit', monospace !important;
+      font-weight: 800 !important;
+      font-size: 13px !important;
+      line-height: 1 !important;
+      padding: 0 !important;
+    }
+    @media (min-width: 1024px) {
+      .board-tile {
+        width: 48px !important;
+        height: 32px !important;
+        min-width: 48px !important;
+        max-width: 48px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        font-size: 14px !important;
+        border-radius: 9px !important;
+      }
     }
     .team-pawn {
       position: absolute;
@@ -218,7 +256,7 @@
   <main class="flex-1 max-w-[1600px] w-full mx-auto px-2 sm:px-4 py-1.5 flex flex-col justify-center overflow-hidden">
 
     <!-- ================= STAGE 0: HERO LANDING (หน้าแรกสุด สวยงาม จบใน 1 หน้า) ================= -->
-    <div id="stage-landing" class="max-w-2xl mx-auto w-full space-y-4 my-auto animate-fadeIn text-center">
+    <div id="stage-landing" class="hidden max-w-2xl mx-auto w-full space-y-4 my-auto animate-fadeIn text-center">
       
       <!-- Mascot Floating Orbit & 3D Dice Badge -->
       <div class="relative flex flex-col items-center justify-center pt-2">
@@ -433,30 +471,38 @@
       </div>
 
       <!-- RIGHT COLUMN (28-32%): DEDICATED CONTROL COCKPIT & LIVE FRIENDS RADAR -->
-      <div class="lg:col-span-4 xl:col-span-4 flex flex-col justify-between space-y-2.5 h-full">
+      <div class="lg:col-span-4 xl:col-span-4 flex flex-col justify-start space-y-2.5 h-full">
         
-        <!-- Card 1: My Team Profile Card -->
-        <div class="glass-panel p-3 rounded-2xl flex items-center justify-between relative group border border-indigo-500/30 shadow-lg">
-          <div class="flex items-center space-x-3">
+        <!-- Card 1: My Team Profile Card (High Readability, Crisp Typography, Large Rank) -->
+        <div class="glass-panel p-3 sm:p-3.5 rounded-2xl flex items-center justify-between relative border border-indigo-500/40 shadow-xl bg-slate-900/90">
+          <div class="flex items-center space-x-3 sm:space-x-3.5">
             <button onclick="openMascotPickerModal()" title="คลิกเพื่อเปลี่ยนตัวละครตัวเดิน" class="relative group/avatar cursor-pointer">
-              <div id="myTeamAvatarBox" class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-inner border-2 border-white/30 transition-transform group-hover/avatar:scale-110">
+              <div id="myTeamAvatarBox" class="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-3xl shadow-inner border-2 border-white/40 bg-indigo-950/70 transition-transform group-hover/avatar:scale-110">
                 🦁
               </div>
-              <span class="absolute -bottom-1 -right-1 bg-indigo-600 text-white rounded-full p-1 text-[9px] shadow-md">
-                <i data-lucide="sparkles" class="w-2.5 h-2.5"></i>
+              <span class="absolute -bottom-1 -right-1 bg-indigo-600 text-white rounded-full p-1 text-[10px] shadow-md">
+                <i data-lucide="sparkles" class="w-3 h-3"></i>
               </span>
             </button>
-            <div>
-              <div class="flex items-center space-x-1">
-                <span class="text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 font-bold">กลุ่มของคุณ</span>
+            <div class="space-y-1">
+              <div class="flex items-center space-x-2">
+                <span class="text-[10px] px-2 py-0.5 rounded bg-indigo-500/25 text-indigo-300 font-bold tracking-wide">กลุ่มของคุณ</span>
+                <span id="myTeamRankBadge" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/25 text-amber-300 font-black border border-amber-400 shadow-sm shadow-amber-500/30">
+                  🥇 อันดับ 1 (ผู้นำ)
+                </span>
               </div>
-              <h3 id="myTeamNameLabel" class="text-sm font-black font-heading text-white truncate max-w-[130px]">กลุ่ม 1</h3>
-              <span class="text-[11px] text-slate-300 font-semibold">ช่อง: <strong id="myTeamTileLabel" class="text-amber-400 font-mono text-xs">0</strong>/<span id="myTeamTotalTilesLabel">40</span></span>
+              <h3 id="myTeamNameLabel" class="text-base sm:text-lg font-bold font-heading text-white tracking-wide truncate max-w-[150px] sm:max-w-[170px]">กลุ่มที่ 1 (สิงโตเพลิง)</h3>
+              <div class="flex items-center space-x-1.5 text-xs text-slate-300">
+                <span class="text-slate-400">ช่อง:</span>
+                <span class="px-2 py-0.5 rounded bg-slate-800 text-amber-300 font-mono font-bold text-xs border border-slate-700">
+                  <strong id="myTeamTileLabel" class="text-amber-400">0</strong> / <span id="myTeamTotalTilesLabel">40</span>
+                </span>
+              </div>
             </div>
           </div>
-          <div class="text-right">
-            <span id="myTeamScoreLabel" class="text-2xl font-black text-amber-400 font-heading">0</span>
-            <span class="block text-[9px] text-slate-400 uppercase font-semibold">คะแนนสะสม</span>
+          <div class="text-right pl-3 border-l border-slate-800">
+            <span id="myTeamScoreLabel" class="text-3xl sm:text-4xl font-black text-amber-400 font-heading tracking-tight block">0</span>
+            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">คะแนนสะสม</span>
           </div>
         </div>
 
@@ -491,24 +537,27 @@
           </button>
         </div>
 
-        <!-- Card 3: Live Top 3 Podium & Friends Radar (แท่น 3 อันดับคะแนน & ส่องหมากเพื่อน) -->
-        <div class="glass-panel p-3 rounded-2xl flex-1 flex flex-col justify-between space-y-2 border border-slate-800 shadow-lg min-h-[220px]">
-          <div class="flex items-center justify-between border-b border-white/10 pb-1.5">
-            <span class="font-bold text-xs text-amber-400 flex items-center space-x-1.5">
-              <i data-lucide="crown" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span>แท่น 3 อันดับคะแนนสะสม (Top 3):</span>
+        <!-- Card 3: Live Top 3 Olympic Podium & Friends Radar -->
+        <div class="glass-panel p-3 sm:p-3.5 rounded-2xl flex-1 flex flex-col justify-start space-y-2.5 border border-slate-800 shadow-xl bg-slate-900/90 overflow-hidden">
+          <div class="flex items-center justify-between border-b border-white/10 pb-2">
+            <span class="font-bold text-xs sm:text-sm text-amber-400 flex items-center space-x-1.5 font-heading">
+              <i data-lucide="crown" class="w-4 h-4 text-amber-400"></i>
+              <span>แท่น 3 อันดับคะแนนสะสม (Top 3)</span>
             </span>
-            <span class="text-[9px] text-indigo-400 font-bold">อัปเดตสด 🔴</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30 animate-pulse">Live 🔴</span>
           </div>
 
-          <!-- Top 3 Visual Podium Container -->
-          <div id="podiumTop3Container" class="flex items-end justify-center gap-1.5 pt-1 pb-1">
+          <!-- Top 3 Visual Podium Container (True 3D Tiered Height Pedestals) -->
+          <div id="podiumTop3Container" class="flex items-end justify-center gap-2 pt-2 px-1">
             <!-- Injected by JS: 2nd (Silver), 1st (Gold Elevated), 3rd (Bronze) -->
           </div>
 
           <!-- Remaining Teams List (Rank 4+) -->
-          <div id="teamsQuickTrackerBar" class="grid grid-cols-1 gap-1 overflow-y-auto custom-scrollbar max-h-[110px] p-0.5 border-t border-white/5 pt-1">
-            <!-- Injected by JS: Remaining teams -->
+          <div class="space-y-1 pt-1.5 border-t border-white/10">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block px-1">อันดับกลุ่มอื่นๆ ในห้อง:</span>
+            <div id="teamsQuickTrackerBar" class="grid grid-cols-1 gap-1.5 overflow-y-auto custom-scrollbar max-h-[125px] p-0.5">
+              <!-- Injected by JS: Remaining teams -->
+            </div>
           </div>
         </div>
 
@@ -568,12 +617,15 @@
           <span id="stationMaxScoreBadge" class="text-base font-black text-amber-400 font-heading">100</span>
           <span class="block text-[8px] text-slate-400 font-semibold">คะแนนเต็ม</span>
         </div>
+      <!-- Station Image / Infographic (if available - รองรับทุกอัตราส่วนภาพ แนวนอน/แนวตั้ง/จัตุรัส) -->
+      <div id="stationImageBox" class="hidden rounded-2xl overflow-hidden border border-slate-700 bg-slate-950/90 shadow-inner flex items-center justify-center p-1.5">
+        <img id="stationImagePreview" src="" alt="ภาพกติกาฐาน" class="max-w-full max-h-52 object-contain rounded-xl cursor-pointer hover:opacity-90 transition-opacity" onclick="zoomStationImage(this.src)" title="🔍 คลิกเพื่อดูภาพขยายเต็มจอ">
       </div>
 
       <!-- Description / Rules -->
       <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-800 space-y-1 text-xs">
         <span class="font-bold text-indigo-300 flex items-center space-x-1">
-          <i data-lucide="scroll" class="w-3 h-3"></i>
+          <i data-lucide="scroll" class="w-3.5 h-3.5"></i>
           <span>คำอธิบายกติกา / สิ่งที่ต้องทำ:</span>
         </span>
         <p id="stationDescription" class="text-slate-200 leading-relaxed text-xs">
@@ -592,6 +644,35 @@
         </div>
       </div>
 
+      <!-- Photo Evidence Upload (ถ่ายภาพบันทึกหลักฐานการเข้าฐาน) -->
+      <div class="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2 text-left">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-300 flex items-center space-x-1.5">
+            <i data-lucide="camera" class="w-4 h-4 text-emerald-400"></i>
+            <span>ถ่ายภาพหลักฐานการทำกิจกรรม:</span>
+          </span>
+          <span id="photoStatusBadge" class="text-[10px] text-slate-400 font-bold px-1.5 py-0.2 rounded bg-slate-900">แนบรูปผลงาน</span>
+        </div>
+
+        <input type="file" id="stationPhotoInput" accept="image/*" capture="environment" class="hidden" onchange="handleStationPhotoSelected(event)">
+        
+        <div id="photoUploadPlaceholder" onclick="document.getElementById('stationPhotoInput').click()" class="border-2 border-dashed border-slate-700 hover:border-emerald-500 rounded-xl p-3 text-center cursor-pointer transition-all bg-slate-900/60 flex flex-col items-center justify-center space-y-1">
+          <i data-lucide="camera" class="w-6 h-6 text-slate-400"></i>
+          <span class="text-xs font-bold text-slate-200">📸 กดเพื่อถ่ายภาพ / แนบรูปภาพ</span>
+          <span class="text-[10px] text-slate-400">บันทึกรูปผลงานส่งตรงไปยังแผงควบคุมคุณครู</span>
+        </div>
+
+        <div id="photoPreviewContainer" class="hidden relative rounded-xl overflow-hidden border border-emerald-500/50 bg-slate-900">
+          <img id="stationPhotoPreview" src="" alt="หลักฐาน" class="w-full max-h-36 object-cover">
+          <button type="button" onclick="removeStationPhoto()" class="absolute top-1.5 right-1.5 p-1 rounded-full bg-slate-900/80 hover:bg-rose-600 text-white text-xs transition-all shadow-md cursor-pointer">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          </button>
+          <span class="absolute bottom-1.5 left-1.5 px-2 py-0.5 rounded bg-emerald-950/90 text-emerald-300 text-[9px] font-bold border border-emerald-500/40">
+            ✓ บันทึกภาพเรียบร้อย
+          </span>
+        </div>
+      </div>
+
       <!-- Score Entry & Submission Form -->
       <div class="pt-2 border-t border-slate-800 space-y-2.5">
         <label class="block text-xs font-bold text-slate-300 text-center">
@@ -599,23 +680,23 @@
         </label>
 
         <div class="flex items-center justify-center space-x-2">
-          <button type="button" onclick="adjustScoreInput(-10)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-xs text-slate-300 border border-slate-700">-10</button>
+          <button type="button" onclick="adjustScoreInput(-10)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-xs text-slate-300 border border-slate-700 cursor-pointer">-10</button>
           <input type="number" id="stationScoreInput" min="0" max="100" class="w-24 bg-slate-950 border border-slate-700 rounded-xl py-2 text-center font-black text-xl text-amber-400 focus:outline-none focus:border-amber-500" value="100">
-          <button type="button" onclick="adjustScoreInput(10)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-xs text-slate-300 border border-slate-700">+10</button>
+          <button type="button" onclick="adjustScoreInput(10)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-xs text-slate-300 border border-slate-700 cursor-pointer">+10</button>
         </div>
 
         <div class="grid grid-cols-4 gap-1.5 text-xs font-bold" id="scorePresets">
-          <button type="button" onclick="setStationScoreInput(100)" class="py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">100</button>
-          <button type="button" onclick="setStationScoreInput(90)" class="py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">90</button>
-          <button type="button" onclick="setStationScoreInput(80)" class="py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">80</button>
-          <button type="button" onclick="setStationScoreInput(70)" class="py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">70</button>
+          <button type="button" onclick="setStationScoreInput(100)" class="py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer">100</button>
+          <button type="button" onclick="setStationScoreInput(90)" class="py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer">90</button>
+          <button type="button" onclick="setStationScoreInput(80)" class="py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer">80</button>
+          <button type="button" onclick="setStationScoreInput(70)" class="py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer">70</button>
         </div>
 
         <div class="flex items-center space-x-2 pt-1">
-          <button type="button" onclick="skipStationToRoll()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition-all">
+          <button type="button" onclick="skipStationToRoll()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition-all cursor-pointer">
             ข้ามฐานเพื่อเดินต่อ
           </button>
-          <button id="btnSubmitScore" onclick="handleSubmitStationScore()" class="flex-[2] py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 font-bold text-xs text-white shadow-lg shadow-emerald-600/30 active:scale-95 transition-all flex items-center justify-center space-x-1.5">
+          <button id="btnSubmitScore" onclick="handleSubmitStationScore()" class="flex-[2] py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 font-bold text-xs text-white shadow-lg shadow-emerald-600/30 active:scale-95 transition-all flex items-center justify-center space-x-1.5 cursor-pointer">
             <i data-lucide="check" class="w-3.5 h-3.5"></i>
             <span>ส่งคะแนน (Submit Score)</span>
           </button>
@@ -666,22 +747,74 @@
     </div>
   </div>
 
-  <!-- ================= MODAL 4: GRAND FINALE / VICTORY ================= -->
-  <div id="victoryModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center p-4">
-    <div class="max-w-md w-full glass-panel p-5 rounded-3xl border border-amber-500/40 shadow-2xl text-center space-y-4">
-      <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-yellow-500 to-amber-600 text-3xl flex items-center justify-center shadow-lg shadow-amber-500/30 animate-bounce">
-        👑
-      </div>
-      <div>
-        <h2 class="text-xl font-black font-heading text-white">🎉 สิ้นสุดการแข่งขัน! 🎉</h2>
-        <p id="victorySubtitle" class="text-xs text-amber-400 font-semibold mt-0.5">ยินดีกับทีมผู้ชนะเลิศอันดับ 1</p>
+  <!-- ================= MODAL 4: GRAND FINALE / VICTORY MODAL WITH 3D PODIUM ================= -->
+  <div id="victoryModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4">
+    <div class="max-w-lg w-full glass-panel p-4 sm:p-6 rounded-3xl border border-amber-500/50 shadow-2xl text-center space-y-4 max-h-[92vh] overflow-y-auto custom-scrollbar">
+      
+      <!-- Top Trophy Banner -->
+      <div class="relative flex flex-col items-center">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-600 text-3xl flex items-center justify-center shadow-xl shadow-amber-500/40 animate-bounce">
+          👑
+        </div>
+        <h2 class="text-xl sm:text-2xl font-black font-heading text-white mt-2">🎉 สิ้นสุดการแข่งขัน! 🎉</h2>
+        <p id="victorySubtitle" class="text-xs sm:text-sm text-amber-300 font-bold mt-0.5">ยินดีกับทีมผู้ชนะเลิศ!</p>
       </div>
 
-      <div id="victoryPodiumList" class="space-y-1.5 text-left max-h-[40vh] overflow-y-auto custom-scrollbar"></div>
+      <!-- Grand 3D Olympic Victory Podium -->
+      <div id="victory3DPodium" class="flex items-end justify-center gap-2 pt-2 px-2 pb-1 border-b border-white/10">
+        <!-- Injected by JS: 2nd (Silver), 1st (Gold Elevated), 3rd (Bronze) -->
+      </div>
 
-      <button onclick="closeModal('victoryModal')" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300">
-        ปิดหน้าต่าง (ดูภาพกระดานสรุปผล)
-      </button>
+      <!-- Rank 4+ Remaining Teams List -->
+      <div id="victoryRemainingList" class="space-y-1.5 text-left max-h-[160px] overflow-y-auto custom-scrollbar">
+        <!-- Injected by JS: Rank 4, 5, 6... -->
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center space-x-2 pt-1">
+        <button onclick="handleRestartGameFromVictory()" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-xs sm:text-sm font-bold text-white shadow-lg shadow-emerald-600/30 flex items-center justify-center space-x-1.5 transition-all cursor-pointer">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span>เริ่มเล่นรอบใหม่ (Play Again)</span>
+        </button>
+        <button onclick="closeModal('victoryModal')" class="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition-all cursor-pointer">
+          ดูภาพกระดาน
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= MODAL 5: MODERN GLASSMORPHIC ADMIN PASSCODE MODAL ================= -->
+  <div id="adminPasscodeModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="max-w-sm w-full glass-panel p-6 rounded-3xl border border-indigo-500/40 shadow-2xl text-center space-y-4">
+      
+      <!-- Lock Icon & Header -->
+      <div class="relative flex flex-col items-center">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 text-3xl flex items-center justify-center shadow-xl shadow-indigo-500/30">
+          🔐
+        </div>
+        <h3 class="text-lg font-bold font-heading text-white mt-3">ระบบควบคุมครูผู้สอน (Admin)</h3>
+        <p class="text-xs text-slate-400 mt-1">กรุณากรอกรหัสผ่านเพื่อเข้าสู่แผงควบคุม</p>
+        <span class="text-[11px] text-amber-400 font-mono mt-0.5 font-bold">(รหัสเริ่มต้น: 1234 หรือที่คุณครูตั้งไว้)</span>
+      </div>
+
+      <!-- Password Input -->
+      <div class="space-y-2">
+        <input id="adminPasscodeInput" type="password" placeholder="••••" maxlength="20" class="w-full px-4 py-3 rounded-2xl bg-slate-950/80 border-2 border-indigo-500/50 text-white font-mono text-center text-xl tracking-widest focus:outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/20 transition-all shadow-inner" onkeydown="if(event.key==='Enter') submitAdminPasscode()">
+        <p id="adminPasscodeError" class="text-xs text-rose-400 font-bold hidden animate-pulse">⚠️ รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง</p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center space-x-2 pt-1">
+        <button type="button" onclick="submitAdminPasscode()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 transition-all active:scale-95 cursor-pointer flex items-center justify-center space-x-1.5">
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+          <span>เข้าสู่ระบบ</span>
+        </button>
+        <button type="button" onclick="closeAdminPasscodeModal()" class="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition-all cursor-pointer">
+          ยกเลิก
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -836,33 +969,56 @@
       PhygitalDB.initFirebase();
     }
 
-    // Admin Passcode Prompt with customizable passcode support
-    async function promptAdminPasscode() {
+    // Admin Passcode Modal
+    function promptAdminPasscode() {
+      const input = document.getElementById('adminPasscodeInput');
+      const err = document.getElementById('adminPasscodeError');
+      if (input) input.value = '';
+      if (err) err.classList.add('hidden');
+      openModal('adminPasscodeModal');
+      setTimeout(() => { if (input) input.focus(); }, 120);
+    }
+
+    function closeAdminPasscodeModal() {
+      closeModal('adminPasscodeModal');
+    }
+
+    async function submitAdminPasscode() {
+      const input = document.getElementById('adminPasscodeInput');
+      const err = document.getElementById('adminPasscodeError');
+      const entered = input.value.trim();
       const currentAdminPass = localStorage.getItem('PHYGITAL_ADMIN_PASSCODE') || '1234';
 
-      const { value: password } = await Swal.fire({
-        title: '🔐 ระบบควบคุมครูผู้สอน (Admin)',
-        html: `<p class="text-xs text-slate-400">กรุณากรอกรหัสผ่านเพื่อเข้าสู่ Admin Panel<br><span class="text-amber-400 font-mono">(รหัสเริ่มต้นคือ: 1234 หรือรหัสที่คุณครูตั้งไว้)</span></p>`,
-        input: 'password',
-        inputPlaceholder: 'กรอกรหัสผ่าน...',
-        showCancelButton: true,
-        confirmButtonText: 'เข้าสู่ระบบ',
-        cancelButtonText: 'ยกเลิก',
-        confirmButtonColor: '#6366f1'
-      });
+      if (entered === currentAdminPass || entered === '1234' || entered === 'admin' || entered === 'krusos') {
+        err.classList.add('hidden');
+        closeModal('adminPasscodeModal');
 
-      if (password === currentAdminPass || password === '1234' || password === 'admin' || password === 'krusos') {
+        const targetPin = currentRoomPin 
+          || new URLSearchParams(window.location.search).get('pin') 
+          || localStorage.getItem('STUDENT_ROOM_PIN') 
+          || localStorage.getItem('PHYGITAL_CURRENT_ROOM_PIN') 
+          || localStorage.getItem('PHYGITAL_SAVED_ROOM_PIN')
+          || (document.getElementById('joinPinInput') ? document.getElementById('joinPinInput').value.trim() : '')
+          || '999999';
+
+        localStorage.setItem('PHYGITAL_SAVED_ROOM_PIN', targetPin);
+        localStorage.setItem('PHYGITAL_CURRENT_ROOM_PIN', targetPin);
+
         Swal.fire({
           icon: 'success',
           title: 'ยินดีต้อนรับคุณครู!',
-          timer: 1000,
+          text: `กำลังเปิดระบบแอดมินห้อง ${targetPin}...`,
+          timer: 800,
           showConfirmButton: false
         });
+
         setTimeout(() => {
-          window.location.href = `admin.html${currentRoomPin ? '?pin=' + currentRoomPin : ''}`;
-        }, 1000);
-      } else if (password !== undefined) {
-        Swal.fire('รหัสผ่านไม่ถูกต้อง', 'กรุณาลองใหม่อีกครั้ง', 'error');
+          window.location.href = `admin.html?pin=${targetPin}`;
+        }, 800);
+      } else {
+        err.classList.remove('hidden');
+        input.classList.add('border-rose-500');
+        playBeep(250, 0.2, 'sawtooth');
       }
     }
 
@@ -959,6 +1115,13 @@
 
       // Update Master Room Timer (40 Minutes or Admin-defined time limit)
       updateMasterRoomTimer(config);
+
+      // Check if entering via Station QR Code URL directly
+      const urlStationId = new URLSearchParams(window.location.search).get('station');
+      if (urlStationId && !window._stationCheckedOnce) {
+        window._stationCheckedOnce = true;
+        handleDirectStationQrEntry(urlStationId, myTeam);
+      }
 
       // Check Game State (Finished / Waiting / In Station / Rolling)
       if (config.game_status === 'finished') {
@@ -1342,24 +1505,25 @@
             continue;
           }
 
+          const baseBox = 'board-tile flex items-center justify-center rounded-lg font-mono font-black text-[11px] sm:text-xs md:text-sm shadow-md border-2 transition-all w-9 sm:w-11 h-6.5 sm:h-7.5';
           const tileEl = document.createElement('div');
           
           if (isFinish) {
-            tileEl.className = 'board-tile flex items-center justify-center rounded-2xl font-mono font-black text-slate-950 text-xs sm:text-sm md:text-base shadow-2xl bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 border-2 border-white animate-pulse px-3 sm:px-4 py-1 sm:py-1.5 min-w-[46px] sm:min-w-[58px]';
+            tileEl.className = `${baseBox} bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 text-slate-950 border-white ring-1 ring-amber-300 animate-pulse`;
             tileEl.innerHTML = `🏆 ${i}`;
           } else if (isStart) {
-            tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-white text-[11px] sm:text-xs md:text-sm shadow-xl bg-indigo-600 border-2 border-indigo-300 px-2 sm:px-3 py-0.5 sm:py-1 min-w-[36px] sm:min-w-[46px]';
+            tileEl.className = `${baseBox} bg-indigo-600 text-white border-indigo-300 shadow-indigo-600/40`;
             tileEl.innerHTML = `🚩 ${i}`;
           } else if (warp && warp.type === 'ladder') {
-            tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-emerald-200 text-[11px] sm:text-xs md:text-sm shadow-xl bg-emerald-950/90 border-2 border-emerald-400 px-2 sm:px-3 py-0.5 sm:py-1 min-w-[40px] sm:min-w-[50px]';
+            tileEl.className = `${baseBox} bg-emerald-950/90 text-emerald-300 border-emerald-400 shadow-emerald-950/50`;
             tileEl.innerHTML = `🧗‍♂️ ${i}`;
             tileEl.title = `บันไดลัดไปช่อง ${warp.to}`;
           } else if (warp && warp.type === 'snake') {
-            tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-rose-200 text-[11px] sm:text-xs md:text-sm shadow-xl bg-rose-950/90 border-2 border-rose-400 px-2 sm:px-3 py-0.5 sm:py-1 min-w-[40px] sm:min-w-[50px]';
+            tileEl.className = `${baseBox} bg-rose-950/90 text-rose-300 border-rose-400 shadow-rose-950/50`;
             tileEl.innerHTML = `🐍 ${i}`;
             tileEl.title = `งู/กับดักถอยไปช่อง ${warp.to}`;
           } else {
-            tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-white text-[11px] sm:text-xs md:text-sm shadow-lg bg-slate-950/85 backdrop-blur-md border-2 border-white/35 px-1.5 sm:px-2.5 py-0.5 sm:py-1 min-w-[32px] sm:min-w-[40px]';
+            tileEl.className = `${baseBox} bg-slate-950/85 backdrop-blur-md text-slate-100 border-white/30`;
             tileEl.innerHTML = `${i}`;
           }
 
@@ -1417,7 +1581,7 @@
       renderTeamsQuickTracker(teams, config);
     }
 
-    // Render Quick-Tracker Live Top 3 Podium & Remaining Teams
+    // Render Quick-Tracker Live Top 3 Olympic Podium & Remaining Teams
     function renderTeamsQuickTracker(teams, config) {
       const podiumEl = document.getElementById('podiumTop3Container');
       const listEl = document.getElementById('teamsQuickTrackerBar');
@@ -1438,42 +1602,42 @@
 
       if (podiumEl) {
         podiumEl.innerHTML = `
-          <!-- Rank 2: Silver Pillar -->
-          <div onclick="inspectTeamPawn('${top2 ? top2.key : ''}')" class="flex-1 flex flex-col items-center cursor-pointer group ${top2?.key === currentTeamId ? 'scale-105' : ''}">
-            <div class="relative mb-0.5">
-              <span class="text-base">${top2 ? top2.avatar || '🐯' : '🥈'}</span>
-              <span class="absolute -top-1.5 -right-1 text-[9px]">🥈</span>
+          <!-- Rank 2: Silver Pedestal (Height: 88px) -->
+          <div onclick="inspectTeamPawn('${top2 ? top2.key : ''}')" class="flex-1 flex flex-col items-center cursor-pointer group transition-transform hover:scale-102 ${top2?.key === currentTeamId ? 'ring-2 ring-indigo-400 rounded-t-xl' : ''}">
+            <div class="relative mb-1 flex flex-col items-center">
+              <span class="text-2xl filter drop-shadow">${top2 ? top2.avatar || '🐯' : '🥈'}</span>
+              <span class="text-xs absolute -top-2 -right-2">🥈</span>
             </div>
-            <div class="w-full h-14 rounded-t-xl bg-gradient-to-t from-slate-800 to-slate-700/90 border-t-2 border-x-2 border-slate-400/60 p-1 flex flex-col items-center justify-between text-center shadow-lg group-hover:border-slate-300 transition-all">
-              <span class="text-[9px] font-black text-slate-200 truncate max-w-[65px]">${top2 ? top2.name : 'อันดับ 2'}</span>
-              <span class="text-[10px] font-black font-mono text-slate-200">${top2 ? (top2.score || 0).toLocaleString() : '0'}</span>
-              <span class="text-[8px] px-1 rounded bg-slate-900/80 text-slate-400 font-mono">ช่อง ${top2 ? Math.min(top2.current_tile || 0, totalTiles) : 0}</span>
-            </div>
-          </div>
-
-          <!-- Rank 1: Gold Pillar (Elevated Center) -->
-          <div onclick="inspectTeamPawn('${top1 ? top1.key : ''}')" class="flex-1 flex flex-col items-center cursor-pointer group z-10 ${top1?.key === currentTeamId ? 'scale-105' : ''}">
-            <div class="relative mb-0.5">
-              <span class="text-lg animate-bounce">${top1 ? top1.avatar || '🦁' : '🥇'}</span>
-              <span class="absolute -top-2 -right-1 text-xs">👑</span>
-            </div>
-            <div class="w-full h-18 rounded-t-xl bg-gradient-to-t from-amber-950 via-amber-900/70 to-yellow-600/60 border-t-2 border-x-2 border-amber-400 p-1 flex flex-col items-center justify-between text-center shadow-xl shadow-amber-500/20 group-hover:border-yellow-300 transition-all">
-              <span class="text-[10px] font-black text-amber-300 truncate max-w-[75px] drop-shadow">${top1 ? top1.name : 'อันดับ 1'}</span>
-              <span class="text-xs font-black font-mono text-yellow-300 drop-shadow">${top1 ? (top1.score || 0).toLocaleString() : '0'}</span>
-              <span class="text-[8px] px-1 rounded bg-amber-950 text-amber-300 font-mono font-bold">ช่อง ${top1 ? Math.min(top1.current_tile || 0, totalTiles) : 0}</span>
+            <div class="w-full h-22 rounded-t-xl bg-gradient-to-t from-slate-900 via-slate-800 to-slate-700 border-t-2 border-x-2 border-slate-300/70 p-1.5 flex flex-col items-center justify-between text-center shadow-lg group-hover:border-slate-200 transition-all">
+              <span class="text-[11px] font-bold text-slate-100 truncate w-full px-0.5">${top2 ? top2.name : 'อันดับ 2'}</span>
+              <span class="text-sm font-black font-mono text-slate-100 tracking-tight">${top2 ? (top2.score || 0).toLocaleString() : '0'}</span>
+              <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-950/80 text-slate-300 font-mono font-bold">ช่อง ${top2 ? Math.min(top2.current_tile || 0, totalTiles) : 0}</span>
             </div>
           </div>
 
-          <!-- Rank 3: Bronze Pillar -->
-          <div onclick="inspectTeamPawn('${top3 ? top3.key : ''}')" class="flex-1 flex flex-col items-center cursor-pointer group ${top3?.key === currentTeamId ? 'scale-105' : ''}">
-            <div class="relative mb-0.5">
-              <span class="text-base">${top3 ? top3.avatar || '🦅' : '🥉'}</span>
-              <span class="absolute -top-1.5 -right-1 text-[9px]">🥉</span>
+          <!-- Rank 1: Gold Pedestal (Height: 120px - Elevated Center) -->
+          <div onclick="inspectTeamPawn('${top1 ? top1.key : ''}')" class="flex-1 flex flex-col items-center cursor-pointer group z-10 transition-transform hover:scale-102 ${top1?.key === currentTeamId ? 'ring-2 ring-amber-400 rounded-t-xl' : ''}">
+            <div class="relative mb-1 flex flex-col items-center">
+              <span class="text-3xl filter drop-shadow animate-bounce">${top1 ? top1.avatar || '🦁' : '🥇'}</span>
+              <span class="text-sm absolute -top-3 -right-2">👑</span>
             </div>
-            <div class="w-full h-11 rounded-t-xl bg-gradient-to-t from-amber-950/60 to-amber-800/40 border-t-2 border-x-2 border-amber-700/60 p-1 flex flex-col items-center justify-between text-center shadow-lg group-hover:border-amber-500 transition-all">
-              <span class="text-[9px] font-black text-amber-200 truncate max-w-[65px]">${top3 ? top3.name : 'อันดับ 3'}</span>
-              <span class="text-[10px] font-black font-mono text-amber-300">${top3 ? (top3.score || 0).toLocaleString() : '0'}</span>
-              <span class="text-[8px] px-1 rounded bg-slate-900/80 text-slate-400 font-mono">ช่อง ${top3 ? Math.min(top3.current_tile || 0, totalTiles) : 0}</span>
+            <div class="w-full h-30 rounded-t-xl bg-gradient-to-t from-amber-950 via-amber-900 to-yellow-500 border-t-2 border-x-2 border-amber-300 p-1.5 flex flex-col items-center justify-between text-center shadow-xl shadow-amber-500/30 group-hover:border-yellow-200 transition-all">
+              <span class="text-xs font-black text-slate-950 bg-amber-300 px-1.5 py-0.5 rounded font-heading truncate w-full shadow-sm">${top1 ? top1.name : 'อันดับ 1'}</span>
+              <span class="text-base font-black font-mono text-yellow-300 drop-shadow-md tracking-tight">${top1 ? (top1.score || 0).toLocaleString() : '0'}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-amber-950/90 text-amber-200 font-mono font-black border border-amber-500/40">ช่อง ${top1 ? Math.min(top1.current_tile || 0, totalTiles) : 0}</span>
+            </div>
+          </div>
+
+          <!-- Rank 3: Bronze Pedestal (Height: 64px) -->
+          <div onclick="inspectTeamPawn('${top3 ? top3.key : ''}')" class="flex-1 flex flex-col items-center cursor-pointer group transition-transform hover:scale-102 ${top3?.key === currentTeamId ? 'ring-2 ring-indigo-400 rounded-t-xl' : ''}">
+            <div class="relative mb-1 flex flex-col items-center">
+              <span class="text-2xl filter drop-shadow">${top3 ? top3.avatar || '🦅' : '🥉'}</span>
+              <span class="text-xs absolute -top-2 -right-2">🥉</span>
+            </div>
+            <div class="w-full h-16 rounded-t-xl bg-gradient-to-t from-amber-950/90 via-amber-900/60 to-amber-700/60 border-t-2 border-x-2 border-amber-600/70 p-1.5 flex flex-col items-center justify-between text-center shadow-lg group-hover:border-amber-400 transition-all">
+              <span class="text-[11px] font-bold text-amber-200 truncate w-full px-0.5">${top3 ? top3.name : 'อันดับ 3'}</span>
+              <span class="text-sm font-black font-mono text-amber-300 tracking-tight">${top3 ? (top3.score || 0).toLocaleString() : '0'}</span>
+              <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-950/80 text-slate-300 font-mono font-bold">ช่อง ${top3 ? Math.min(top3.current_tile || 0, totalTiles) : 0}</span>
             </div>
           </div>
         `;
@@ -1483,22 +1647,22 @@
       if (listEl) {
         const remainingKeys = sortedKeys.slice(3);
         if (remainingKeys.length === 0) {
-          listEl.innerHTML = `<span class="text-[9px] text-slate-500 italic text-center p-1">คลิกที่แท่นโพเดียมเพื่อส่องหมากบนกระดาน</span>`;
+          listEl.innerHTML = `<span class="text-xs text-slate-400 italic text-center p-2 block bg-slate-950/50 rounded-lg">กำลังแข่งขันทั้งหมด 3 กลุ่ม</span>`;
         } else {
           listEl.innerHTML = remainingKeys.map((key, idx) => {
             const t = teams[key];
             const tile = Math.min(t.current_tile || 0, totalTiles);
             const isMyTeam = key === currentTeamId;
             return `
-              <button type="button" onclick="inspectTeamPawn('${key}')" class="w-full px-2 py-1 rounded-lg bg-slate-900/80 hover:bg-slate-800 border ${isMyTeam ? 'border-amber-400 ring-1 ring-amber-400/40 bg-indigo-950/30' : 'border-slate-800 hover:border-slate-700'} flex items-center justify-between text-[11px] text-slate-300 hover:text-white transition-all cursor-pointer shadow-sm group">
-                <div class="flex items-center space-x-1.5 truncate">
+              <button type="button" onclick="inspectTeamPawn('${key}')" class="w-full px-2.5 py-1.5 rounded-xl bg-slate-950/80 hover:bg-slate-800 border ${isMyTeam ? 'border-amber-400 ring-1 ring-amber-400/50 bg-indigo-950/40' : 'border-slate-800 hover:border-slate-700'} flex items-center justify-between text-xs text-slate-200 hover:text-white transition-all cursor-pointer shadow-sm group">
+                <div class="flex items-center space-x-2 truncate">
                   <span class="text-xs font-mono font-bold text-slate-500">#${idx + 4}</span>
-                  <span>${t.avatar || '🦁'}</span>
-                  <span class="truncate font-semibold text-[10px] ${isMyTeam ? 'text-amber-300 font-bold' : ''}">${t.name}</span>
+                  <span class="text-base">${t.avatar || '🦁'}</span>
+                  <span class="truncate font-bold text-xs ${isMyTeam ? 'text-amber-300 font-extrabold' : 'text-slate-200'}">${t.name}</span>
                 </div>
-                <div class="flex items-center space-x-1.5 flex-shrink-0">
-                  <span class="text-[9px] font-mono text-slate-400">${(t.score || 0).toLocaleString()} แต้ม</span>
-                  <span class="px-1.5 py-0.2 rounded bg-indigo-600/80 text-white font-mono text-[9px] font-bold">ช่อง ${tile}</span>
+                <div class="flex items-center space-x-2 flex-shrink-0">
+                  <span class="text-xs font-mono font-bold text-slate-300">${(t.score || 0).toLocaleString()} แต้ม</span>
+                  <span class="px-2 py-0.5 rounded-md bg-indigo-600/90 text-white font-mono text-xs font-bold shadow-sm">ช่อง ${tile}</span>
                 </div>
               </button>
             `;
@@ -1574,6 +1738,29 @@
       document.getElementById('myTeamTileLabel').textContent = displayTile;
       document.getElementById('myTeamTotalTilesLabel').textContent = totalTiles;
       document.getElementById('myTeamScoreLabel').textContent = (myTeam.score || 0).toLocaleString();
+
+      // Calculate Live Team Rank
+      const allTeams = roomData?.teams || {};
+      const sortedKeys = Object.keys(allTeams).sort((a, b) => (allTeams[b].score || 0) - (allTeams[a].score || 0));
+      const myRankIndex = sortedKeys.indexOf(currentTeamId);
+      const myRank = myRankIndex !== -1 ? myRankIndex + 1 : 1;
+
+      const rankBadgeEl = document.getElementById('myTeamRankBadge');
+      if (rankBadgeEl) {
+        if (myRank === 1) {
+          rankBadgeEl.className = "text-xs px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500/30 to-yellow-500/20 text-yellow-300 font-black border border-amber-400 shadow-md shadow-amber-500/20 animate-pulse";
+          rankBadgeEl.textContent = "🥇 ครองอันดับ 1";
+        } else if (myRank === 2) {
+          rankBadgeEl.className = "text-xs px-2.5 py-0.5 rounded-full bg-slate-700/80 text-slate-200 font-black border border-slate-400 shadow-sm";
+          rankBadgeEl.textContent = "🥈 อยู่อันดับ 2";
+        } else if (myRank === 3) {
+          rankBadgeEl.className = "text-xs px-2.5 py-0.5 rounded-full bg-amber-950/80 text-amber-300 font-black border border-amber-600 shadow-sm";
+          rankBadgeEl.textContent = "🥉 อยู่อันดับ 3";
+        } else {
+          rankBadgeEl.className = "text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-bold border border-slate-700";
+          rankBadgeEl.textContent = `อันดับที่ ${myRank}`;
+        }
+      }
 
       const btn = document.getElementById('btnRollDice');
       const resultTextEl = document.getElementById('diceResultText');
@@ -1657,19 +1844,27 @@
             playFanfare();
           }
 
-          // 2. Dynamic Station Assignment Logic (Guaranteed & Direct for Every Roll!)
+          // 2. Dynamic Station Assignment Logic (Uncompleted Stations Only - ห้ามเข้าซ้ำฐานที่ผ่านแล้ว)
           const assignRes = await PhygitalDB.assignVacantStation(currentRoomPin, currentTeamId);
           roomData = PhygitalDB.getLocalRoom(currentRoomPin) || roomData;
           const myTeam = roomData?.teams?.[currentTeamId] || {};
 
-          // 3. Immediately launch Station Mission Modal
+          // 3. Immediately launch Station Mission Modal or Notify
           if (assignRes && assignRes.success && assignRes.station) {
             confetti({ particleCount: 80, spread: 70, origin: { y: 0.5 } });
             playBeep(700, 0.3, 'sine');
             setupStationMissionModal(assignRes.station, myTeam);
             openModal('stationMissionModal');
             
-            if (moveRes.reachedFinish) {
+            if (assignRes.isNewCycle) {
+              Swal.fire({
+                title: `🏆 ปลดล็อกการหมุนเวียนรอบที่ ${assignRes.cycleNumber}!`,
+                text: `กลุ่มของคุณเล่นครบทุกฐานแล้ว และเริ่มเปิดให้สะสมแต้มวนรอบใหม่ได้อีกครั้ง!`,
+                icon: 'success',
+                timer: 2500,
+                showConfirmButton: false
+              });
+            } else if (moveRes.reachedFinish) {
               Swal.fire({
                 title: `🏆 เข้าเส้นชัยรอบที่ ${moveRes.lapsCompleted}! (+${moveRes.finishBonus} แต้ม)`,
                 text: `รับโบนัสสำเร็จ และเข้าสู่ภารกิจ "${assignRes.station.name}" ทันที!`,
@@ -1678,6 +1873,10 @@
                 showConfirmButton: false
               });
             }
+          } else if (assignRes && assignRes.reason === 'occupied') {
+            // Uncompleted stations in this cycle are currently occupied
+            openModal('queueModal');
+            watchForVacantStation();
           } else if (moveRes.reachedFinish) {
             Swal.fire({
               title: `🏆 เข้าเส้นชัยรอบที่ ${moveRes.lapsCompleted}! (+${moveRes.finishBonus} แต้ม)`,
@@ -1751,13 +1950,57 @@
           const myTeam = roomData?.teams?.[currentTeamId] || {};
           setupStationMissionModal(assignRes.station, myTeam);
           openModal('stationMissionModal');
+        } else if (assignRes.reason === 'all_stations_completed') {
+          clearInterval(interval);
+          closeModal('queueModal');
         }
       }, 3000);
     }
 
+    // Handle Direct Station QR Code Entry (ห้ามเข้าซ้ำฐานที่เคยส่งคะแนนแล้ว)
+    async function handleDirectStationQrEntry(stationId, myTeam) {
+      if (!currentRoomPin || !currentTeamId) return;
+      try {
+        const res = await PhygitalDB.checkAndEnterStation(currentRoomPin, currentTeamId, stationId);
+        if (!res.success) {
+          if (res.alreadyCompleted) {
+            Swal.fire({
+              title: '🚫 เคยผ่านฐานนี้แล้ว',
+              text: res.message,
+              icon: 'warning',
+              confirmButtonText: 'ไปทำภารกิจฐานอื่น',
+              confirmButtonColor: '#6366f1'
+            });
+          } else if (res.isOccupied) {
+            Swal.fire({
+              title: '🔒 ฐานกิจกรรมไม่ว่าง',
+              text: res.message,
+              icon: 'info',
+              confirmButtonText: 'ตกลง',
+              confirmButtonColor: '#6366f1'
+            });
+          } else {
+            Swal.fire('ข้อผิดพลาด', res.message || 'ไม่สามารถเข้าฐานได้', 'error');
+          }
+          return;
+        }
+
+        // Success: Launch mission
+        confetti({ particleCount: 80, spread: 70 });
+        setupStationMissionModal(res.station, myTeam);
+        openModal('stationMissionModal');
+      } catch (e) {
+        console.error("Direct Station QR error:", e);
+      }
+    }
+
     // ================= STATION MISSION MODAL =================
+    let currentPhotoEvidenceBase64 = null;
+
     function setupStationMissionModal(station, myTeam) {
       activeStation = station;
+      currentPhotoEvidenceBase64 = null;
+      removeStationPhoto();
       clearInterval(timerInterval);
 
       document.getElementById('stationIconBox').textContent = station.icon || '🎯';
@@ -1766,6 +2009,18 @@
       document.getElementById('stationMaxScoreBadge').textContent = station.max_score || 100;
       document.getElementById('stationScoreInput').max = station.max_score || 100;
       document.getElementById('stationScoreInput').value = station.max_score || 100;
+
+      // Station Image banner display (if present)
+      const imgBox = document.getElementById('stationImageBox');
+      const imgPreview = document.getElementById('stationImagePreview');
+      if (imgBox && imgPreview) {
+        if (station.image_url) {
+          imgPreview.src = station.image_url;
+          imgBox.classList.remove('hidden');
+        } else {
+          imgBox.classList.add('hidden');
+        }
+      }
 
       stationTotalSeconds = (parseInt(station.timer_minutes) || 3) * 60;
       const startTime = myTeam.station_start_time || Date.now();
@@ -1785,6 +2040,67 @@
           }
         }
       }, 1000);
+    }
+
+    // Photo Evidence Compression & Preview Handler
+    function handleStationPhotoSelected(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          // Compress image to max 800px width/height for fast realtime database sync
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDimension = 800;
+
+          if (width > height && width > maxDimension) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else if (height > maxDimension) {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          currentPhotoEvidenceBase64 = canvas.toDataURL('image/jpeg', 0.75);
+
+          document.getElementById('stationPhotoPreview').src = currentPhotoEvidenceBase64;
+          document.getElementById('photoUploadPlaceholder').classList.add('hidden');
+          document.getElementById('photoPreviewContainer').classList.remove('hidden');
+          playBeep(800, 0.1);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeStationPhoto() {
+      currentPhotoEvidenceBase64 = null;
+      const fileInput = document.getElementById('stationPhotoInput');
+      if (fileInput) fileInput.value = '';
+      const preview = document.getElementById('photoPreviewContainer');
+      const placeholder = document.getElementById('photoUploadPlaceholder');
+      if (preview) preview.classList.add('hidden');
+      if (placeholder) placeholder.classList.remove('hidden');
+    }
+
+    function zoomStationImage(src) {
+      if (!src) return;
+      Swal.fire({
+        imageUrl: src,
+        imageAlt: 'ภาพกติกาฐานกิจกรรม',
+        showCloseButton: true,
+        showConfirmButton: false,
+        background: '#0f172a'
+      });
     }
 
     function updateTimerUI() {
@@ -1827,9 +2143,10 @@
       if (!currentRoomPin || !currentTeamId || !activeStation) return;
       const score = parseInt(document.getElementById('stationScoreInput').value) || 0;
 
+      const hasPhoto = !!currentPhotoEvidenceBase64;
       const res = await Swal.fire({
         title: `ยืนยันส่งคะแนน +${score} แต้ม?`,
-        text: 'เมื่อยืนยันแล้ว ระบบจะบันทึกคะแนน ปลดล็อกฐาน และกลับสู่หน้ากระดานเกม',
+        text: hasPhoto ? '✓ พร้อมแนบรูปถ่ายหลักฐานการทำกิจกรรม' : 'คุณยังไม่ได้แนบรูปถ่าย (สามารถกดส่งได้ หรือกดยกเลิกเพื่อถ่ายรูปก่อน)',
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'ยืนยันส่งคะแนน',
@@ -1841,12 +2158,12 @@
         try {
           clearInterval(timerInterval);
           Swal.fire({
-            title: 'กำลังบันทึกคะแนน...',
+            title: 'กำลังบันทึกคะแนนและรูปหลักฐาน...',
             allowOutsideClick: false,
             didOpen: () => Swal.showLoading()
           });
 
-          await PhygitalDB.submitStationScore(currentRoomPin, currentTeamId, activeStation.id, score);
+          await PhygitalDB.submitStationScore(currentRoomPin, currentTeamId, activeStation.id, score, currentPhotoEvidenceBase64);
           
           confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
           playFanfare();
@@ -1859,7 +2176,7 @@
 
           Swal.fire({
             icon: 'success',
-            title: 'บันทึกคะแนนสำเร็จ!',
+            title: 'บันทึกคะแนนและรูปผลงานสำเร็จ!',
             text: `คุณได้รับ +${score} คะแนนสำหรับฐานนี้ พร้อมทอยเต๋าในรอบถัดไปแล้ว!`,
             timer: 2000,
             showConfirmButton: false
@@ -1905,34 +2222,121 @@
     }
 
     function renderVictoryModal(config, teams, myTeam) {
-      confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } });
+      confetti({ particleCount: 160, spread: 100, origin: { y: 0.4 } });
       playFanfare();
 
-      const sortedTeams = Object.keys(teams).map(key => ({ ...teams[key], key })).sort((a, b) => b.score - a.score);
+      const sortedTeams = Object.keys(teams).map(key => ({ ...teams[key], key })).sort((a, b) => (b.score || 0) - (a.score || 0));
       const winner = sortedTeams[0] || {};
       document.getElementById('victorySubtitle').textContent = `ขอแสดงความยินดีกับ "${winner.name}" ที่คว้าชัยชนะคะแนนรวมสูงสุด!`;
 
-      document.getElementById('victoryPodiumList').innerHTML = sortedTeams.map((t, idx) => {
-        let badge = idx === 0 ? '🥇 ชนะเลิศอันดับ 1' : idx === 1 ? '🥈 รองชนะเลิศอันดับ 1' : idx === 2 ? '🥉 รองชนะเลิศอันดับ 2' : `อันดับที่ ${idx + 1}`;
-        const isMe = t.key === currentTeamId;
-        return `
-          <div class="flex items-center justify-between p-2.5 rounded-xl ${isMe ? 'bg-amber-950/40 border border-amber-500/50' : 'bg-slate-900/80 border border-slate-800'} text-xs">
-            <div class="flex items-center space-x-2.5">
-              <span class="text-xl">${t.avatar || '🦁'}</span>
-              <div>
-                <h4 class="font-bold text-white ${isMe ? 'text-amber-300' : ''}">${t.name} ${isMe ? '(กลุ่มคุณ)' : ''}</h4>
-                <span class="text-[9px] text-amber-400 font-semibold">${badge}</span>
-              </div>
+      const top1 = sortedTeams[0];
+      const top2 = sortedTeams[1];
+      const top3 = sortedTeams[2];
+
+      const podiumEl = document.getElementById('victory3DPodium');
+      if (podiumEl) {
+        podiumEl.innerHTML = `
+          <!-- Rank 2: Silver Pedestal (Height: 88px) -->
+          <div class="flex-1 flex flex-col items-center">
+            <div class="relative mb-1">
+              <span class="text-2xl filter drop-shadow">${top2 ? top2.avatar || '🐯' : '🥈'}</span>
+              <span class="text-xs absolute -top-2 -right-2">🥈</span>
             </div>
-            <div class="text-right">
-              <span class="font-black text-amber-400 text-sm font-heading">${t.score || 0}</span>
-              <span class="block text-[8px] text-slate-400">แต้ม</span>
+            <div class="w-full h-22 rounded-t-xl bg-gradient-to-t from-slate-900 via-slate-800 to-slate-700 border-t-2 border-x-2 border-slate-300 p-1.5 flex flex-col items-center justify-between text-center shadow-lg">
+              <span class="text-[11px] font-bold text-slate-100 truncate w-full px-0.5">${top2 ? top2.name : 'อันดับ 2'}</span>
+              <span class="text-sm font-black font-mono text-slate-100">${top2 ? (top2.score || 0).toLocaleString() : '0'}</span>
+              <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-950/80 text-slate-300 font-mono font-bold">รองชนะเลิศ 1</span>
+            </div>
+          </div>
+
+          <!-- Rank 1: Gold Pedestal (Height: 120px - Elevated Center) -->
+          <div class="flex-1 flex flex-col items-center z-10 scale-105">
+            <div class="relative mb-1">
+              <span class="text-3xl filter drop-shadow animate-bounce">${top1 ? top1.avatar || '🦁' : '🥇'}</span>
+              <span class="text-sm absolute -top-3 -right-2">👑</span>
+            </div>
+            <div class="w-full h-30 rounded-t-xl bg-gradient-to-t from-amber-950 via-amber-900 to-yellow-500 border-t-2 border-x-2 border-amber-300 p-1.5 flex flex-col items-center justify-between text-center shadow-xl shadow-amber-500/40">
+              <span class="text-xs font-black text-slate-950 bg-amber-300 px-2 py-0.5 rounded font-heading truncate w-full shadow-sm">${top1 ? top1.name : 'อันดับ 1'}</span>
+              <span class="text-lg font-black font-mono text-yellow-300 drop-shadow-md">${top1 ? (top1.score || 0).toLocaleString() : '0'}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-amber-950 text-amber-200 font-mono font-black border border-amber-500/50">🏆 ชนะเลิศ</span>
+            </div>
+          </div>
+
+          <!-- Rank 3: Bronze Pedestal (Height: 64px) -->
+          <div class="flex-1 flex flex-col items-center">
+            <div class="relative mb-1">
+              <span class="text-2xl filter drop-shadow">${top3 ? top3.avatar || '🦅' : '🥉'}</span>
+              <span class="text-xs absolute -top-2 -right-2">🥉</span>
+            </div>
+            <div class="w-full h-16 rounded-t-xl bg-gradient-to-t from-amber-950/90 via-amber-900/60 to-amber-700/60 border-t-2 border-x-2 border-amber-600 p-1.5 flex flex-col items-center justify-between text-center shadow-lg">
+              <span class="text-[11px] font-bold text-amber-200 truncate w-full px-0.5">${top3 ? top3.name : 'อันดับ 3'}</span>
+              <span class="text-sm font-black font-mono text-amber-300">${top3 ? (top3.score || 0).toLocaleString() : '0'}</span>
+              <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-950/80 text-slate-300 font-mono font-bold">รองชนะเลิศ 2</span>
             </div>
           </div>
         `;
-      }).join('');
+      }
+
+      const remainingList = sortedTeams.slice(3);
+      const remainingEl = document.getElementById('victoryRemainingList');
+      if (remainingEl) {
+        if (remainingList.length === 0) {
+          remainingEl.innerHTML = '';
+        } else {
+          remainingEl.innerHTML = remainingList.map((t, idx) => {
+            const isMe = t.key === currentTeamId;
+            return `
+              <div class="flex items-center justify-between p-2 rounded-xl ${isMe ? 'bg-indigo-950/60 border border-indigo-500/50' : 'bg-slate-900/80 border border-slate-800'} text-xs">
+                <div class="flex items-center space-x-2.5">
+                  <span class="text-xs font-mono font-bold text-slate-500">#${idx + 4}</span>
+                  <span class="text-lg">${t.avatar || '🦁'}</span>
+                  <div>
+                    <h4 class="font-bold text-white ${isMe ? 'text-indigo-300 font-black' : ''}">${t.name} ${isMe ? '(กลุ่มคุณ)' : ''}</h4>
+                    <span class="text-[10px] text-slate-400">ช่อง ${t.current_tile || 0}</span>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="font-black text-amber-400 text-xs font-mono">${(t.score || 0).toLocaleString()}</span>
+                  <span class="block text-[8px] text-slate-400">แต้ม</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
 
       openModal('victoryModal');
+      lucide.createIcons();
+    }
+
+    // Restart Game from Victory Modal
+    async function handleRestartGameFromVictory() {
+      if (!currentRoomPin) return;
+      closeModal('victoryModal');
+      try {
+        await PhygitalDB.updateTeamData(currentRoomPin, currentTeamId, {
+          is_finished: false,
+          current_station_id: null,
+          station_start_time: null
+        });
+        if (PhygitalDB.db) {
+          await PhygitalDB.getRoomRef(currentRoomPin).child('config').update({
+            game_status: 'playing',
+            game_started_at: Date.now(),
+            updated_at: Date.now()
+          });
+        }
+        const local = PhygitalDB.getLocalRoom(currentRoomPin);
+        if (local?.config) {
+          local.config.game_status = 'playing';
+          local.config.game_started_at = Date.now();
+          PhygitalDB.saveLocalRoom(currentRoomPin, local);
+        }
+        roomData = local || roomData;
+        handleRoomStateChange();
+      } catch (e) {
+        console.error(e);
+      }
     }
   </script>
 </body>

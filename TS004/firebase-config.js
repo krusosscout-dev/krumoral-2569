@@ -597,7 +597,20 @@ class PhygitalFirebaseManager {
       },
       stations: stationsObj,
       teams: teamsObj,
-      logs: {}
+      logs: {
+        log_init_1: {
+          id: 'log_init_1',
+          type: 'system',
+          message: `🚀 สร้างห้องเล่นเกม ${roomPin} สำเร็จ (${totalTeamsCount} กลุ่ม, ${Object.keys(stationsObj).length} ฐาน)`,
+          timestamp: Date.now() - 1000 * 60 * 3
+        },
+        log_init_2: {
+          id: 'log_init_2',
+          type: 'system',
+          message: `✨ เริ่มต้นการแข่งขัน Active Learning พร้อมจับเวลาและคำนวณคะแนนสด`,
+          timestamp: Date.now() - 1000 * 60 * 2
+        }
+      }
     };
 
     // บันทึกลง Local Storage เสมอ
@@ -608,11 +621,6 @@ class PhygitalFirebaseManager {
       try {
         const roomRef = this.getRoomRef(roomPin);
         this.withTimeout(roomRef.set(initialData));
-        this.addLog(roomPin, {
-          team_id: "system",
-          type: "system",
-          message: `สร้างห้องเล่นเกม ${roomPin} สำเร็จ (${totalTeamsCount} กลุ่ม, ${Object.keys(stationsObj).length} ฐาน)`
-        });
       } catch (e) {}
     }
 
@@ -621,8 +629,46 @@ class PhygitalFirebaseManager {
 
   // สร้างหรือตรวจสอบห้องจำลองเริ่มต้น (Demo Simulation Room)
   async createDemoRoomIfNotExist(roomPin = '999999') {
-    const local = this.getLocalRoom(roomPin);
-    if (local) return local;
+    let local = this.getLocalRoom(roomPin);
+    if (local) {
+      // ตรวจสอบว่าถ้ายังไม่มีประวัติ Logs ให้เติม Starter Logs อัตโนมัติ
+      if (!local.logs || Object.keys(local.logs).length === 0) {
+        local.logs = {
+          log_1: {
+            id: 'log_1',
+            type: 'system',
+            message: `🚀 ระบบเริ่มเปิดห้องเล่นเกม ${roomPin} พร้อมกลุ่มผู้เล่น 6 กลุ่ม`,
+            timestamp: Date.now() - 1000 * 60 * 5
+          },
+          log_2: {
+            id: 'log_2',
+            type: 'dice',
+            message: `🎲 ทีมสิงโตเจ้าป่า ทอยเต๋าได้ 4 แต้ม เดินจากช่อง 0 ➔ 4`,
+            timestamp: Date.now() - 1000 * 60 * 4
+          },
+          log_3: {
+            id: 'log_3',
+            type: 'station',
+            message: `🎯 ทีมเหยี่ยวเวหา เข้าสู่ฐาน "ทดลองวิทยาศาสตร์น่ารู้" (โต๊ะ 2)`,
+            timestamp: Date.now() - 1000 * 60 * 3
+          },
+          log_4: {
+            id: 'log_4',
+            type: 'station',
+            message: `📸 ทีมสิงโตเจ้าป่า ส่งคะแนน +100 แต้ม (แนบรูปหลักฐานแล้ว) ที่ฐาน "ต่อวงจรไฟฟ้า"`,
+            timestamp: Date.now() - 1000 * 60 * 2
+          },
+          log_5: {
+            id: 'log_5',
+            type: 'finish',
+            message: `🏆 ทีมมังกรไฟ เดินเข้าเส้นชัยรอบที่ 1 (+500 แต้มโบนัส)`,
+            timestamp: Date.now() - 1000 * 60 * 1
+          }
+        };
+        this.saveLocalRoom(roomPin, local);
+      }
+      return local;
+    }
 
     return await this.createRoom(roomPin, {
       title: `ห้องทดลอง Active Learning (${roomPin})`,
@@ -686,17 +732,60 @@ class PhygitalFirebaseManager {
     this.listeners = [];
   }
 
-  // เพิ่ม Activity Log
+  // บันทึก Activity Log (บันทึกทั้ง LocalStorage และ Firebase Realtime Database)
+  logActivity(roomPin, message, type = 'general', teamId = null) {
+    const data = this.getLocalRoom(roomPin);
+    if (!data) return;
+    if (!data.logs) data.logs = {};
+
+    const logId = `log_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const newLog = {
+      id: logId,
+      message,
+      type,
+      team_id: teamId,
+      timestamp: Date.now()
+    };
+
+    data.logs[logId] = newLog;
+
+    // จำกัดไม่ให้เกิน 100 รายการล่าสุดเพื่อความลื่นไหล
+    const logKeys = Object.keys(data.logs);
+    if (logKeys.length > 100) {
+      const sorted = logKeys.sort((a, b) => (data.logs[a].timestamp || 0) - (data.logs[b].timestamp || 0));
+      for (let i = 0; i < sorted.length - 100; i++) {
+        delete data.logs[sorted[i]];
+      }
+    }
+
+    this.saveLocalRoom(roomPin, data);
+
+    if (this.db) {
+      try {
+        this.withTimeout(this.getRoomRef(roomPin).child(`logs/${logId}`).set(newLog));
+      } catch(e) {}
+    }
+
+    return newLog;
+  }
+
+  // Alias สำหรับ addLog
   async addLog(roomPin, logData) {
-    if (!this.db) return;
-    try {
-      const logsRef = this.getLogsRef(roomPin);
-      const newLogRef = logsRef.push();
-      this.withTimeout(newLogRef.set({
-        ...logData,
-        timestamp: Date.now()
-      }));
-    } catch(e) {}
+    return this.logActivity(roomPin, logData?.message || '', logData?.type || 'system', logData?.team_id || null);
+  }
+
+  // ล้าง Activity Logs ในห้อง
+  async clearLogs(roomPin) {
+    const data = this.getLocalRoom(roomPin);
+    if (data) {
+      data.logs = {};
+      this.saveLocalRoom(roomPin, data);
+    }
+    if (this.db) {
+      try {
+        await this.withTimeout(this.getRoomRef(roomPin).child('logs').remove());
+      } catch(e) {}
+    }
   }
 
   // อัปเดตสถานะเกม (waiting / playing / finished)
@@ -709,6 +798,8 @@ class PhygitalFirebaseManager {
       local.config.winner_team_id = winnerTeamId;
     }
     this.saveLocalRoom(roomPin, local);
+
+    this.logActivity(roomPin, `📢 เปลี่ยนสถานะเกมเป็น: ${status === 'playing' ? 'กำลังแข่งขัน 🟢' : status === 'waiting' ? 'พักเบรก ⏸️' : 'จบการแข่งขัน 🏁'}`, 'system');
 
     if (this.db) {
       try {
@@ -764,6 +855,8 @@ class PhygitalFirebaseManager {
     data.stations = resetStations;
     this.saveLocalRoom(roomPin, data);
 
+    this.logActivity(roomPin, `🔄 คุณครูรีเซ็ตเกมและคะแนนทั้งหมด พร้อมเริ่มต้นรอบใหม่`, 'system');
+
     if (this.db) {
       try {
         const roomRef = this.getRoomRef(roomPin);
@@ -778,14 +871,23 @@ class PhygitalFirebaseManager {
     }
   }
 
-  // ปลดล็อกฐาน (Force Vacant / Reset Lock)
+  // ปลดล็อกฐานเดี่ยว (Force Vacant / Reset Lock)
   async forceUnlockStation(roomPin, stationId) {
     const data = this.getLocalRoom(roomPin);
     if (data?.stations?.[stationId]) {
+      const occupantTeamId = data.stations[stationId].current_team_id;
       data.stations[stationId].is_vacant = true;
       data.stations[stationId].current_team_id = null;
       data.stations[stationId].occupied_at = null;
+
+      if (occupantTeamId && data.teams?.[occupantTeamId]) {
+        if (data.teams[occupantTeamId].current_station_id === stationId) {
+          data.teams[occupantTeamId].current_station_id = null;
+          data.teams[occupantTeamId].station_start_time = null;
+        }
+      }
       this.saveLocalRoom(roomPin, data);
+      this.logActivity(roomPin, `🔓 ปลดล็อกฐาน "${data.stations[stationId]?.name || stationId}" ให้เป็นสถานะว่าง`, 'system');
     }
 
     if (this.db) {
@@ -797,6 +899,44 @@ class PhygitalFirebaseManager {
         this.withTimeout(this.getRoomRef(roomPin).update(updates));
       } catch(e) {}
     }
+  }
+
+  // ปลดล็อกทุกฐานในห้องให้ว่างทั้งหมดทันที (Unlock All Stations)
+  async unlockAllStations(roomPin) {
+    const data = this.getLocalRoom(roomPin);
+    if (!data) return;
+
+    const updates = {};
+    if (data.stations) {
+      Object.keys(data.stations).forEach(stId => {
+        data.stations[stId].is_vacant = true;
+        data.stations[stId].current_team_id = null;
+        data.stations[stId].occupied_at = null;
+        updates[`stations/${stId}/is_vacant`] = true;
+        updates[`stations/${stId}/current_team_id`] = null;
+        updates[`stations/${stId}/occupied_at`] = null;
+      });
+    }
+
+    if (data.teams) {
+      Object.keys(data.teams).forEach(teamId => {
+        data.teams[teamId].current_station_id = null;
+        data.teams[teamId].station_start_time = null;
+        updates[`teams/${teamId}/current_station_id`] = null;
+        updates[`teams/${teamId}/station_start_time`] = null;
+      });
+    }
+
+    this.saveLocalRoom(roomPin, data);
+    this.logActivity(roomPin, `🔓 คุณครูปลดล็อกทุกฐานกิจกรรมให้ว่าง 100%`, 'system');
+
+    if (this.db) {
+      try {
+        await this.withTimeout(this.getRoomRef(roomPin).update(updates));
+      } catch(e) {}
+    }
+
+    return { success: true };
   }
 
   // ปรับคะแนนหรือข้อมูลทีม
@@ -880,6 +1020,15 @@ class PhygitalFirebaseManager {
     team.dice_history = history;
     team.is_finished = false; // เล่นต่อเนื่องได้ตลอดจนหมดเวลาควบคุมของแอดมิน!
 
+    this.logActivity(roomPin, `🎲 ${team.name} ทอยเต๋าได้ ${diceValue} แต้ม เดินจากช่อง ${oldTile} ➔ ${rawTile}`, 'dice', teamId);
+    if (warpEvent) {
+      if (warpEvent.type === 'ladder') {
+        this.logActivity(roomPin, `🪜 ${team.name} เหยียบบันได! ปีนขึ้นจากช่อง ${warpEvent.from} ➔ ${warpEvent.to}`, 'warp', teamId);
+      } else {
+        this.logActivity(roomPin, `🐍 ${team.name} โดนงูกัด! สไลด์ลงจากช่อง ${warpEvent.from} ➔ ${warpEvent.to}`, 'warp', teamId);
+      }
+    }
+
     this.saveLocalRoom(roomPin, data);
 
     if (this.db) {
@@ -904,7 +1053,7 @@ class PhygitalFirebaseManager {
     };
   }
 
-  // จัดสรรฐานกิจกรรมว่าง
+  // จัดสรรฐานกิจกรรมว่าง (พร้อมระบบปลดล็อกฐานเดิมอัตโนมัติ: 1 กลุ่ม = 1 ฐานเท่านั้น)
   async assignVacantStation(roomPin, teamId) {
     let data = this.getLocalRoom(roomPin);
     if (!data) data = await this.createDemoRoomIfNotExist(roomPin);
@@ -913,26 +1062,60 @@ class PhygitalFirebaseManager {
     if (!team) throw new Error("ไม่พบข้อมูลกลุ่ม");
 
     const stations = data.stations || {};
-    const completed = team.completed_stations || {};
+    const updates = {};
 
-    let availableStations = Object.values(stations).filter(st => {
-      return st.is_vacant === true && !completed[st.id];
+    // 1. ปลดล็อกฐานเดิมทั้งหมดที่กลุ่มนี้อาจเคยถือครองอยู่ก่อนให้ว่าง 100%
+    Object.keys(stations).forEach(stId => {
+      if (stations[stId].current_team_id === teamId) {
+        stations[stId].is_vacant = true;
+        stations[stId].current_team_id = null;
+        stations[stId].occupied_at = null;
+        updates[`stations/${stId}/is_vacant`] = true;
+        updates[`stations/${stId}/current_team_id`] = null;
+        updates[`stations/${stId}/occupied_at`] = null;
+      }
     });
 
-    // If all stations completed by this team, allow replay to keep earning score!
-    if (availableStations.length === 0) {
-      availableStations = Object.values(stations).filter(st => st.is_vacant === true);
-    }
-    // If all stations occupied by other teams, allow parallel activity!
-    if (availableStations.length === 0) {
-      availableStations = Object.values(stations);
+    const allStations = Object.values(stations);
+    if (allStations.length === 0) {
+      return { success: false, reason: 'no_stations', message: 'ยังไม่มีฐานกิจกรรมในระบบ' };
     }
 
+    if (!team.completed_stations_cycle) team.completed_stations_cycle = {};
+    const completedInCycle = team.completed_stations_cycle;
+    const lastStationId = team.last_completed_station_id;
+
+    // 2. กรองหาฐานที่ "ยังไม่ได้เล่นในรอบปัจจุบัน"
+    let uncompletedInCycle = allStations.filter(st => !completedInCycle[st.id]);
+
+    // 3. ถ้ารอบนี้เล่นครบทุกฐานแล้ว (เช่น ครบ 10/10 ฐาน) ➔ เริ่มรอบใหม่ (Cycle 2, 3...) อัตโนมัติ!
+    let isNewCycleStarted = false;
+    if (uncompletedInCycle.length === 0) {
+      team.station_cycle = (team.station_cycle || 1) + 1;
+      team.completed_stations_cycle = {};
+      uncompletedInCycle = allStations;
+      isNewCycleStarted = true;
+      updates[`teams/${teamId}/station_cycle`] = team.station_cycle;
+      updates[`teams/${teamId}/completed_stations_cycle`] = {};
+    }
+
+    // 4. กรองฐานที่ว่าง และ "ไม่ใช่ฐานที่เพิ่งส่งคะแนนล่าสุด" (ป้องกันการเล่นซ้ำติดกันทันที)
+    let availableStations = uncompletedInCycle.filter(st => {
+      const isNotLast = allStations.length > 1 ? st.id !== lastStationId : true;
+      return st.is_vacant === true && isNotLast;
+    });
+
+    // ถ้าไม่มีฐานว่างที่เข้าเงื่อนไข ให้ลองดูฐานว่างทั้งหมดในรอบนี้
+    if (availableStations.length === 0) {
+      availableStations = uncompletedInCycle.filter(st => st.is_vacant === true);
+    }
+
+    // 5. ถ้าทุกฐานที่ต้องเล่นในรอบนี้กำลังมีกลุ่มอื่นเล่นอยู่ ➔ เข้าคิวรอว่าง
     if (availableStations.length === 0) {
       return {
         success: false,
-        reason: 'no_stations',
-        message: 'ยังไม่มีฐานกิจกรรมในระบบ'
+        reason: 'occupied',
+        message: 'ฐานกิจกรรมที่ยังไม่เคยเล่นกำลังมีกลุ่มอื่นเล่นอยู่ กำลังรอคิวว่าง...'
       };
     }
 
@@ -945,33 +1128,121 @@ class PhygitalFirebaseManager {
     team.current_station_id = chosenStation.id;
     team.station_start_time = Date.now();
 
+    updates[`stations/${chosenStation.id}/is_vacant`] = false;
+    updates[`stations/${chosenStation.id}/current_team_id`] = teamId;
+    updates[`stations/${chosenStation.id}/occupied_at`] = Date.now();
+    updates[`teams/${teamId}/current_station_id`] = chosenStation.id;
+    updates[`teams/${teamId}/station_start_time`] = Date.now();
+
     this.saveLocalRoom(roomPin, data);
+    this.logActivity(roomPin, `🎯 ${team.name} เข้าสู่ภารกิจ "${chosenStation.name}"`, 'station', teamId);
 
     if (this.db) {
       try {
-        const updates = {};
-        updates[`stations/${chosenStation.id}/is_vacant`] = false;
-        updates[`stations/${chosenStation.id}/current_team_id`] = teamId;
-        updates[`stations/${chosenStation.id}/occupied_at`] = Date.now();
-        updates[`teams/${teamId}/current_station_id`] = chosenStation.id;
-        updates[`teams/${teamId}/station_start_time`] = Date.now();
         this.withTimeout(this.getRoomRef(roomPin).update(updates));
       } catch(e) {}
     }
 
     return {
       success: true,
-      station: chosenStation
+      station: chosenStation,
+      isNewCycle: isNewCycleStarted,
+      cycleNumber: team.station_cycle || 1
     };
   }
 
-  // ส่งคะแนนและปลดล็อกฐาน
-  async submitStationScore(roomPin, teamId, stationId, score) {
+  // ตรวจสอบการเข้าฐานจาก QR Code (ห้ามเล่นซ้ำทันทีในรอบเดียวกัน แต่ถ้าขึ้นรอบใหม่ให้เล่นได้)
+  async checkAndEnterStation(roomPin, teamId, stationId) {
     let data = this.getLocalRoom(roomPin);
     if (!data) data = await this.createDemoRoomIfNotExist(roomPin);
 
     const team = data.teams?.[teamId];
     const station = data.stations?.[stationId];
+    if (!team) throw new Error("ไม่พบข้อมูลกลุ่ม");
+    if (!station) throw new Error("ไม่พบฐานกิจกรรมนี้");
+
+    const allStations = Object.values(data.stations || {});
+    const completedInCycle = team.completed_stations_cycle || {};
+    const lastStationId = team.last_completed_station_id;
+
+    // กฎข้อ 1: ห้ามเล่นฐานที่เพิ่งส่งคะแนนล่าสุดทันที
+    if (allStations.length > 1 && stationId === lastStationId) {
+      return {
+        success: false,
+        alreadyCompleted: true,
+        stationName: station.name,
+        message: `กลุ่มของคุณเพิ่งทำภารกิจฐาน "${station.name}" เสร็จไป กรุณาหมุนเวียนไปทำภารกิจฐานอื่นก่อนครับ`
+      };
+    }
+
+    // กฎข้อ 2: ถ้าในรอบปัจจุบันเล่นฐานนี้ไปแล้ว และยังมีฐานอื่นที่ยังไม่ครบในรอบนี้ ➔ ห้ามเล่นซ้ำ
+    const uncompletedCount = allStations.filter(st => !completedInCycle[st.id]).length;
+    if (completedInCycle[stationId] && uncompletedCount > 0) {
+      const prevScore = completedInCycle[stationId].score || 0;
+      return {
+        success: false,
+        alreadyCompleted: true,
+        score: prevScore,
+        stationName: station.name,
+        message: `กลุ่มของคุณผ่านฐาน "${station.name}" ในรอบนี้ไปแล้ว (+${prevScore} แต้ม) กรุณาไปทำภารกิจฐานอื่นที่ยังไม่เคยเล่นในรอบนี้ก่อนครับ (เหลืออีก ${uncompletedCount} ฐานจะจบรอบ)`
+      };
+    }
+
+    // กฎข้อ 3: ตรวจสอบว่าฐานว่างหรือไม่
+    if (!station.is_vacant && station.current_team_id !== teamId) {
+      return {
+        success: false,
+        isOccupied: true,
+        stationName: station.name,
+        message: `ฐาน "${station.name}" กำลังมีกลุ่มอื่นเล่นอยู่ กรุณารอสักครู่หรือเลือกฐานอื่น`
+      };
+    }
+
+    // ปลดล็อกฐานเดิมของกลุ่มนี้ (ถ้ามี)
+    const updates = {};
+    Object.keys(data.stations || {}).forEach(stId => {
+      if (stId !== stationId && data.stations[stId].current_team_id === teamId) {
+        data.stations[stId].is_vacant = true;
+        data.stations[stId].current_team_id = null;
+        data.stations[stId].occupied_at = null;
+        updates[`stations/${stId}/is_vacant`] = true;
+        updates[`stations/${stId}/current_team_id`] = null;
+        updates[`stations/${stId}/occupied_at`] = null;
+      }
+    });
+
+    station.is_vacant = false;
+    station.current_team_id = teamId;
+    station.occupied_at = Date.now();
+    team.current_station_id = stationId;
+    team.station_start_time = Date.now();
+
+    updates[`stations/${stationId}/is_vacant`] = false;
+    updates[`stations/${stationId}/current_team_id`] = teamId;
+    updates[`stations/${stationId}/occupied_at`] = Date.now();
+    updates[`teams/${teamId}/current_station_id`] = stationId;
+    updates[`teams/${teamId}/station_start_time`] = Date.now();
+
+    this.saveLocalRoom(roomPin, data);
+    this.logActivity(roomPin, `📱 ${team.name} สแกน QR Code เข้าสู่ฐาน "${station.name}"`, 'station', teamId);
+
+    if (this.db) {
+      try { this.withTimeout(this.getRoomRef(roomPin).update(updates)); } catch(e) {}
+    }
+
+    return {
+      success: true,
+      station
+    };
+  }
+
+  // ส่งคะแนนและปลดล็อกฐานอัตโนมัติ (พร้อมบันทึกรูปภาพหลักฐานและการจำกัดการเล่นซ้ำ)
+  async submitStationScore(roomPin, teamId, stationId, score, photoEvidence = null) {
+    let data = this.getLocalRoom(roomPin);
+    if (!data) data = await this.createDemoRoomIfNotExist(roomPin);
+
+    const team = data.teams?.[teamId];
+    const stations = data.stations || {};
     if (!team) throw new Error("ไม่พบข้อมูลกลุ่ม");
 
     const earnedScore = Math.max(0, parseInt(score) || 0);
@@ -979,46 +1250,58 @@ class PhygitalFirebaseManager {
 
     team.score = newTotalScore;
     if (!team.completed_stations) team.completed_stations = {};
-    team.completed_stations[stationId] = {
+    if (!team.completed_stations_cycle) team.completed_stations_cycle = {};
+    
+    const record = {
       score: earnedScore,
       completed_at: Date.now()
     };
+    if (photoEvidence) {
+      record.photo_evidence = photoEvidence;
+    }
+
+    // บันทึกประวัติรวม และ ประจำรอบ (Cycle)
+    team.completed_stations[stationId] = record;
+    team.completed_stations_cycle[stationId] = record;
+    team.last_completed_station_id = stationId; // บันทึกฐานล่าสุดที่เพิ่งทำเสร็จ
     team.current_station_id = null;
     team.station_start_time = null;
 
-    if (station) {
-      station.is_vacant = true;
-      station.current_team_id = null;
-      station.occupied_at = null;
-    }
+    const updates = {};
+    updates[`teams/${teamId}/score`] = newTotalScore;
+    updates[`teams/${teamId}/completed_stations/${stationId}`] = record;
+    updates[`teams/${teamId}/completed_stations_cycle/${stationId}`] = record;
+    updates[`teams/${teamId}/last_completed_station_id`] = stationId;
+    updates[`teams/${teamId}/current_station_id`] = null;
+    updates[`teams/${teamId}/station_start_time`] = null;
+
+    // ปลดล็อกฐานทั้งหมดที่กลุ่มนี้ถือครองอยู่
+    Object.keys(stations).forEach(stId => {
+      if (stId === stationId || stations[stId].current_team_id === teamId) {
+        stations[stId].is_vacant = true;
+        stations[stId].current_team_id = null;
+        stations[stId].occupied_at = null;
+        updates[`stations/${stId}/is_vacant`] = true;
+        updates[`stations/${stId}/current_team_id`] = null;
+        updates[`stations/${stId}/occupied_at`] = null;
+      }
+    });
 
     this.saveLocalRoom(roomPin, data);
 
     if (this.db) {
       try {
-        const updates = {};
-        updates[`teams/${teamId}/score`] = newTotalScore;
-        updates[`teams/${teamId}/completed_stations/${stationId}`] = {
-          score: earnedScore,
-          completed_at: Date.now()
-        };
-        updates[`teams/${teamId}/current_station_id`] = null;
-        updates[`teams/${teamId}/station_start_time`] = null;
-
-        if (station) {
-          updates[`stations/${stationId}/is_vacant`] = true;
-          updates[`stations/${stationId}/current_team_id`] = null;
-          updates[`stations/${stationId}/occupied_at`] = null;
-        }
-
         this.withTimeout(this.getRoomRef(roomPin).update(updates));
       } catch(e) {}
     }
 
+    // บันทึกลงประวัติกิจกรรม Logs
+    this.logActivity(roomPin, `📸 ${team.name} ส่งคะแนน +${earnedScore} แต้ม ${photoEvidence ? '(แนบรูปหลักฐานแล้ว)' : ''} ที่ฐาน ${stations[stationId]?.name || stationId}`, 'station');
+
     return {
       success: true,
-      earnedScore,
-      newTotalScore
+      score: earnedScore,
+      totalScore: newTotalScore
     };
   }
 }
