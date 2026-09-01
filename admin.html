@@ -954,13 +954,15 @@
       checkUrlParams();
     });
 
-    // ตรวจสอบ Parameter จาก URL (เช่น ?pin=123456)
+    // ตรวจสอบ Parameter จาก URL (เช่น ?pin=123456) หรือดึงจากแคชห้องล่าสุด
     function checkUrlParams() {
       const params = new URLSearchParams(window.location.search);
       const urlPin = params.get('pin');
-      const savedPin = localStorage.getItem(DEFAULT_SAVED_ROOM_KEY);
+      const savedPin = localStorage.getItem(DEFAULT_SAVED_ROOM_KEY)
+        || localStorage.getItem('PHYGITAL_CURRENT_ROOM_PIN')
+        || localStorage.getItem('STUDENT_ROOM_PIN');
       
-      const pinToLoad = urlPin || savedPin;
+      const pinToLoad = urlPin || savedPin || '999999';
       if (pinToLoad) {
         loadRoom(pinToLoad);
       }
