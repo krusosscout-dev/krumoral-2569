@@ -206,6 +206,16 @@ class PhygitalFirebaseManager {
     this.listeners = [];
   }
 
+  // Promise Timeout Wrapper ป้องกัน Network Hang
+  async withTimeout(promise, ms = 1200) {
+    if (!promise) return null;
+    let timer;
+    const timeoutPromise = new Promise(resolve => {
+      timer = setTimeout(() => resolve(null), ms);
+    });
+    return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timer));
+  }
+
   // ดึง Config จาก LocalStorage
   getStoredConfig() {
     try {
@@ -316,7 +326,6 @@ class PhygitalFirebaseManager {
       return { success: true, db: this.db, config };
     } catch (error) {
       this.connected = false;
-      console.warn("Firebase init note (using local/cloud hybrid):", error);
       return { success: false, error: error.message };
     }
   }
@@ -398,19 +407,17 @@ class PhygitalFirebaseManager {
     // บันทึกลง Local Storage เสมอ
     this.saveLocalRoom(roomPin, initialData);
 
-    // บันทึกลง Firebase (ถ้ามี)
+    // บันทึกลง Firebase แบบ Non-blocking
     if (this.db) {
       try {
         const roomRef = this.getRoomRef(roomPin);
-        await roomRef.set(initialData);
-        await this.addLog(roomPin, {
+        this.withTimeout(roomRef.set(initialData));
+        this.addLog(roomPin, {
           team_id: "system",
           type: "system",
           message: `สร้างห้องเล่นเกม ${roomPin} สำเร็จ (${totalTeamsCount} กลุ่ม, ${Object.keys(stationsObj).length} ฐาน)`
         });
-      } catch (e) {
-        console.warn("Firebase createRoom sync warning:", e);
-      }
+      } catch (e) {}
     }
 
     return initialData;
@@ -455,13 +462,12 @@ class PhygitalFirebaseManager {
             }
           }
         }, (err) => {
-          console.warn("Firebase listener network fallback:", err);
           if (localData) callback(localData);
         });
         this.listeners.push({ ref: roomRef, listener });
         return listener;
       } catch(e) {
-        console.warn("Firebase listener error:", e);
+        if (localData) callback(localData);
       }
     }
 
@@ -490,10 +496,10 @@ class PhygitalFirebaseManager {
     try {
       const logsRef = this.getLogsRef(roomPin);
       const newLogRef = logsRef.push();
-      return newLogRef.set({
+      this.withTimeout(newLogRef.set({
         ...logData,
         timestamp: Date.now()
-      });
+      }));
     } catch(e) {}
   }
 
@@ -517,7 +523,7 @@ class PhygitalFirebaseManager {
         if (winnerTeamId !== undefined) {
           updateObj['config/winner_team_id'] = winnerTeamId;
         }
-        await this.getRoomRef(roomPin).update(updateObj);
+        this.withTimeout(this.getRoomRef(roomPin).update(updateObj));
       } catch(e) {}
     }
   }
@@ -565,13 +571,13 @@ class PhygitalFirebaseManager {
     if (this.db) {
       try {
         const roomRef = this.getRoomRef(roomPin);
-        await roomRef.update({
+        this.withTimeout(roomRef.update({
           'config/game_status': 'playing',
           'config/winner_team_id': null,
           'config/updated_at': Date.now(),
           teams: resetTeams,
           stations: resetStations
-        });
+        }));
       } catch(e) {}
     }
   }
@@ -592,7 +598,7 @@ class PhygitalFirebaseManager {
         updates[`stations/${stationId}/is_vacant`] = true;
         updates[`stations/${stationId}/current_team_id`] = null;
         updates[`stations/${stationId}/occupied_at`] = null;
-        await this.getRoomRef(roomPin).update(updates);
+        this.withTimeout(this.getRoomRef(roomPin).update(updates));
       } catch(e) {}
     }
   }
@@ -613,9 +619,10 @@ class PhygitalFirebaseManager {
         Object.keys(updateFields).forEach(k => {
           updates[`teams/${teamId}/${k}`] = updateFields[k];
         });
-        await this.getRoomRef(roomPin).update(updates);
+        this.withTimeout(this.getRoomRef(roomPin).update(updates));
       } catch(e) {}
     }
+    return { success: true };
   }
 
   // ทอยลูกเต๋าและเดินตัวหมาก
@@ -667,7 +674,7 @@ class PhygitalFirebaseManager {
             updates['config/winner_team_id'] = teamId;
           }
         }
-        await this.getRoomRef(roomPin).update(updates);
+        this.withTimeout(this.getRoomRef(roomPin).update(updates));
       } catch(e) {}
     }
 
@@ -731,7 +738,7 @@ class PhygitalFirebaseManager {
         updates[`stations/${chosenStation.id}/occupied_at`] = Date.now();
         updates[`teams/${teamId}/current_station_id`] = chosenStation.id;
         updates[`teams/${teamId}/station_start_time`] = Date.now();
-        await this.getRoomRef(roomPin).update(updates);
+        this.withTimeout(this.getRoomRef(roomPin).update(updates));
       } catch(e) {}
     }
 
@@ -787,7 +794,7 @@ class PhygitalFirebaseManager {
           updates[`stations/${stationId}/occupied_at`] = null;
         }
 
-        await this.getRoomRef(roomPin).update(updates);
+        this.withTimeout(this.getRoomRef(roomPin).update(updates));
       } catch(e) {}
     }
 

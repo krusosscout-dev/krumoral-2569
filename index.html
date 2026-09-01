@@ -702,6 +702,12 @@
 
     // Stage Navigation (Landing ➔ Join ➔ Gameplay)
     function goToLandingStage() {
+      localStorage.removeItem('STUDENT_ROOM_PIN');
+      localStorage.removeItem('STUDENT_TEAM_ID');
+      currentRoomPin = null;
+      currentTeamId = null;
+      document.getElementById('topTeamBadge').classList.add('hidden');
+      document.getElementById('topRoomPinText').textContent = 'เกมบันไดงูฐานกิจกรรม';
       document.getElementById('stage-landing').classList.remove('hidden');
       document.getElementById('stage-join').classList.add('hidden');
       document.getElementById('stage-gameplay').classList.add('hidden');
@@ -730,7 +736,7 @@
       checkAndLoadRoom();
     }
 
-    // On Load
+    // On Load - Restore Session & Room State on Refresh
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
       initFirebaseApp();
@@ -740,16 +746,16 @@
       const savedPin = localStorage.getItem('STUDENT_ROOM_PIN') || localStorage.getItem('PHYGITAL_CURRENT_ROOM_PIN');
       const savedTeam = localStorage.getItem('STUDENT_TEAM_ID');
 
-      if (urlPin) {
-        document.getElementById('joinPinInput').value = urlPin;
-        goToJoinStage();
-        checkAndLoadRoom(savedTeam);
-      } else if (savedPin && savedTeam) {
-        document.getElementById('joinPinInput').value = savedPin;
+      const targetPin = urlPin || savedPin;
+
+      if (targetPin) {
+        document.getElementById('joinPinInput').value = targetPin;
         goToJoinStage();
         checkAndLoadRoom(savedTeam);
       } else {
-        goToLandingStage();
+        document.getElementById('stage-landing').classList.remove('hidden');
+        document.getElementById('stage-join').classList.add('hidden');
+        document.getElementById('stage-gameplay').classList.add('hidden');
       }
     });
 
@@ -1026,28 +1032,27 @@
       }
 
       try {
-        Swal.fire({
-          title: 'กำลังเข้าสู่เกม...',
-          allowOutsideClick: false,
-          didOpen: () => Swal.showLoading()
-        });
+        currentTeamId = selectedTempTeamId;
+        localStorage.setItem('STUDENT_TEAM_ID', currentTeamId);
 
-        // Save selected unique mascot & custom team name in Firebase
-        await PhygitalDB.updateTeamData(currentRoomPin, selectedTempTeamId, {
+        if (roomData && roomData.teams && roomData.teams[selectedTempTeamId]) {
+          roomData.teams[selectedTempTeamId].name = customName;
+          roomData.teams[selectedTempTeamId].avatar = avatarToUse;
+        }
+
+        // Save selected unique mascot & custom team name in Firebase / Local
+        PhygitalDB.updateTeamData(currentRoomPin, selectedTempTeamId, {
           name: customName,
           avatar: avatarToUse
         });
 
-        currentTeamId = selectedTempTeamId;
-        localStorage.setItem('STUDENT_TEAM_ID', currentTeamId);
-
-        Swal.close();
         playFanfare();
-        confetti({ particleCount: 70, spread: 60 });
+        try { confetti({ particleCount: 70, spread: 60 }); } catch(e) {}
 
         handleRoomStateChange();
       } catch (e) {
-        Swal.fire('เกิดข้อผิดพลาด', e.message, 'error');
+        console.error(e);
+        handleRoomStateChange();
       }
     }
 
