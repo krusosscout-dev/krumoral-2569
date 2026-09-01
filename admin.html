@@ -625,8 +625,31 @@
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">คำอธิบายภารกิจ</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1">คำอธิบายภารกิจ / กติกา</label>
           <textarea id="modalStationDesc" rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="อธิบายสิ่งที่นักเรียนต้องปฏิบัติ..."></textarea>
+        </div>
+
+        <!-- Station Image / Rules Graphic Input -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-xs font-bold text-slate-300 flex items-center space-x-1">
+              <i data-lucide="image" class="w-3.5 h-3.5 text-indigo-400"></i>
+              <span>รูปภาพกติกา / ภาพประกอบฐาน (URL หรือ แนบรูป)</span>
+            </label>
+            <button type="button" onclick="document.getElementById('modalStationImageFileInput').click()" class="text-[10px] text-indigo-400 hover:underline font-bold cursor-pointer">
+              📁 เลือกไฟล์รูปภาพ
+            </button>
+          </div>
+          
+          <input type="file" id="modalStationImageFileInput" accept="image/*" class="hidden" onchange="handleStationImageFileSelected(event)">
+          <input type="text" id="modalStationImageUrl" oninput="updateModalStationImagePreview(this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="เช่น https://... หรือ data:image/...">
+          
+          <div id="modalStationImagePreviewBox" class="hidden mt-2 relative rounded-xl overflow-hidden border border-slate-700 bg-slate-900">
+            <img id="modalStationImagePreview" src="" alt="ภาพตัวอย่าง" class="w-full max-h-32 object-cover">
+            <button type="button" onclick="clearModalStationImage()" class="absolute top-1.5 right-1.5 p-1 rounded-full bg-slate-900/80 hover:bg-rose-600 text-white text-xs transition-all cursor-pointer">
+              <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -645,6 +668,84 @@
         <button onclick="closeModal('stationModal')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 cursor-pointer">ยกเลิก</button>
         <button onclick="submitSaveStation()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-bold text-xs text-white shadow-md shadow-indigo-600/30 cursor-pointer">บันทึกฐาน</button>
       </div>
+    </div>
+  </div>
+
+  <!-- 7. STATION DESK QR CODE MODAL -->
+  <div id="stationQrModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="max-w-sm w-full glass-card p-6 rounded-3xl border border-indigo-500/40 shadow-2xl text-center space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <div class="flex items-center space-x-2">
+          <span id="stationQrIcon" class="text-2xl">🎯</span>
+          <h3 id="stationQrTitle" class="text-base font-bold font-heading text-white">QR Code ประจำฐาน</h3>
+        </div>
+        <button onclick="closeModal('stationQrModal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="flex justify-center p-4 bg-white rounded-2xl mx-auto w-fit shadow-inner">
+        <div id="stationQrCanvas"></div>
+      </div>
+
+      <div>
+        <p class="text-xs text-slate-300">ติดไว้ที่โต๊ะประจำฐานให้นักเรียนสแกน</p>
+        <p id="stationQrDesc" class="text-[11px] text-slate-400 mt-1 line-clamp-2"></p>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <button onclick="window.print()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white flex items-center justify-center space-x-1.5 cursor-pointer">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>พิมพ์ป้ายฐาน</span>
+        </button>
+        <button onclick="copyStationDirectLink()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-md shadow-indigo-600/30 flex items-center justify-center space-x-1.5 cursor-pointer">
+          <i data-lucide="copy" class="w-4 h-4"></i>
+          <span>คัดลอกลิงก์</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. PHOTO EVIDENCE INSPECTOR MODAL -->
+  <div id="photoEvidenceModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="max-w-md w-full glass-card p-6 rounded-3xl border border-indigo-500/40 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="image" class="w-5 h-5 text-emerald-400"></i>
+          <h3 id="photoEvidenceModalTitle" class="text-base font-bold font-heading text-white">หลักฐานภาพถ่ายการปฏิบัติกิจกรรม</h3>
+        </div>
+        <button onclick="closeModal('photoEvidenceModal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 flex items-center justify-center min-h-[220px]">
+        <img id="photoEvidenceModalImg" src="" alt="ภาพถ่ายหลักฐาน" class="w-full max-h-[380px] object-contain">
+      </div>
+
+      <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs space-y-1 text-slate-300">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-400">👥 กลุ่มผู้ส่ง:</span>
+          <span id="photoEvidenceTeam" class="font-bold text-white font-heading">กลุ่มที่ 1</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-400">🎯 ฐานกิจกรรม:</span>
+          <span id="photoEvidenceStation" class="font-bold text-indigo-300">ฐานที่ 1: คิดเลขเร็ว</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-400">⭐ คะแนนที่ได้รับ:</span>
+          <span id="photoEvidenceScore" class="font-mono font-bold text-amber-400">+100 แต้ม</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-400">🕒 เวลาที่ส่ง:</span>
+          <span id="photoEvidenceTime" class="font-mono text-slate-400">12:34:56</span>
+        </div>
+      </div>
+
+      <button onclick="downloadCurrentPhotoEvidence()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md shadow-emerald-600/30 flex items-center justify-center space-x-1.5 cursor-pointer">
+        <i data-lucide="download" class="w-4 h-4"></i>
+        <span>ดาวน์โหลดรูปภาพเก็บไว้</span>
+      </button>
     </div>
   </div>
 
@@ -970,8 +1071,22 @@
       const sorted = Object.keys(teams).map(k => ({ ...teams[k], key: k })).sort((a, b) => (b.score || 0) - (a.score || 0));
 
       container.innerHTML = sorted.map((t, idx) => {
-        const completedCount = Object.keys(t.completed_stations || {}).length;
+        const completedMap = t.completed_stations || {};
+        const completedCount = Object.keys(completedMap).length;
         const currentStation = t.current_station_id ? (stations[t.current_station_id]?.name || 'กำลังทำภารกิจ') : 'อยู่บนกระดาน';
+
+        const completedBadges = Object.keys(completedMap).map(stId => {
+          const stObj = stations[stId] || {};
+          const rec = completedMap[stId] || {};
+          const stScore = rec.score !== undefined ? rec.score : (rec || 0);
+          const hasPhoto = !!rec.photo_evidence;
+          return `<span class="px-2 py-0.5 rounded-md bg-emerald-950/90 border ${hasPhoto ? 'border-amber-400/80 text-amber-300 shadow-sm shadow-amber-500/20' : 'border-emerald-500/40 text-emerald-300'} font-semibold text-[10px] flex items-center space-x-1 ${hasPhoto ? 'cursor-pointer hover:bg-amber-950 transition-all' : ''}" ${hasPhoto ? `onclick="openPhotoEvidenceModal('${t.key}', '${stId}')"` : ''} title="${stObj.name || stId} (+${stScore} แต้ม)${hasPhoto ? ' - คลิกดูรูปหลักฐาน' : ''}">
+            <span>${stObj.icon || '🎯'}</span>
+            <span class="truncate max-w-[85px]">${stObj.name || stId}</span>
+            <span class="text-amber-300 font-mono font-bold">+${stScore}</span>
+            ${hasPhoto ? `<span class="text-xs animate-bounce" title="มีรูปหลักฐาน">📸</span>` : ''}
+          </span>`;
+        }).join('');
 
         return `
           <div class="glass-card p-4 rounded-2xl border border-slate-800 space-y-3 relative overflow-hidden">
@@ -994,14 +1109,19 @@
               </div>
             </div>
 
-            <div class="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/80 text-xs space-y-1">
+            <div class="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/80 text-xs space-y-2">
               <div class="flex items-center justify-between text-slate-400">
-                <span>🎯 สถานะภารกิจ:</span>
+                <span>🎯 สถานะปัจจุบัน:</span>
                 <span class="font-bold ${t.current_station_id ? 'text-rose-400' : 'text-emerald-400'} truncate max-w-[150px]">${currentStation}</span>
               </div>
-              <div class="flex items-center justify-between text-slate-400">
-                <span>🏆 ฐานที่ผ่านแล้ว:</span>
-                <span class="font-mono font-bold text-indigo-300">${completedCount} ฐาน</span>
+              
+              <div>
+                <div class="flex items-center justify-between text-slate-400 mb-1">
+                  <span>🏆 ฐานที่ผ่านแล้ว (${completedCount} ฐาน):</span>
+                </div>
+                <div class="flex flex-wrap gap-1 max-h-[75px] overflow-y-auto custom-scrollbar">
+                  ${completedCount > 0 ? completedBadges : '<span class="text-[10px] text-slate-500 italic">ยังไม่ได้ผ่านฐานใด</span>'}
+                </div>
               </div>
             </div>
 
@@ -1045,6 +1165,12 @@
               </span>
             </div>
 
+            ${st.image_url ? `
+              <div class="rounded-xl overflow-hidden border border-slate-700 bg-slate-950 max-h-28">
+                <img src="${st.image_url}" alt="ภาพกติกา" class="w-full h-28 object-cover cursor-pointer hover:opacity-90 transition-opacity" onclick="window.open('${st.image_url}', '_blank')">
+              </div>
+            ` : ''}
+
             <p class="text-xs text-slate-300 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 line-clamp-2">
               ${st.description || 'ไม่มีคำอธิบายภารกิจ'}
             </p>
@@ -1059,9 +1185,13 @@
             ` : ''}
 
             <div class="flex items-center space-x-2 pt-1">
+              <button onclick="openStationQrModal('${st.id}')" class="py-1.5 px-2.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 font-bold text-xs text-indigo-300 transition-all flex items-center justify-center space-x-1 cursor-pointer" title="แสดง QR Code ประจำฐาน">
+                <i data-lucide="qr-code" class="w-3.5 h-3.5"></i>
+                <span class="hidden sm:inline">QR ฐาน</span>
+              </button>
               <button onclick="openEditStationModal('${st.id}')" class="flex-1 py-1.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-xs text-slate-300 hover:text-white transition-all flex items-center justify-center space-x-1 cursor-pointer">
                 <i data-lucide="edit" class="w-3.5 h-3.5"></i>
-                <span>แก้ไขฐาน</span>
+                <span>แก้ไข</span>
               </button>
               <button onclick="handleDeleteStation('${st.id}')" class="p-1.5 rounded-xl bg-rose-950/50 hover:bg-rose-900 border border-rose-500/30 text-rose-300 transition-all cursor-pointer" title="ลบฐานนี้">
                 <i data-lucide="trash" class="w-4 h-4"></i>
@@ -1338,6 +1468,58 @@
     }
 
     // Add / Edit Station Modal
+    // Station Image Upload & Preview in Modal
+    function handleStationImageFileSelected(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDimension = 900;
+          if (width > height && width > maxDimension) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else if (height > maxDimension) {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const base64 = canvas.toDataURL('image/jpeg', 0.8);
+          document.getElementById('modalStationImageUrl').value = base64;
+          updateModalStationImagePreview(base64);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function updateModalStationImagePreview(url) {
+      const box = document.getElementById('modalStationImagePreviewBox');
+      const img = document.getElementById('modalStationImagePreview');
+      if (!box || !img) return;
+      if (url && url.trim()) {
+        img.src = url.trim();
+        box.classList.remove('hidden');
+      } else {
+        box.classList.add('hidden');
+      }
+    }
+
+    function clearModalStationImage() {
+      document.getElementById('modalStationImageUrl').value = '';
+      const fileInput = document.getElementById('modalStationImageFileInput');
+      if (fileInput) fileInput.value = '';
+      updateModalStationImagePreview('');
+    }
+
+    // Add / Edit Station Modal
     function openAddStationModal() {
       document.getElementById('modalStationId').value = '';
       document.getElementById('modalStationTitle').textContent = 'เพิ่มฐานกิจกรรมใหม่';
@@ -1346,8 +1528,10 @@
       document.getElementById('modalStationDesc').value = '';
       document.getElementById('modalStationTimer').value = 3;
       document.getElementById('modalStationMaxScore').value = 100;
+      clearModalStationImage();
       openModal('stationModal');
     }
+
     function openEditStationModal(stId) {
       const st = currentRoomData?.stations?.[stId];
       if (!st) return;
@@ -1358,13 +1542,17 @@
       document.getElementById('modalStationDesc').value = st.description || '';
       document.getElementById('modalStationTimer').value = st.timer_minutes || 3;
       document.getElementById('modalStationMaxScore').value = st.max_score || 100;
+      document.getElementById('modalStationImageUrl').value = st.image_url || '';
+      updateModalStationImagePreview(st.image_url || '');
       openModal('stationModal');
     }
+
     async function submitSaveStation() {
       const stId = document.getElementById('modalStationId').value || `st_${Date.now()}`;
       const icon = document.getElementById('modalStationIcon').value.trim() || '🎯';
       const name = document.getElementById('modalStationName').value.trim();
       const description = document.getElementById('modalStationDesc').value.trim();
+      const imageUrl = document.getElementById('modalStationImageUrl').value.trim();
       const timer = parseInt(document.getElementById('modalStationTimer').value) || 3;
       const maxScore = parseInt(document.getElementById('modalStationMaxScore').value) || 100;
 
@@ -1378,6 +1566,7 @@
           icon,
           name,
           description,
+          image_url: imageUrl || null,
           timer_minutes: timer,
           max_score: maxScore,
           is_vacant: true,
@@ -1389,6 +1578,7 @@
         Swal.fire('เกิดข้อผิดพลาด', e.message, 'error');
       }
     }
+
     async function handleDeleteStation(stId) {
       if (!currentRoomPin || !stId) return;
       const res = await Swal.fire({
@@ -1407,6 +1597,62 @@
           Swal.fire('เกิดข้อผิดพลาด', e.message, 'error');
         }
       }
+    }
+
+    // Station Desk QR Code Modal
+    let activeStationQrUrl = '';
+    function openStationQrModal(stId) {
+      if (!currentRoomPin || !stId) return;
+      const st = currentRoomData?.stations?.[stId];
+      if (!st) return;
+
+      document.getElementById('stationQrIcon').textContent = st.icon || '🎯';
+      document.getElementById('stationQrTitle').textContent = st.name;
+      document.getElementById('stationQrDesc').textContent = st.description || 'กติกาและภารกิจประจำฐาน';
+
+      const qrContainer = document.getElementById('stationQrCanvas');
+      qrContainer.innerHTML = '';
+      const directUrl = `${window.location.origin}${window.location.pathname.replace('admin.html', 'index.html')}?pin=${currentRoomPin}&station=${stId}`;
+      activeStationQrUrl = directUrl;
+
+      new QRCode(qrContainer, { text: directUrl, width: 190, height: 190 });
+      openModal('stationQrModal');
+    }
+
+    function copyStationDirectLink() {
+      if (!activeStationQrUrl) return;
+      navigator.clipboard.writeText(activeStationQrUrl);
+      Swal.fire({ icon: 'success', title: 'คัดลอกลิงก์ประจำฐานแล้ว!', text: activeStationQrUrl, timer: 1500, showConfirmButton: false });
+    }
+
+    // Photo Evidence Inspector Modal
+    let currentInspectorPhotoUrl = '';
+    function openPhotoEvidenceModal(teamId, stId) {
+      const team = currentRoomData?.teams?.[teamId];
+      const st = currentRoomData?.stations?.[stId];
+      const record = team?.completed_stations?.[stId];
+
+      if (!record || !record.photo_evidence) {
+        Swal.fire('ไม่มีรูปหลักฐาน', 'กลุ่มนี้ส่งคะแนนโดยไม่ได้แนบรูปถ่าย', 'info');
+        return;
+      }
+
+      currentInspectorPhotoUrl = record.photo_evidence;
+      document.getElementById('photoEvidenceModalImg').src = record.photo_evidence;
+      document.getElementById('photoEvidenceTeam').textContent = team ? `${team.avatar || '🦁'} ${team.name}` : teamId;
+      document.getElementById('photoEvidenceStation').textContent = st ? `${st.icon || '🎯'} ${st.name}` : stId;
+      document.getElementById('photoEvidenceScore').textContent = `+${record.score || 0} แต้ม`;
+      document.getElementById('photoEvidenceTime').textContent = record.completed_at ? new Date(record.completed_at).toLocaleTimeString('th-TH') : '-';
+
+      openModal('photoEvidenceModal');
+    }
+
+    function downloadCurrentPhotoEvidence() {
+      if (!currentInspectorPhotoUrl) return;
+      const link = document.createElement('a');
+      link.href = currentInspectorPhotoUrl;
+      link.download = `Photo_Evidence_${Date.now()}.jpg`;
+      link.click();
     }
 
     // QR Code Modal & Copy Direct URL

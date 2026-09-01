@@ -1024,8 +1024,8 @@ class PhygitalFirebaseManager {
     };
   }
 
-  // ส่งคะแนนและปลดล็อกฐานอัตโนมัติ
-  async submitStationScore(roomPin, teamId, stationId, score) {
+  // ส่งคะแนนและปลดล็อกฐานอัตโนมัติ (พร้อมบันทึกรูปภาพหลักฐานการเข้าฐาน)
+  async submitStationScore(roomPin, teamId, stationId, score, photoEvidence = null) {
     let data = this.getLocalRoom(roomPin);
     if (!data) data = await this.createDemoRoomIfNotExist(roomPin);
 
@@ -1038,19 +1038,22 @@ class PhygitalFirebaseManager {
 
     team.score = newTotalScore;
     if (!team.completed_stations) team.completed_stations = {};
-    team.completed_stations[stationId] = {
+    
+    const record = {
       score: earnedScore,
       completed_at: Date.now()
     };
+    if (photoEvidence) {
+      record.photo_evidence = photoEvidence;
+    }
+
+    team.completed_stations[stationId] = record;
     team.current_station_id = null;
     team.station_start_time = null;
 
     const updates = {};
     updates[`teams/${teamId}/score`] = newTotalScore;
-    updates[`teams/${teamId}/completed_stations/${stationId}`] = {
-      score: earnedScore,
-      completed_at: Date.now()
-    };
+    updates[`teams/${teamId}/completed_stations/${stationId}`] = record;
     updates[`teams/${teamId}/current_station_id`] = null;
     updates[`teams/${teamId}/station_start_time`] = null;
 
@@ -1073,6 +1076,9 @@ class PhygitalFirebaseManager {
         this.withTimeout(this.getRoomRef(roomPin).update(updates));
       } catch(e) {}
     }
+
+    // บันทึกลงประวัติกิจกรรม Logs
+    this.logActivity(roomPin, `📸 ${team.name} ส่งคะแนน +${earnedScore} แต้ม ${photoEvidence ? '(แนบรูปหลักฐานแล้ว)' : ''} ที่ฐาน ${stations[stationId]?.name || stationId}`, 'station');
 
     return {
       success: true,
