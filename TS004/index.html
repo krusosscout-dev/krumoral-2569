@@ -100,6 +100,8 @@
       position: absolute;
       transform: translate(-50%, -50%);
       transition: all 0.3s ease;
+      user-select: none;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.7));
     }
     .team-pawn {
       position: absolute;
@@ -213,7 +215,7 @@
   </header>
 
   <!-- ================= MAIN VIEW CONTAINER (FITS IN 1 VIEWPORT SCREEN) ================= -->
-  <main class="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-4 py-2 flex flex-col justify-center overflow-hidden">
+  <main class="flex-1 max-w-[1600px] w-full mx-auto px-2 sm:px-4 py-1.5 flex flex-col justify-center overflow-hidden">
 
     <!-- ================= STAGE 0: HERO LANDING (หน้าแรกสุด สวยงาม จบใน 1 หน้า) ================= -->
     <div id="stage-landing" class="max-w-2xl mx-auto w-full space-y-4 my-auto animate-fadeIn text-center">
@@ -379,14 +381,14 @@
 
     </div>
 
-    <!-- ================= STAGE 2: LIVE BOARD + INTERACTIVE DICE GAMEPLAY ================= -->
-    <div id="stage-gameplay" class="hidden space-y-3 w-full my-auto">
+    <!-- ================= STAGE 2: LIVE BOARD + SIDEBAR COCKPIT ================= -->
+    <div id="stage-gameplay" class="hidden w-full h-full my-auto grid grid-cols-1 lg:grid-cols-12 gap-3 items-stretch animate-fadeIn">
       
-      <!-- 1. MAIN LIVE BOARD CANVAS (Adaptive Widescreen Scenic Arena) -->
-      <div class="glass-panel p-2 sm:p-3 rounded-2xl space-y-1.5 relative">
+      <!-- LEFT COLUMN (68-72%): MAIN LIVE BOARD ARENA -->
+      <div class="lg:col-span-8 xl:col-span-8 flex flex-col justify-between space-y-1.5 h-full">
         
         <!-- Board Container: Widescreen HD Scenic Arena -->
-        <div id="boardCanvasContainer" class="board-container w-full aspect-[16/9] sm:aspect-[16/8.5] max-h-[64vh] rounded-2xl overflow-hidden border border-white/15 relative transition-all duration-300 shadow-2xl mx-auto bg-slate-950">
+        <div id="boardCanvasContainer" class="board-container w-full aspect-[16/9] lg:aspect-[16/9.2] flex-1 max-h-[72vh] rounded-2xl overflow-hidden border border-white/15 relative transition-all duration-300 shadow-2xl bg-slate-950">
           <!-- Background Board Image -->
           <img id="boardBgImage" src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1400&q=80" alt="Snakes and Ladders Board" class="w-full h-full object-cover">
           <div class="absolute inset-0 bg-slate-950/20 pointer-events-none"></div>
@@ -403,92 +405,111 @@
               ⏳
             </div>
             <h3 class="text-base font-bold font-heading text-white">รอคุณครูกดเริ่มเกม (Waiting for Teacher)</h3>
-            <p class="text-[11px] text-slate-300">เมื่อคุณครูกดเริ่มเกม ปุ่มทอยเต๋าด้านล่างจะเปิดใช้งานอัตโนมัติ</p>
+            <p class="text-[11px] text-slate-300">เมื่อคุณครูกดเริ่มเกม ปุ่มทอยเต๋าด้านข้างจะเปิดใช้งานอัตโนมัติ</p>
           </div>
         </div>
 
         <!-- Board Mini Info Bar -->
-        <div class="flex items-center justify-between text-[10px] text-slate-400 px-1 pt-0.5">
-          <div class="flex items-center space-x-3">
-            <span>🚩 เริ่ม: ช่อง 1</span>
-            <span>🏁 เส้นชัย: ช่อง <strong id="boardTotalTilesLabel" class="text-amber-400">40</strong> (+500 โบนัส)</span>
+        <div class="glass-panel px-3 py-1.5 rounded-xl flex items-center justify-between text-[11px] text-slate-400">
+          <div class="flex items-center space-x-2 sm:space-x-3">
+            <span>🚩 ช่อง 1</span>
+            <span>🏁 เส้นชัย: <strong id="boardTotalTilesLabel" class="text-amber-400">40</strong> (+500 แต้ม/รอบ)</span>
+            <span id="masterGameTimerBadge" class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-mono font-bold border border-indigo-500/40 flex items-center space-x-1">
+              <i data-lucide="clock" class="w-3 h-3 text-indigo-400"></i>
+              <span id="masterGameTimerDisplay">เวลาเหลือ 40:00</span>
+            </span>
           </div>
           <div class="flex items-center space-x-2">
-            <button type="button" onclick="toggleBoardExpand()" class="px-2.5 py-0.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white flex items-center space-x-1 text-[9px] font-semibold transition-all cursor-pointer">
-              <i id="expandIcon" data-lucide="maximize-2" class="w-2.5 h-2.5"></i>
-              <span id="expandLabel">ขยายกระดานใหญ่</span>
+            <button type="button" onclick="toggleBoardExpand()" class="px-2.5 py-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white flex items-center space-x-1 text-[10px] font-semibold transition-all cursor-pointer">
+              <i id="expandIcon" data-lucide="maximize-2" class="w-3 h-3"></i>
+              <span id="expandLabel">ขยายกระดาน</span>
             </button>
-            <div id="boardCurrentStatusPill" class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            <div id="boardCurrentStatusPill" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
               🟢 กำลังแข่งขัน
             </div>
           </div>
         </div>
 
-        <!-- Team Positions Quick-Tracker Strip (คลิกส่องตำแหน่งเพื่อนบนกระดาน) -->
-        <div class="w-full pt-1.5 border-t border-white/10">
-          <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1 px-1">
-            <span class="font-semibold text-slate-300 flex items-center space-x-1">
-              <i data-lucide="crosshair" class="w-3 h-3 text-amber-400"></i>
-              <span>คลิกเพื่อส่องตำแหน่งกลุ่มเพื่อนบนกระดาน:</span>
-            </span>
-            <span class="text-[9px] text-indigo-400">กดที่กลุ่มเพื่อดูช่อง</span>
-          </div>
-          <div id="teamsQuickTrackerBar" class="flex items-center space-x-1.5 overflow-x-auto custom-scrollbar pb-0.5">
-            <!-- Injected by JS: 6 team buttons -->
-          </div>
-        </div>
-
       </div>
 
-      <!-- 2. CONTROL DASHBOARD: 3D DICE + ROLL BUTTON + STATS -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 items-center">
+      <!-- RIGHT COLUMN (28-32%): DEDICATED CONTROL COCKPIT & LIVE FRIENDS RADAR -->
+      <div class="lg:col-span-4 xl:col-span-4 flex flex-col justify-between space-y-2.5 h-full">
         
-        <!-- Left: Team Stats Card + Avatar Customizer -->
-        <div class="glass-panel p-2.5 rounded-xl flex items-center justify-between relative group">
-          <div class="flex items-center space-x-2.5">
+        <!-- Card 1: My Team Profile Card -->
+        <div class="glass-panel p-3 rounded-2xl flex items-center justify-between relative group border border-indigo-500/30 shadow-lg">
+          <div class="flex items-center space-x-3">
             <button onclick="openMascotPickerModal()" title="คลิกเพื่อเปลี่ยนตัวละครตัวเดิน" class="relative group/avatar cursor-pointer">
-              <div id="myTeamAvatarBox" class="w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-inner border border-white/20 transition-transform group-hover/avatar:scale-110">
+              <div id="myTeamAvatarBox" class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-inner border-2 border-white/30 transition-transform group-hover/avatar:scale-110">
                 🦁
               </div>
-              <span class="absolute -bottom-1 -right-1 bg-indigo-600 text-white rounded-full p-0.5 text-[8px] shadow">
-                <i data-lucide="sparkles" class="w-2 h-2"></i>
+              <span class="absolute -bottom-1 -right-1 bg-indigo-600 text-white rounded-full p-1 text-[9px] shadow-md">
+                <i data-lucide="sparkles" class="w-2.5 h-2.5"></i>
               </span>
             </button>
             <div>
-              <h3 id="myTeamNameLabel" class="text-xs font-bold font-heading text-white truncate max-w-[120px]">กลุ่ม 1</h3>
-              <span class="text-[10px] text-slate-400">ช่อง: <strong id="myTeamTileLabel" class="text-indigo-400 font-bold">0</strong>/<span id="myTeamTotalTilesLabel">40</span></span>
+              <div class="flex items-center space-x-1">
+                <span class="text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 font-bold">กลุ่มของคุณ</span>
+              </div>
+              <h3 id="myTeamNameLabel" class="text-sm font-black font-heading text-white truncate max-w-[130px]">กลุ่ม 1</h3>
+              <span class="text-[11px] text-slate-300 font-semibold">ช่อง: <strong id="myTeamTileLabel" class="text-amber-400 font-mono text-xs">0</strong>/<span id="myTeamTotalTilesLabel">40</span></span>
             </div>
           </div>
           <div class="text-right">
-            <span id="myTeamScoreLabel" class="text-xl font-black text-amber-400 font-heading">0</span>
-            <span class="block text-[8px] text-slate-400 uppercase font-semibold">คะแนนสะสม</span>
+            <span id="myTeamScoreLabel" class="text-2xl font-black text-amber-400 font-heading">0</span>
+            <span class="block text-[9px] text-slate-400 uppercase font-semibold">คะแนนสะสม</span>
           </div>
         </div>
 
-        <!-- Center / Right: 3D Interactive Dice & Roll Button -->
-        <div class="md:col-span-2 glass-panel p-2.5 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-2.5">
-          
-          <!-- 3D Dice Display -->
-          <div class="flex items-center space-x-2.5">
-            <div class="dice-container flex items-center justify-center scale-90">
-              <div id="diceCube" class="dice-cube">
-                <div id="diceFaceDisplay" class="dice-face text-3xl font-black text-slate-800 font-heading">
-                  <span id="diceFaceValue">🎲</span>
+        <!-- Card 2: 3D Interactive Dice & Action Center -->
+        <div class="glass-panel p-3 rounded-2xl flex flex-col space-y-2.5 border border-purple-500/30 shadow-lg">
+          <div class="flex items-center justify-between">
+            <!-- 3D Dice Display -->
+            <div class="flex items-center space-x-3">
+              <div class="dice-container flex items-center justify-center scale-95">
+                <div id="diceCube" class="dice-cube">
+                  <div id="diceFaceDisplay" class="dice-face text-3xl font-black text-slate-800 font-heading">
+                    <span id="diceFaceValue">🎲</span>
+                  </div>
                 </div>
               </div>
+              <div class="text-left">
+                <span class="text-[10px] text-slate-400 font-semibold uppercase block">สถานะลูกเต๋า</span>
+                <span id="diceResultText" class="text-xs font-bold text-amber-400 font-heading">พร้อมทอยเต๋า</span>
+              </div>
             </div>
-            <div class="text-left">
-              <span class="text-[10px] text-slate-400 font-semibold uppercase block">ผลการทอย</span>
-              <span id="diceResultText" class="text-xs font-bold text-amber-400 font-heading">พร้อมทอยเต๋า</span>
-            </div>
+
+            <button onclick="openLeaderboardModal()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[10px] font-bold text-amber-400 flex items-center space-x-1">
+              <i data-lucide="trophy" class="w-3 h-3 text-amber-400"></i>
+              <span>อันดับคะแนน</span>
+            </button>
           </div>
 
-          <!-- Roll Button -->
-          <button id="btnRollDice" onclick="handleRollDice()" class="w-full sm:flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-black font-heading text-sm shadow-lg shadow-indigo-600/30 active:scale-95 transition-all flex items-center justify-center space-x-1.5">
+          <!-- Master Action Button (Roll / Mission / Victory) -->
+          <button id="btnRollDice" onclick="handleRollDice()" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-black font-heading text-sm shadow-xl shadow-indigo-600/30 active:scale-95 transition-all flex items-center justify-center space-x-2 cursor-pointer">
             <i data-lucide="dices" class="w-4 h-4"></i>
             <span>กดทอยลูกเต๋า (Roll Dice)</span>
           </button>
+        </div>
 
+        <!-- Card 3: Live Top 3 Podium & Friends Radar (แท่น 3 อันดับคะแนน & ส่องหมากเพื่อน) -->
+        <div class="glass-panel p-3 rounded-2xl flex-1 flex flex-col justify-between space-y-2 border border-slate-800 shadow-lg min-h-[220px]">
+          <div class="flex items-center justify-between border-b border-white/10 pb-1.5">
+            <span class="font-bold text-xs text-amber-400 flex items-center space-x-1.5">
+              <i data-lucide="crown" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>แท่น 3 อันดับคะแนนสะสม (Top 3):</span>
+            </span>
+            <span class="text-[9px] text-indigo-400 font-bold">อัปเดตสด 🔴</span>
+          </div>
+
+          <!-- Top 3 Visual Podium Container -->
+          <div id="podiumTop3Container" class="flex items-end justify-center gap-1.5 pt-1 pb-1">
+            <!-- Injected by JS: 2nd (Silver), 1st (Gold Elevated), 3rd (Bronze) -->
+          </div>
+
+          <!-- Remaining Teams List (Rank 4+) -->
+          <div id="teamsQuickTrackerBar" class="grid grid-cols-1 gap-1 overflow-y-auto custom-scrollbar max-h-[110px] p-0.5 border-t border-white/5 pt-1">
+            <!-- Injected by JS: Remaining teams -->
+          </div>
         </div>
 
       </div>
@@ -526,8 +547,8 @@
     </div>
   </div>
 
-  <!-- ================= MODAL 1: STATION MISSION & COUNTDOWN OVERLAY ================= -->
-  <div id="stationMissionModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center p-4">
+  <!-- ================= MODAL 1: STATION MISSION & SCORE SUBMISSION ================= -->
+  <div id="stationMissionModal" class="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-md hidden items-center justify-center p-4">
     <div class="max-w-md w-full glass-panel p-5 rounded-3xl border border-indigo-500/40 shadow-2xl space-y-3 relative overflow-hidden animate-fadeIn">
       
       <div class="flex items-start justify-between border-b border-slate-800 pb-2.5">
@@ -936,6 +957,9 @@
       // Render Control Dashboard
       renderControlDashboard(config, myTeam);
 
+      // Update Master Room Timer (40 Minutes or Admin-defined time limit)
+      updateMasterRoomTimer(config);
+
       // Check Game State (Finished / Waiting / In Station / Rolling)
       if (config.game_status === 'finished') {
         clearInterval(timerInterval);
@@ -961,6 +985,39 @@
         setupStationMissionModal(st, myTeam);
         openModal('stationMissionModal');
       }
+    }
+
+    // Master Room Timer Controller
+    let masterTimerInterval = null;
+    function updateMasterRoomTimer(config) {
+      if (masterTimerInterval) clearInterval(masterTimerInterval);
+
+      const displayEl = document.getElementById('masterGameTimerDisplay');
+      if (!displayEl) return;
+
+      const durationMinutes = parseInt(config.game_duration_minutes) || 40;
+      const totalSeconds = durationMinutes * 60;
+      const startedAt = config.game_started_at || config.created_at || Date.now();
+
+      function tick() {
+        const elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
+        const remainingSeconds = Math.max(0, totalSeconds - elapsedSeconds);
+
+        const mins = Math.floor(remainingSeconds / 60);
+        const secs = remainingSeconds % 60;
+        const timeStr = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        
+        displayEl.textContent = `เวลาเหลือ ${timeStr}`;
+
+        if (remainingSeconds <= 0 && config.game_status === 'playing') {
+          clearInterval(masterTimerInterval);
+          if (roomData?.config) roomData.config.game_status = 'finished';
+          handleRoomStateChange();
+        }
+      }
+
+      tick();
+      masterTimerInterval = setInterval(tick, 1000);
     }
 
     // ================= ONBOARDING STEP 2 & UNIQUE MASCOT PICKER =================
@@ -1288,21 +1345,21 @@
           const tileEl = document.createElement('div');
           
           if (isFinish) {
-            tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-slate-950 text-[11px] sm:text-xs shadow-2xl bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-600 border-2 border-yellow-200 animate-pulse px-2 py-1 min-w-[34px] sm:min-w-[42px]';
+            tileEl.className = 'board-tile flex items-center justify-center rounded-2xl font-mono font-black text-slate-950 text-xs sm:text-sm md:text-base shadow-2xl bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 border-2 border-white animate-pulse px-3 sm:px-4 py-1 sm:py-1.5 min-w-[46px] sm:min-w-[58px]';
             tileEl.innerHTML = `🏆 ${i}`;
           } else if (isStart) {
-            tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-bold text-white text-[10px] sm:text-xs shadow-lg bg-indigo-600/90 border border-indigo-400 px-1.5 py-0.5 min-w-[28px] sm:min-w-[34px]';
+            tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-white text-[11px] sm:text-xs md:text-sm shadow-xl bg-indigo-600 border-2 border-indigo-300 px-2 sm:px-3 py-0.5 sm:py-1 min-w-[36px] sm:min-w-[46px]';
             tileEl.innerHTML = `🚩 ${i}`;
           } else if (warp && warp.type === 'ladder') {
-            tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-emerald-300 text-[10px] sm:text-xs shadow-lg bg-emerald-950/85 border-2 border-emerald-400 px-1.5 py-0.5 min-w-[32px] sm:min-w-[38px]';
+            tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-emerald-200 text-[11px] sm:text-xs md:text-sm shadow-xl bg-emerald-950/90 border-2 border-emerald-400 px-2 sm:px-3 py-0.5 sm:py-1 min-w-[40px] sm:min-w-[50px]';
             tileEl.innerHTML = `🧗‍♂️ ${i}`;
             tileEl.title = `บันไดลัดไปช่อง ${warp.to}`;
           } else if (warp && warp.type === 'snake') {
-            tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-rose-300 text-[10px] sm:text-xs shadow-lg bg-rose-950/85 border-2 border-rose-400 px-1.5 py-0.5 min-w-[32px] sm:min-w-[38px]';
+            tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-rose-200 text-[11px] sm:text-xs md:text-sm shadow-xl bg-rose-950/90 border-2 border-rose-400 px-2 sm:px-3 py-0.5 sm:py-1 min-w-[40px] sm:min-w-[50px]';
             tileEl.innerHTML = `🐍 ${i}`;
             tileEl.title = `งู/กับดักถอยไปช่อง ${warp.to}`;
           } else {
-            tileEl.className = 'board-tile flex items-center justify-center rounded-lg font-mono font-bold text-slate-100 text-[9px] sm:text-[11px] shadow-md bg-slate-900/80 backdrop-blur-sm border border-white/25 px-1 py-0.5 min-w-[24px] sm:min-w-[30px]';
+            tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-white text-[11px] sm:text-xs md:text-sm shadow-lg bg-slate-950/85 backdrop-blur-md border-2 border-white/35 px-1.5 sm:px-2.5 py-0.5 sm:py-1 min-w-[32px] sm:min-w-[40px]';
             tileEl.innerHTML = `${i}`;
           }
 
@@ -1318,6 +1375,10 @@
       Object.keys(teams).forEach(teamKey => {
         const team = teams[teamKey];
         const tile = team.current_tile || 0;
+        if (!tileClusters[tile]) tileClusters[tile] = [];
+        tileClusters[tile].push({ key: teamKey, ...team });
+      });
+
       pawnsContainer.innerHTML = Object.keys(teams).map(teamKey => {
         const team = teams[teamKey];
         const currentTile = team.current_tile || 0;
@@ -1356,24 +1417,94 @@
       renderTeamsQuickTracker(teams, config);
     }
 
-    // Render Quick-Tracker Strip
+    // Render Quick-Tracker Live Top 3 Podium & Remaining Teams
     function renderTeamsQuickTracker(teams, config) {
-      const container = document.getElementById('teamsQuickTrackerBar');
-      if (!container) return;
+      const podiumEl = document.getElementById('podiumTop3Container');
+      const listEl = document.getElementById('teamsQuickTrackerBar');
+      if (!podiumEl && !listEl) return;
       
       const totalTiles = parseInt(config.total_tiles) || 40;
-      container.innerHTML = Object.keys(teams).map(key => {
-        const t = teams[key];
-        const tile = t.current_tile || 0;
-        const isMyTeam = key === currentTeamId;
-        return `
-          <button type="button" onclick="inspectTeamPawn('${key}')" class="px-2 py-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 border ${isMyTeam ? 'border-amber-400 ring-1 ring-amber-400/50' : 'border-slate-700'} flex items-center space-x-1.5 text-[10px] font-semibold text-slate-200 hover:text-white transition-all cursor-pointer whitespace-nowrap flex-shrink-0 shadow">
-            <span>${t.avatar || '🦁'}</span>
-            <span class="truncate max-w-[65px]">${t.name}</span>
-            <span class="px-1.5 py-0.2 rounded bg-indigo-600/80 text-white font-mono text-[9px] font-bold">ช่อง ${tile}</span>
-          </button>
+      
+      // Sort teams by score descending
+      const sortedKeys = Object.keys(teams).sort((a, b) => {
+        const scoreA = teams[a].score || 0;
+        const scoreB = teams[b].score || 0;
+        return scoreB - scoreA;
+      });
+
+      const top1 = sortedKeys[0] ? { key: sortedKeys[0], ...teams[sortedKeys[0]] } : null;
+      const top2 = sortedKeys[1] ? { key: sortedKeys[1], ...teams[sortedKeys[1]] } : null;
+      const top3 = sortedKeys[2] ? { key: sortedKeys[2], ...teams[sortedKeys[2]] } : null;
+
+      if (podiumEl) {
+        podiumEl.innerHTML = `
+          <!-- Rank 2: Silver Pillar -->
+          <div onclick="inspectTeamPawn('${top2 ? top2.key : ''}')" class="flex-1 flex flex-col items-center cursor-pointer group ${top2?.key === currentTeamId ? 'scale-105' : ''}">
+            <div class="relative mb-0.5">
+              <span class="text-base">${top2 ? top2.avatar || '🐯' : '🥈'}</span>
+              <span class="absolute -top-1.5 -right-1 text-[9px]">🥈</span>
+            </div>
+            <div class="w-full h-14 rounded-t-xl bg-gradient-to-t from-slate-800 to-slate-700/90 border-t-2 border-x-2 border-slate-400/60 p-1 flex flex-col items-center justify-between text-center shadow-lg group-hover:border-slate-300 transition-all">
+              <span class="text-[9px] font-black text-slate-200 truncate max-w-[65px]">${top2 ? top2.name : 'อันดับ 2'}</span>
+              <span class="text-[10px] font-black font-mono text-slate-200">${top2 ? (top2.score || 0).toLocaleString() : '0'}</span>
+              <span class="text-[8px] px-1 rounded bg-slate-900/80 text-slate-400 font-mono">ช่อง ${top2 ? Math.min(top2.current_tile || 0, totalTiles) : 0}</span>
+            </div>
+          </div>
+
+          <!-- Rank 1: Gold Pillar (Elevated Center) -->
+          <div onclick="inspectTeamPawn('${top1 ? top1.key : ''}')" class="flex-1 flex flex-col items-center cursor-pointer group z-10 ${top1?.key === currentTeamId ? 'scale-105' : ''}">
+            <div class="relative mb-0.5">
+              <span class="text-lg animate-bounce">${top1 ? top1.avatar || '🦁' : '🥇'}</span>
+              <span class="absolute -top-2 -right-1 text-xs">👑</span>
+            </div>
+            <div class="w-full h-18 rounded-t-xl bg-gradient-to-t from-amber-950 via-amber-900/70 to-yellow-600/60 border-t-2 border-x-2 border-amber-400 p-1 flex flex-col items-center justify-between text-center shadow-xl shadow-amber-500/20 group-hover:border-yellow-300 transition-all">
+              <span class="text-[10px] font-black text-amber-300 truncate max-w-[75px] drop-shadow">${top1 ? top1.name : 'อันดับ 1'}</span>
+              <span class="text-xs font-black font-mono text-yellow-300 drop-shadow">${top1 ? (top1.score || 0).toLocaleString() : '0'}</span>
+              <span class="text-[8px] px-1 rounded bg-amber-950 text-amber-300 font-mono font-bold">ช่อง ${top1 ? Math.min(top1.current_tile || 0, totalTiles) : 0}</span>
+            </div>
+          </div>
+
+          <!-- Rank 3: Bronze Pillar -->
+          <div onclick="inspectTeamPawn('${top3 ? top3.key : ''}')" class="flex-1 flex flex-col items-center cursor-pointer group ${top3?.key === currentTeamId ? 'scale-105' : ''}">
+            <div class="relative mb-0.5">
+              <span class="text-base">${top3 ? top3.avatar || '🦅' : '🥉'}</span>
+              <span class="absolute -top-1.5 -right-1 text-[9px]">🥉</span>
+            </div>
+            <div class="w-full h-11 rounded-t-xl bg-gradient-to-t from-amber-950/60 to-amber-800/40 border-t-2 border-x-2 border-amber-700/60 p-1 flex flex-col items-center justify-between text-center shadow-lg group-hover:border-amber-500 transition-all">
+              <span class="text-[9px] font-black text-amber-200 truncate max-w-[65px]">${top3 ? top3.name : 'อันดับ 3'}</span>
+              <span class="text-[10px] font-black font-mono text-amber-300">${top3 ? (top3.score || 0).toLocaleString() : '0'}</span>
+              <span class="text-[8px] px-1 rounded bg-slate-900/80 text-slate-400 font-mono">ช่อง ${top3 ? Math.min(top3.current_tile || 0, totalTiles) : 0}</span>
+            </div>
+          </div>
         `;
-      }).join('');
+      }
+
+      // Render Remaining teams (Rank 4+)
+      if (listEl) {
+        const remainingKeys = sortedKeys.slice(3);
+        if (remainingKeys.length === 0) {
+          listEl.innerHTML = `<span class="text-[9px] text-slate-500 italic text-center p-1">คลิกที่แท่นโพเดียมเพื่อส่องหมากบนกระดาน</span>`;
+        } else {
+          listEl.innerHTML = remainingKeys.map((key, idx) => {
+            const t = teams[key];
+            const tile = Math.min(t.current_tile || 0, totalTiles);
+            const isMyTeam = key === currentTeamId;
+            return `
+              <button type="button" onclick="inspectTeamPawn('${key}')" class="w-full px-2 py-1 rounded-lg bg-slate-900/80 hover:bg-slate-800 border ${isMyTeam ? 'border-amber-400 ring-1 ring-amber-400/40 bg-indigo-950/30' : 'border-slate-800 hover:border-slate-700'} flex items-center justify-between text-[11px] text-slate-300 hover:text-white transition-all cursor-pointer shadow-sm group">
+                <div class="flex items-center space-x-1.5 truncate">
+                  <span class="text-xs font-mono font-bold text-slate-500">#${idx + 4}</span>
+                  <span>${t.avatar || '🦁'}</span>
+                  <span class="truncate font-semibold text-[10px] ${isMyTeam ? 'text-amber-300 font-bold' : ''}">${t.name}</span>
+                </div>
+                <div class="flex items-center space-x-1.5 flex-shrink-0">
+                  <span class="text-[9px] font-mono text-slate-400">${(t.score || 0).toLocaleString()} แต้ม</span>
+                  <span class="px-1.5 py-0.2 rounded bg-indigo-600/80 text-white font-mono text-[9px] font-bold">ช่อง ${tile}</span>
+                </div>
+              </button>
+            `;
+          }).join('');
+        }
+      }
     }
 
     // Spotlight / Inspect Any Team Pawn
@@ -1435,12 +1566,14 @@
     // Render Control Dashboard (Intelligent Dynamic Button)
     function renderControlDashboard(config, myTeam) {
       const totalTiles = parseInt(config.total_tiles) || 40;
+      const displayTile = (myTeam.current_tile > totalTiles) ? ((myTeam.current_tile - 1) % totalTiles + 1) : (myTeam.current_tile || 0);
+      
       document.getElementById('myTeamNameLabel').textContent = myTeam.name;
       document.getElementById('myTeamAvatarBox').textContent = myTeam.avatar || '🦁';
       document.getElementById('myTeamAvatarBox').style.backgroundColor = `${myTeam.color || '#6366f1'}33`;
-      document.getElementById('myTeamTileLabel').textContent = myTeam.current_tile || 0;
+      document.getElementById('myTeamTileLabel').textContent = displayTile;
       document.getElementById('myTeamTotalTilesLabel').textContent = totalTiles;
-      document.getElementById('myTeamScoreLabel').textContent = myTeam.score || 0;
+      document.getElementById('myTeamScoreLabel').textContent = (myTeam.score || 0).toLocaleString();
 
       const btn = document.getElementById('btnRollDice');
       const resultTextEl = document.getElementById('diceResultText');
@@ -1448,30 +1581,31 @@
       if (myTeam.current_station_id && roomData?.stations?.[myTeam.current_station_id]) {
         const st = roomData.stations[myTeam.current_station_id];
         btn.disabled = false;
-        btn.className = "w-full sm:flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 hover:from-amber-400 hover:to-rose-400 text-white font-black font-heading text-xs sm:text-sm shadow-lg shadow-orange-500/30 active:scale-95 transition-all flex items-center justify-center space-x-2 animate-pulse cursor-pointer";
+        btn.className = "w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 hover:from-amber-400 hover:to-rose-400 text-white font-black font-heading text-xs sm:text-sm shadow-xl shadow-orange-500/30 active:scale-95 transition-all flex items-center justify-center space-x-2 animate-pulse cursor-pointer";
         btn.onclick = () => {
           setupStationMissionModal(st, myTeam);
           openModal('stationMissionModal');
         };
         btn.innerHTML = `
           <span class="text-base">${st.icon || '🎯'}</span>
-          <span class="truncate">เข้าทำภารกิจ "${st.name}" (คลิกส่งคะแนน)</span>
+          <span class="truncate font-black">เข้าทำภารกิจ "${st.name}" (คลิกส่งคะแนน)</span>
         `;
         if (resultTextEl) resultTextEl.textContent = `ภารกิจ: ${st.name}`;
       } else if (config.game_status === 'playing') {
         btn.disabled = false;
-        btn.className = "w-full sm:flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-black font-heading text-xs sm:text-sm shadow-lg shadow-indigo-600/30 active:scale-95 transition-all flex items-center justify-center space-x-1.5 cursor-pointer";
+        btn.className = "w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-black font-heading text-xs sm:text-sm shadow-xl shadow-indigo-600/30 active:scale-95 transition-all flex items-center justify-center space-x-1.5 cursor-pointer";
         btn.onclick = handleRollDice;
+        const lapLabel = myTeam.laps_completed ? ` (รอบที่ ${myTeam.laps_completed + 1})` : '';
         btn.innerHTML = `
           <i data-lucide="dices" class="w-4 h-4"></i>
-          <span>กดทอยลูกเต๋า (Roll Dice)</span>
+          <span>กดทอยลูกเต๋า (Roll Dice)${lapLabel}</span>
         `;
-        if (resultTextEl && resultTextEl.textContent.startsWith("ภารกิจ:")) {
+        if (resultTextEl && (resultTextEl.textContent.startsWith("ภารกิจ:") || resultTextEl.textContent.includes("เข้าเส้นชัย"))) {
           resultTextEl.textContent = "พร้อมทอยเต๋า";
         }
       } else {
         btn.disabled = true;
-        btn.className = "w-full sm:flex-1 py-3 px-4 rounded-xl bg-slate-800 text-slate-500 font-black font-heading text-xs sm:text-sm opacity-50 cursor-not-allowed flex items-center justify-center space-x-1.5";
+        btn.className = "w-full py-3.5 px-4 rounded-xl bg-slate-800 text-slate-500 font-black font-heading text-xs sm:text-sm opacity-50 cursor-not-allowed flex items-center justify-center space-x-1.5";
         btn.onclick = null;
       }
       lucide.createIcons();
@@ -1518,62 +1652,56 @@
           // Animate Step-by-Step Hopping of Pawn
           animatePawnHopping(currentTeamId, diceVal);
 
+          if (moveRes.reachedFinish) {
+            confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
+            playFanfare();
+          }
+
+          // 2. Dynamic Station Assignment Logic (Guaranteed & Direct for Every Roll!)
+          const assignRes = await PhygitalDB.assignVacantStation(currentRoomPin, currentTeamId);
+          roomData = PhygitalDB.getLocalRoom(currentRoomPin) || roomData;
+          const myTeam = roomData?.teams?.[currentTeamId] || {};
+
+          // 3. Immediately launch Station Mission Modal
+          if (assignRes && assignRes.success && assignRes.station) {
+            confetti({ particleCount: 80, spread: 70, origin: { y: 0.5 } });
+            playBeep(700, 0.3, 'sine');
+            setupStationMissionModal(assignRes.station, myTeam);
+            openModal('stationMissionModal');
+            
+            if (moveRes.reachedFinish) {
+              Swal.fire({
+                title: `🏆 เข้าเส้นชัยรอบที่ ${moveRes.lapsCompleted}! (+${moveRes.finishBonus} แต้ม)`,
+                text: `รับโบนัสสำเร็จ และเข้าสู่ภารกิจ "${assignRes.station.name}" ทันที!`,
+                icon: 'success',
+                timer: 2200,
+                showConfirmButton: false
+              });
+            }
+          } else if (moveRes.reachedFinish) {
+            Swal.fire({
+              title: `🏆 เข้าเส้นชัยรอบที่ ${moveRes.lapsCompleted}! (+${moveRes.finishBonus} แต้ม)`,
+              text: `รับโบนัสสำเร็จ และวนรอบกลับมาเดินต่อเพื่อสะสมแต้มเพิ่ม!`,
+              icon: 'success',
+              timer: 2000,
+              showConfirmButton: false
+            });
+          }
+
+          // 4. Update Board & UI
+          handleRoomStateChange();
+
+          // 5. Warp feedback if any
           if (moveRes.warpEvent) {
             const w = moveRes.warpEvent;
-            setTimeout(() => {
-              if (w.type === 'ladder') {
-                playFanfare();
-                confetti({ particleCount: 80, spread: 70 });
-                Swal.fire({
-                  icon: 'success',
-                  title: '🧗‍♂️ ขึ้นบันไดลัด!',
-                  text: w.message,
-                  timer: 2500,
-                  showConfirmButton: false
-                });
-              } else {
-                playBeep(200, 0.4, 'sawtooth');
-                Swal.fire({
-                  icon: 'warning',
-                  title: '⚠️ ตกช่องอุปสรรค!',
-                  text: w.message,
-                  timer: 2500,
-                  showConfirmButton: false
-                });
-              }
-            }, 600);
-          }
-
-          if (moveRes.reachedFinish) {
-            confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
-            return;
-          }
-
-          // 2. Dynamic Station Assignment Logic (Instant & Direct!)
-          setTimeout(async () => {
-            try {
-              const assignRes = await PhygitalDB.assignVacantStation(currentRoomPin, currentTeamId);
-
-              if (assignRes && assignRes.success && assignRes.station) {
-                confetti({ particleCount: 60, spread: 60, origin: { y: 0.5 } });
-                playBeep(700, 0.3, 'sine');
-                
-                // Re-read fresh roomData
-                roomData = PhygitalDB.getLocalRoom(currentRoomPin) || roomData;
-                const myTeam = roomData?.teams?.[currentTeamId] || {};
-                
-                setupStationMissionModal(assignRes.station, myTeam);
-                openModal('stationMissionModal');
-              }
-            } catch(err) {
-              console.log("Station assignment fallback:", err);
+            if (w.type === 'ladder') {
+              playFanfare();
+              confetti({ particleCount: 80, spread: 70 });
             }
-
-            // Always update control dashboard so button is active and ready
-            handleRoomStateChange();
-          }, 600);
+          }
 
         } catch (e) {
+          console.error("Roll dice error:", e);
           Swal.fire('เกิดข้อผิดพลาด', e.message, 'error');
           btn.disabled = false;
           btn.classList.remove('opacity-50', 'cursor-not-allowed');
