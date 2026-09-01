@@ -17,111 +17,47 @@ const SAMPLE_FIREBASE_CONFIG = {
   appId: "1:1234567890:web:abcdef123456"
 };
 
-// ข้อมูลเริ่มต้น 6 กลุ่ม
-const DEFAULT_TEAMS = {
-  team_1: {
-    id: "team_1",
-    name: "กลุ่มที่ 1 (สิงโตเพลิง)",
-    color: "#EF4444", // Red
-    bgColor: "bg-red-500",
-    lightBg: "bg-red-50",
-    borderColor: "border-red-500",
-    avatar: "🦁",
-    current_tile: 0,
-    score: 0,
-    current_station_id: null,
-    station_start_time: null,
-    completed_stations: {},
-    is_finished: false,
-    finish_time: null,
-    dice_history: []
-  },
-  team_2: {
-    id: "team_2",
-    name: "กลุ่มที่ 2 (พยัคฆ์คราม)",
-    color: "#3B82F6", // Blue
-    bgColor: "bg-blue-500",
-    lightBg: "bg-blue-50",
-    borderColor: "border-blue-500",
-    avatar: "🐯",
-    current_tile: 0,
-    score: 0,
-    current_station_id: null,
-    station_start_time: null,
-    completed_stations: {},
-    is_finished: false,
-    finish_time: null,
-    dice_history: []
-  },
-  team_3: {
-    id: "team_3",
-    name: "กลุ่มที่ 3 (มังกรเขียว)",
-    color: "#10B981", // Green
-    bgColor: "bg-emerald-500",
-    lightBg: "bg-emerald-50",
-    borderColor: "border-emerald-500",
-    avatar: "🐉",
-    current_tile: 0,
-    score: 0,
-    current_station_id: null,
-    station_start_time: null,
-    completed_stations: {},
-    is_finished: false,
-    finish_time: null,
-    dice_history: []
-  },
-  team_4: {
-    id: "team_4",
-    name: "กลุ่มที่ 4 (อินทรีทอง)",
-    color: "#F59E0B", // Yellow/Amber
-    bgColor: "bg-amber-500",
-    lightBg: "bg-amber-50",
-    borderColor: "border-amber-500",
-    avatar: "🦅",
-    current_tile: 0,
-    score: 0,
-    current_station_id: null,
-    station_start_time: null,
-    completed_stations: {},
-    is_finished: false,
-    finish_time: null,
-    dice_history: []
-  },
-  team_5: {
-    id: "team_5",
-    name: "กลุ่มที่ 5 (ฟีนิกซ์ม่วง)",
-    color: "#8B5CF6", // Purple
-    bgColor: "bg-purple-500",
-    lightBg: "bg-purple-50",
-    borderColor: "border-purple-500",
-    avatar: "🦚",
-    current_tile: 0,
-    score: 0,
-    current_station_id: null,
-    station_start_time: null,
-    completed_stations: {},
-    is_finished: false,
-    finish_time: null,
-    dice_history: []
-  },
-  team_6: {
-    id: "team_6",
-    name: "กลุ่มที่ 6 (วาฬชมพู)",
-    color: "#EC4899", // Pink
-    bgColor: "bg-pink-500",
-    lightBg: "bg-pink-50",
-    borderColor: "border-pink-500",
-    avatar: "🐬",
-    current_tile: 0,
-    score: 0,
-    current_station_id: null,
-    station_start_time: null,
-    completed_stations: {},
-    is_finished: false,
-    finish_time: null,
-    dice_history: []
+// คลังสีและค่าเริ่มต้นสำหรับกลุ่มผู้เล่น (รองรับ 2 - 12 กลุ่ม)
+const TEAM_COLOR_PALETTES = [
+  { color: "#EF4444", defaultAvatar: "🦁", defaultName: "กลุ่มที่ 1 (สิงโตเพลิง)" },
+  { color: "#3B82F6", defaultAvatar: "🐯", defaultName: "กลุ่มที่ 2 (พยัคฆ์คราม)" },
+  { color: "#10B981", defaultAvatar: "🐉", defaultName: "กลุ่มที่ 3 (มังกรเขียว)" },
+  { color: "#F59E0B", defaultAvatar: "🦅", defaultName: "กลุ่มที่ 4 (อินทรีทอง)" },
+  { color: "#8B5CF6", defaultAvatar: "🦚", defaultName: "กลุ่มที่ 5 (ฟีนิกซ์ม่วง)" },
+  { color: "#EC4899", defaultAvatar: "🐬", defaultName: "กลุ่มที่ 6 (วาฬชมพู)" },
+  { color: "#06B6D4", defaultAvatar: "🦊", defaultName: "กลุ่มที่ 7 (จิ้งจอกสายฟ้า)" },
+  { color: "#84CC16", defaultAvatar: "🐼", defaultName: "กลุ่มที่ 8 (แพนด้าพิทักษ์)" },
+  { color: "#F97316", defaultAvatar: "🦄", defaultName: "กลุ่มที่ 9 (ยูนิคอร์นสุริยา)" },
+  { color: "#64748B", defaultAvatar: "🤖", defaultName: "กลุ่มที่ 10 (หุ่นยนต์พิทักษ์)" },
+  { color: "#D946EF", defaultAvatar: "🧙‍♂️", defaultName: "กลุ่มที่ 11 (จอมเวทแห่งแสง)" },
+  { color: "#14B8A6", defaultAvatar: "🚀", defaultName: "กลุ่มที่ 12 (นักบินอวกาศ)" }
+];
+
+function generateDefaultTeams(count = 6) {
+  const teams = {};
+  const actualCount = Math.min(12, Math.max(2, parseInt(count) || 6));
+  for (let i = 0; i < actualCount; i++) {
+    const palette = TEAM_COLOR_PALETTES[i] || TEAM_COLOR_PALETTES[i % TEAM_COLOR_PALETTES.length];
+    const teamId = `team_${i + 1}`;
+    teams[teamId] = {
+      id: teamId,
+      name: palette.defaultName,
+      color: palette.color,
+      avatar: palette.defaultAvatar,
+      current_tile: 0,
+      score: 0,
+      current_station_id: null,
+      station_start_time: null,
+      completed_stations: {},
+      is_finished: false,
+      finish_time: null,
+      dice_history: []
+    };
   }
-};
+  return teams;
+}
+
+const DEFAULT_TEAMS = generateDefaultTeams(6);
 
 // ฐานกิจกรรมตัวอย่างสำหรับการจัดการเรียนรู้เชิงรุก (Active Learning 10 ฐาน)
 const SAMPLE_ACTIVE_LEARNING_STATIONS = [
@@ -344,14 +280,19 @@ class PhygitalFirebaseManager {
     return this.getRoomRef(roomPin).child('logs');
   }
 
-  // สร้างห้องใหม่
+  // สร้างห้องใหม่ (กำหนดจำนวนกลุ่ม 2-12 และจำนวนฐาน 2-12 ได้อย่างยืดหยุ่น)
   async createRoom(roomPin, roomData) {
     if (!this.db) throw new Error("Firebase ยังไม่ได้เชื่อมต่อ");
     const roomRef = this.getRoomRef(roomPin);
     
-    // แปลง Array ของ Stations ให้เป็น Object Key
+    // แปลง Array ของ Stations ให้เป็น Object Key (ตามจำนวนฐานที่ระบุ)
     const stationsObj = {};
-    const stationsList = roomData.stations || SAMPLE_ACTIVE_LEARNING_STATIONS;
+    let stationsList = roomData.stations || SAMPLE_ACTIVE_LEARNING_STATIONS;
+    if (roomData.total_stations && parseInt(roomData.total_stations) > 0) {
+      const targetCount = parseInt(roomData.total_stations);
+      stationsList = SAMPLE_ACTIVE_LEARNING_STATIONS.slice(0, targetCount);
+    }
+
     stationsList.forEach((st, idx) => {
       const stId = st.id || `station_${idx + 1}`;
       stationsObj[stId] = {
@@ -367,12 +308,18 @@ class PhygitalFirebaseManager {
       };
     });
 
+    // กำหนดกลุ่มตามจำนวนที่เลือก (เช่น 2 - 12 กลุ่ม)
+    const totalTeamsCount = parseInt(roomData.total_teams) || 6;
+    const teamsObj = roomData.teams || generateDefaultTeams(totalTeamsCount);
+
     const initialData = {
       config: {
         room_pin: roomPin,
         title: roomData.title || `ห้องเรียนเกมบันไดงู (${roomPin})`,
         board_image_url: roomData.board_image_url || SAMPLE_BOARD_PRESETS[0].url,
         total_tiles: parseInt(roomData.total_tiles) || 40,
+        total_teams: totalTeamsCount,
+        total_stations: Object.keys(stationsObj).length,
         finish_bonus: parseInt(roomData.finish_bonus) || 500,
         game_status: "waiting", // "waiting" | "playing" | "finished"
         winner_team_id: null,
@@ -380,7 +327,7 @@ class PhygitalFirebaseManager {
         updated_at: firebase.database.ServerValue.TIMESTAMP
       },
       stations: stationsObj,
-      teams: roomData.teams || DEFAULT_TEAMS,
+      teams: teamsObj,
       logs: {}
     };
 
@@ -390,7 +337,7 @@ class PhygitalFirebaseManager {
     await this.addLog(roomPin, {
       team_id: "system",
       type: "system",
-      message: `สร้างห้องเล่นเกม ${roomPin} เรียบร้อยแล้ว พร้อมเริ่มการเรียนรู้!`
+      message: `สร้างห้องเล่นเกม ${roomPin} สำเร็จ (${totalTeamsCount} กลุ่ม, ${Object.keys(stationsObj).length} ฐาน) พร้อมเริ่มการเรียนรู้!`
     });
 
     return initialData;

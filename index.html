@@ -2,110 +2,1409 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Active Learning: Phygital Snakes and Ladders</title>
-  <!-- Google Fonts -->
+  
+  <!-- Google Fonts: Prompt & Kanit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Kanit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Kanit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'sans-serif'],
+            heading: ['Kanit', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- SweetAlert2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Firebase App & Database Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  
+  <!-- Project Firebase Config & Helper -->
+  <script src="firebase-config.js"></script>
+
   <style>
-    body { font-family: 'Prompt', sans-serif; }
+    body {
+      font-family: 'Prompt', sans-serif;
+      touch-action: manipulation;
+      background: radial-gradient(circle at top, #0f172a 0%, #020617 100%);
+      color: #f8fafc;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+    .neon-glow-indigo {
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.35);
+    }
+    .neon-glow-amber {
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+    }
+
+    /* Board Area */
+    .board-container {
+      position: relative;
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    }
+    .board-tile {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      transition: all 0.3s ease;
+    }
+    .team-pawn {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1), top 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+      z-index: 30;
+      pointer-events: auto;
+    }
+    @keyframes hop-animation {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -85%) scale(1.3); }
+    }
+    .pawn-hopping {
+      animation: hop-animation 0.38s ease-in-out;
+    }
+
+    /* 3D Dice Styling */
+    .dice-container {
+      perspective: 600px;
+    }
+    .dice-cube {
+      width: 78px;
+      height: 78px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .dice-face {
+      position: absolute;
+      width: 78px;
+      height: 78px;
+      background: linear-gradient(145deg, #ffffff, #f1f5f9);
+      border: 2px solid #cbd5e1;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 14px rgba(0,0,0,0.15), 0 8px 25px rgba(0,0,0,0.5);
+    }
+    @keyframes rolling-3d {
+      0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+      25% { transform: rotateX(360deg) rotateY(180deg) rotateZ(90deg) scale(1.15); }
+      50% { transform: rotateX(720deg) rotateY(360deg) rotateZ(180deg) scale(1.25); }
+      75% { transform: rotateX(1080deg) rotateY(540deg) rotateZ(270deg) scale(1.15); }
+      100% { transform: rotateX(1440deg) rotateY(720deg) rotateZ(360deg); }
+    }
+    .is-rolling {
+      animation: rolling-3d 1.1s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+    }
+
+    /* Circular SVG Timer */
+    .timer-circle-bg {
+      fill: none;
+      stroke: #1e293b;
+      stroke-width: 6;
+    }
+    .timer-circle-progress {
+      fill: none;
+      stroke: #6366f1;
+      stroke-width: 6;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s linear, stroke 0.3s;
+    }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+<body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
 
-  <!-- Header -->
-  <header class="py-6 px-4 max-w-6xl mx-auto w-full text-center">
-    <div class="inline-flex items-center justify-center p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-4xl mb-3 shadow-lg shadow-indigo-500/20">
-      🎲
+  <!-- ================= TOP NAVIGATION BAR ================= -->
+  <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-xl px-4 py-2.5">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      
+      <!-- Brand & Secret Admin Emoji -->
+      <div class="flex items-center space-x-3">
+        <button onclick="promptAdminPasscode()" title="เข้าสู่ระบบครูผู้สอน (ใส่รหัสลับ)" class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-xl font-bold shadow-lg shadow-indigo-500/30 hover:scale-110 active:scale-95 transition-all cursor-pointer">
+          🎲
+        </button>
+        <div>
+          <h1 id="topGameTitle" class="text-sm sm:text-base font-black font-heading text-white leading-tight">
+            Phygital Snakes & Ladders
+          </h1>
+          <p id="topRoomPinText" class="text-[11px] text-amber-400 font-mono font-bold tracking-wider">ยังไม่ได้เข้าห้อง</p>
+        </div>
+      </div>
+
+      <!-- Right Action Controls -->
+      <div class="flex items-center space-x-2">
+        
+        <!-- Live Leaderboard Button -->
+        <button onclick="openLeaderboardModal()" class="px-3.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-amber-400 hover:text-white flex items-center space-x-1.5 transition-all">
+          <i data-lucide="trophy" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span class="hidden sm:inline">อันดับคะแนน</span>
+        </button>
+
+        <!-- Current Team Badge (If joined) -->
+        <div id="topTeamBadge" class="hidden items-center space-x-1.5">
+          <button onclick="openMascotPickerModal()" title="คลิกเพื่อเปลี่ยนตัวละครตัวเดิน" class="flex items-center space-x-1.5 px-3 py-1 rounded-xl bg-slate-800 border border-slate-700 hover:border-indigo-500 transition-all hover:scale-105">
+            <span id="topTeamAvatar" class="text-lg">🦁</span>
+            <span id="topTeamName" class="text-xs font-bold text-white max-w-[85px] truncate">กลุ่ม 1</span>
+            <i data-lucide="sparkles" class="w-3 h-3 text-indigo-400 ml-0.5"></i>
+          </button>
+          <button onclick="confirmLeaveTeam()" title="ออกจากกลุ่ม / เปลี่ยนห้อง" class="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-900/40 text-slate-400 hover:text-rose-300 transition-all border border-slate-700">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+      </div>
+
     </div>
-    <h1 class="text-3xl sm:text-4xl font-extrabold font-['Kanit'] bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-purple-400">
-      Active Learning: Phygital Snakes & Ladders
-    </h1>
-    <p class="text-sm text-slate-400 mt-2">
-      นวัตกรรมเกมบันไดงูผสมผสานฐานกิจกรรมจริง เชื่อมต่อโลกกายภาพและดิจิทัลด้วย Real-time Database
-    </p>
   </header>
 
-  <!-- Portal Cards -->
-  <main class="max-w-4xl mx-auto px-4 w-full grid grid-cols-1 md:grid-cols-3 gap-6 my-auto py-8">
-    
-    <!-- 1. Admin Panel -->
-    <a href="admin.html" class="group p-6 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-indigo-500/60 transition-all duration-300 flex flex-col justify-between hover:scale-[1.02] shadow-xl hover:shadow-indigo-500/20">
-      <div class="space-y-4">
-        <div class="w-14 h-14 rounded-2xl bg-indigo-600/20 border border-indigo-500/40 text-indigo-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-          <i data-lucide="shield-check" class="w-7 h-7"></i>
-        </div>
-        <div>
-          <h2 class="text-xl font-bold font-['Kanit'] text-white group-hover:text-indigo-300 transition-colors">
-            สำหรับครูผู้สอน (Admin Panel)
-          </h2>
-          <p class="text-xs text-slate-400 mt-2 leading-relaxed">
-            สร้างห้องเรียน (Room PIN), ออกแบบฐานกิจกรรม, กำหนดเวลานับถอยหลัง, และติดตามคะแนนสดของทั้ง 6 กลุ่ม
-          </p>
-        </div>
-      </div>
-      <div class="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-semibold text-indigo-400 group-hover:text-indigo-300">
-        <span>เข้าสู่ห้องควบคุม</span>
-        <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
-      </div>
-    </a>
+  <!-- ================= MAIN CONTAINER ================= -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-4 py-4 flex flex-col justify-center">
 
-    <!-- 2. Student App -->
-    <a href="student.html" class="group p-6 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-emerald-500/60 transition-all duration-300 flex flex-col justify-between hover:scale-[1.02] shadow-xl hover:shadow-emerald-500/20">
-      <div class="space-y-4">
-        <div class="w-14 h-14 rounded-2xl bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-          <i data-lucide="smartphone" class="w-7 h-7"></i>
+    <!-- ================= STAGE 1: ONBOARDING (PIN ➔ GROUP ➔ UNIQUE MASCOT) ================= -->
+    <div id="stage-join" class="max-w-xl mx-auto w-full space-y-5 my-auto">
+      
+      <!-- Welcome Hero Banner -->
+      <div class="text-center p-6 sm:p-8 rounded-3xl glass-panel relative overflow-hidden space-y-2">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center text-3xl mb-2 shadow-inner">
+          🎯
         </div>
-        <div>
-          <h2 class="text-xl font-bold font-['Kanit'] text-white group-hover:text-emerald-300 transition-colors">
-            สำหรับนักเรียน (Student App)
-          </h2>
-          <p class="text-xs text-slate-400 mt-2 leading-relaxed">
-            กรอก Room PIN เลือกกลุ่ม ทอยลูกเต๋า รับภารกิจฐานว่างอัตโนมัติ พร้อมตัวจับเวลาและบันทึกคะแนน
-          </p>
-        </div>
+        <h2 class="text-2xl sm:text-3xl font-black font-heading bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-100 to-purple-300">
+          เข้าสู่สมรภูมิบันไดงูฐานกิจกรรม
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-400">กรอกรหัสห้องเรียน เลือกกลุ่ม และเลือกตัวละครผู้พิทักษ์ประจำทีม</p>
       </div>
-      <div class="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-semibold text-emerald-400 group-hover:text-emerald-300">
-        <span>เข้าเล่นเกม</span>
-        <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
-      </div>
-    </a>
 
-    <!-- 3. Shared Board View -->
-    <a href="board.html" class="group p-6 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-purple-500/60 transition-all duration-300 flex flex-col justify-between hover:scale-[1.02] shadow-xl hover:shadow-purple-500/20">
-      <div class="space-y-4">
-        <div class="w-14 h-14 rounded-2xl bg-purple-600/20 border border-purple-500/40 text-purple-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-          <i data-lucide="tv" class="w-7 h-7"></i>
-        </div>
-        <div>
-          <h2 class="text-xl font-bold font-['Kanit'] text-white group-hover:text-purple-300 transition-colors">
-            จอภาพกระดานรวม (Board View)
-          </h2>
-          <p class="text-xs text-slate-400 mt-2 leading-relaxed">
-            จอภาพขนาดใหญ่ฉายหน้าชั้นเรียน แสดงการเคลื่อนที่ของตัวละคร 6 กลุ่มบนกระดาน และ Leaderboard สด
-          </p>
+      <!-- Step 1: Room PIN Input -->
+      <div id="joinStep1-Pin" class="glass-panel p-5 rounded-3xl space-y-3">
+        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider">
+          ขั้นตอนที่ 1: กรอกรหัสห้องเรียน (Room PIN 6 หลัก)
+        </label>
+        <div class="flex items-center space-x-2.5">
+          <input type="text" id="joinPinInput" maxlength="6" class="flex-1 bg-slate-950/80 border border-slate-700 rounded-2xl px-4 py-3.5 font-mono text-center font-black text-2xl sm:text-3xl text-amber-400 tracking-widest uppercase focus:outline-none focus:border-indigo-500" placeholder="123456">
+          <button onclick="checkAndLoadRoom()" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 flex items-center space-x-2 transition-all">
+            <i data-lucide="search" class="w-4 h-4"></i>
+            <span>ค้นหาห้อง</span>
+          </button>
         </div>
       </div>
-      <div class="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-semibold text-purple-400 group-hover:text-purple-300">
-        <span>เปิดจอภาพกระดาน</span>
-        <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
+
+      <!-- Step 2 & 3: Team & Unique Mascot Picker (Revealed after PIN verified) -->
+      <div id="joinStep2-TeamMascot" class="hidden glass-panel p-5 sm:p-6 rounded-3xl space-y-5">
+        
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold uppercase">ขั้นตอนที่ 2 & 3</span>
+            <h3 class="font-bold text-base font-heading text-white mt-1">เลือกกลุ่มและตัวละครผู้พิทักษ์</h3>
+          </div>
+          <span id="joinRoomTitleBadge" class="text-xs text-amber-400 font-mono font-bold truncate max-w-[150px]">ห้องเรียน</span>
+        </div>
+
+        <!-- 2.1 Select Team Grid -->
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-slate-300 flex items-center justify-between">
+            <span>1. เลือกกลุ่มของท่าน (ตามที่ครูกำหนดในห้องนี้):</span>
+            <span id="activeTeamsCountLabel" class="text-[10px] text-indigo-400 font-semibold">6 กลุ่ม</span>
+          </label>
+          <div id="joinTeamsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <!-- 2.2 Custom Team Name Input -->
+        <div class="space-y-1.5 pt-1">
+          <label class="block text-xs font-bold text-slate-300">
+            2. ตั้งชื่อกลุ่ม / สมาชิกของคุณ (<span class="text-indigo-400">แก้ไขตั้งชื่อเองได้</span>):
+          </label>
+          <input type="text" id="customTeamNameInput" maxlength="30" class="w-full bg-slate-950/90 border border-slate-700 rounded-2xl px-4 py-2.5 text-sm text-white font-semibold focus:outline-none focus:border-indigo-500" placeholder="เช่น ทีมสิงโตสายฟ้า ม.1/2">
+        </div>
+
+        <!-- 2.3 Select Unique Mascot Grid (No Duplicates Allowed!) -->
+        <div id="mascotSelectionSection" class="space-y-3 pt-2 border-t border-slate-800">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-slate-300">
+              3. เลือกตัวละครตัวเดิน (<span class="text-amber-400">ห้ามซ้ำกับกลุ่มอื่น!</span>):
+            </label>
+            <span class="text-[10px] text-slate-400">ตัวละครที่ถูกเลือกจะถูกล็อกทันที 🔒</span>
+          </div>
+
+          <div id="uniqueMascotsGrid" class="grid grid-cols-6 sm:grid-cols-8 gap-2 p-3 bg-slate-950/60 rounded-2xl border border-slate-800 max-h-[180px] overflow-y-auto custom-scrollbar">
+            <!-- Injected by JS with lock checks -->
+          </div>
+        </div>
+            <!-- Injected by JS with lock checks -->
+          </div>
+        </div>
+
+        <!-- Final Join Button -->
+        <button id="btnConfirmEnterGame" onclick="confirmEnterGame()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 font-black font-heading text-base text-white shadow-xl shadow-emerald-600/30 active:scale-95 transition-all flex items-center justify-center space-x-2">
+          <i data-lucide="play" class="w-5 h-5 fill-current"></i>
+          <span>พร้อมเข้าสู่สมรภูมิกิจกรรม (Enter Game)</span>
+        </button>
+
       </div>
-    </a>
+
+    </div>
+
+    <!-- ================= STAGE 2: LIVE BOARD + INTERACTIVE DICE GAMEPLAY ================= -->
+    <div id="stage-gameplay" class="hidden space-y-4 w-full">
+      
+      <!-- 1. MAIN LIVE BOARD CANVAS -->
+      <div class="glass-panel p-3 sm:p-4 rounded-3xl space-y-2 relative">
+        
+        <!-- Board Container -->
+        <div id="boardCanvasContainer" class="board-container w-full aspect-[16/9] max-h-[52vh] rounded-2xl overflow-hidden border border-white/10 relative">
+          <!-- Background Board Image -->
+          <img id="boardBgImage" src="" alt="Snakes and Ladders Board" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-slate-950/45 backdrop-blur-[0.5px]"></div>
+          
+          <!-- Tiles Layer -->
+          <div id="boardTilesOverlay" class="absolute inset-0 pointer-events-none"></div>
+
+          <!-- Pawns Layer (All 6 Teams Moving Live) -->
+          <div id="boardPawnsOverlay" class="absolute inset-0 pointer-events-none"></div>
+
+          <!-- Waiting for Start Overlay (if waiting) -->
+          <div id="boardWaitingOverlay" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-sm flex flex-col items-center justify-center p-4 text-center z-20 space-y-3">
+            <div class="w-16 h-16 rounded-full bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-3xl animate-bounce">
+              ⏳
+            </div>
+            <h3 class="text-xl font-bold font-heading text-white">รอคุณครูกดเริ่มเกม (Waiting for Teacher)</h3>
+            <p class="text-xs text-slate-300">เมื่อคุณครูกดเริ่มเกม ปุ่มทอยเต๋าด้านล่างจะเปิดใช้งานอัตโนมัติ</p>
+          </div>
+        </div>
+
+        <!-- Board Mini Info Bar -->
+        <div class="flex items-center justify-between text-[11px] text-slate-400 px-1 pt-1">
+          <div class="flex items-center space-x-3">
+            <span>🚩 เริ่ม: ช่อง 1</span>
+            <span>🏁 เส้นชัย: ช่อง <strong id="boardTotalTilesLabel" class="text-amber-400">40</strong> (+500 โบนัส)</span>
+          </div>
+          <div id="boardCurrentStatusPill" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            🟢 กำลังแข่งขัน
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 2. CONTROL DASHBOARD: 3D DICE + ROLL BUTTON + STATS -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+        
+        <!-- Left: Team Stats Card + Avatar Customizer -->
+        <div class="glass-panel p-3.5 rounded-2xl flex items-center justify-between relative group">
+          <div class="flex items-center space-x-3">
+            <button onclick="openMascotPickerModal()" title="คลิกเพื่อเปลี่ยนตัวละครตัวเดิน" class="relative group/avatar cursor-pointer">
+              <div id="myTeamAvatarBox" class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-inner border border-white/20 transition-transform group-hover/avatar:scale-110">
+                🦁
+              </div>
+              <span class="absolute -bottom-1 -right-1 bg-indigo-600 text-white rounded-full p-0.5 text-[9px] shadow">
+                <i data-lucide="sparkles" class="w-2.5 h-2.5"></i>
+              </span>
+            </button>
+            <div>
+              <h3 id="myTeamNameLabel" class="text-sm font-bold font-heading text-white">กลุ่ม 1</h3>
+              <span class="text-xs text-slate-400">ช่องปัจจุบัน: <strong id="myTeamTileLabel" class="text-indigo-400 font-bold">0</strong>/<span id="myTeamTotalTilesLabel">40</span></span>
+            </div>
+          </div>
+          <div class="text-right">
+            <span id="myTeamScoreLabel" class="text-2xl font-black text-amber-400 font-heading">0</span>
+            <span class="block text-[9px] text-slate-400 uppercase font-semibold">คะแนนสะสม</span>
+          </div>
+        </div>
+
+        <!-- Center / Right: 3D Interactive Dice & Roll Button -->
+        <div class="md:col-span-2 glass-panel p-3 sm:p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
+          
+          <!-- 3D Dice Display -->
+          <div class="flex items-center space-x-3">
+            <div class="dice-container flex items-center justify-center">
+              <div id="diceCube" class="dice-cube">
+                <div id="diceFaceDisplay" class="dice-face text-4xl font-black text-slate-800 font-heading">
+                  <span id="diceFaceValue">🎲</span>
+                </div>
+              </div>
+            </div>
+            <div class="text-left">
+              <span class="text-[11px] text-slate-400 font-semibold uppercase block">ผลการทอย</span>
+              <span id="diceResultText" class="text-base font-bold text-amber-400 font-heading">พร้อมทอยเต๋า</span>
+            </div>
+          </div>
+
+          <!-- Giant Roll Button -->
+          <button id="btnRollDice" onclick="handleRollDice()" class="w-full sm:flex-1 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-black font-heading text-base sm:text-lg shadow-xl shadow-indigo-600/30 active:scale-95 transition-all transform flex items-center justify-center space-x-2">
+            <i data-lucide="dices" class="w-5 h-5"></i>
+            <span>กดทอยลูกเต๋า (Roll Dice)</span>
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
 
   </main>
 
-  <!-- Footer -->
-  <footer class="py-4 text-center text-xs text-slate-500 border-t border-slate-900">
-    Active Learning: Phygital Snakes and Ladders &copy; 2026
+  <!-- ================= MODAL: CHOOSE UNIQUE MASCOT (ตัวละครห้ามซ้ำ) ================= -->
+  <div id="mascotPickerModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="max-w-md w-full glass-panel p-6 rounded-3xl border border-indigo-500/40 shadow-2xl space-y-4">
+      
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center space-x-2">
+          <span class="text-2xl">🎭</span>
+          <div>
+            <h3 class="font-bold text-base font-heading text-white">เปลี่ยนตัวละครตัวเดิน</h3>
+            <p class="text-[10px] text-slate-400">เลือกตัวละครที่ว่างอยู่ (ห้ามซ้ำกับกลุ่มอื่น)</p>
+          </div>
+        </div>
+        <button onclick="closeModal('mascotPickerModal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Mascot Grid in Modal -->
+      <div id="modalMascotGrid" class="grid grid-cols-6 gap-2.5 max-h-[50vh] overflow-y-auto custom-scrollbar pr-1">
+        <!-- Injected by JS -->
+      </div>
+
+      <button onclick="closeModal('mascotPickerModal')" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300">
+        ปิดหน้าต่าง
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ================= MODAL 1: STATION MISSION & COUNTDOWN OVERLAY ================= -->
+  <div id="stationMissionModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="max-w-lg w-full glass-panel p-6 rounded-3xl border border-indigo-500/40 shadow-2xl space-y-4 relative overflow-hidden animate-fadeIn">
+      
+      <div class="flex items-start justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center space-x-3">
+          <div id="stationIconBox" class="w-14 h-14 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-3xl shadow-inner">
+            🎯
+          </div>
+          <div>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold uppercase">
+              ภารกิจฐานกิจกรรม
+            </span>
+            <h2 id="stationTitle" class="text-lg font-black font-heading text-white mt-0.5 leading-snug">ฐานที่ 1: คิดเลขเร็ว</h2>
+          </div>
+        </div>
+
+        <div class="text-right">
+          <span id="stationMaxScoreBadge" class="text-lg font-black text-amber-400 font-heading">100</span>
+          <span class="block text-[9px] text-slate-400 font-semibold">คะแนนเต็ม</span>
+        </div>
+      </div>
+
+      <!-- Description / Rules -->
+      <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 space-y-1 text-xs">
+        <span class="font-bold text-indigo-300 flex items-center space-x-1">
+          <i data-lucide="scroll" class="w-3.5 h-3.5"></i>
+          <span>คำอธิบายกติกา / สิ่งที่ต้องทำ:</span>
+        </span>
+        <p id="stationDescription" class="text-slate-200 leading-relaxed text-sm">
+          ช่วยกันตอบคำถามคณิตศาสตร์คิดเลขเร็ว 5 ข้อ ให้ถูกต้องภายในเวลา
+        </p>
+      </div>
+
+      <!-- Countdown Timer with Circular Graphics -->
+      <div class="text-center py-2 space-y-1">
+        <div class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">เวลาที่เหลือ (Countdown Timer)</div>
+        <div id="stationTimerDisplay" class="text-5xl font-black font-mono text-white tracking-widest">
+          03:00
+        </div>
+        <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800 mt-2">
+          <div id="stationTimerBar" class="h-2 rounded-full bg-indigo-500 transition-all duration-1000" style="width: 100%"></div>
+        </div>
+      </div>
+
+      <!-- Score Entry & Submission Form -->
+      <div class="pt-3 border-t border-slate-800 space-y-3">
+        <label class="block text-xs font-bold text-slate-300 text-center">
+          กรอกคะแนนที่ได้รับจากคุณครูประจำฐาน
+        </label>
+
+        <div class="flex items-center justify-center space-x-2">
+          <button type="button" onclick="adjustScoreInput(-10)" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-sm text-slate-300 border border-slate-700">-10</button>
+          <input type="number" id="stationScoreInput" min="0" max="100" class="w-28 bg-slate-950 border border-slate-700 rounded-xl py-2.5 text-center font-black text-2xl text-amber-400 focus:outline-none focus:border-amber-500" value="100">
+          <button type="button" onclick="adjustScoreInput(10)" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-sm text-slate-300 border border-slate-700">+10</button>
+        </div>
+
+        <div class="grid grid-cols-4 gap-1.5 text-xs font-bold" id="scorePresets">
+          <button type="button" onclick="setStationScoreInput(100)" class="py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">100</button>
+          <button type="button" onclick="setStationScoreInput(90)" class="py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">90</button>
+          <button type="button" onclick="setStationScoreInput(80)" class="py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">80</button>
+          <button type="button" onclick="setStationScoreInput(70)" class="py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">70</button>
+        </div>
+
+        <button id="btnSubmitScore" onclick="handleSubmitStationScore()" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 font-bold text-sm text-white shadow-lg shadow-emerald-600/30 active:scale-95 transition-all flex items-center justify-center space-x-1.5">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>ส่งคะแนนและกลับสู่กระดาน (Submit Score)</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= MODAL 2: WAITING QUEUE OVERLAY ================= -->
+  <div id="queueModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="max-w-sm w-full glass-panel p-6 rounded-3xl border border-slate-800 shadow-2xl text-center space-y-4">
+      <div class="w-16 h-16 mx-auto rounded-3xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-3xl animate-bounce">
+        ⏳
+      </div>
+      <h3 class="text-lg font-bold font-heading text-white">ทุกฐานกิจกรรมกำลังมีเพื่อนเล่นอยู่</h3>
+      <p class="text-xs text-slate-300 leading-relaxed">
+        ระบบกำลังรอฐานกิจกรรมว่าง และจะส่งกลุ่มของคุณเข้าสู่ฐานทันทีโดยอัตโนมัติ
+      </p>
+      <div class="p-2.5 bg-slate-900 rounded-xl border border-slate-800 text-xs text-indigo-300 flex items-center justify-center space-x-2">
+        <span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
+        <span>กำลังรอคิวสด (Auto Queue)...</span>
+      </div>
+      <button onclick="closeQueueModal()" class="text-xs text-slate-400 hover:text-white underline">
+        ดูกระดานเกมระหว่างรอ
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 3: LEADERBOARD MODAL ================= -->
+  <div id="leaderboardModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="max-w-md w-full glass-panel p-6 rounded-3xl border border-slate-800 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center space-x-2">
+          <span class="text-2xl">🏆</span>
+          <h3 class="font-bold text-base font-heading text-white">ตารางคะแนนสด (Leaderboard)</h3>
+        </div>
+        <button onclick="closeModal('leaderboardModal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div id="leaderboardModalList" class="space-y-2 max-h-[50vh] overflow-y-auto custom-scrollbar pr-1"></div>
+
+      <button onclick="closeModal('leaderboardModal')" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300">
+        ปิดหน้าต่าง
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 4: GRAND FINALE / VICTORY ================= -->
+  <div id="victoryModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="max-w-lg w-full glass-panel p-6 rounded-3xl border border-amber-500/40 shadow-2xl text-center space-y-5">
+      <div class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-br from-yellow-500 to-amber-600 text-4xl flex items-center justify-center shadow-lg shadow-amber-500/30 animate-bounce">
+        👑
+      </div>
+      <div>
+        <h2 class="text-2xl font-black font-heading text-white">🎉 สิ้นสุดการแข่งขัน! 🎉</h2>
+        <p id="victorySubtitle" class="text-xs text-amber-400 font-semibold mt-1">ยินดีกับทีมผู้ชนะเลิศอันดับ 1</p>
+      </div>
+
+      <div id="victoryPodiumList" class="space-y-2 text-left"></div>
+
+      <button onclick="closeModal('victoryModal')" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300">
+        ปิดหน้าต่าง (ดูภาพกระดานสรุปผล)
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="py-2.5 text-center text-[10px] text-slate-500 border-t border-slate-900">
+    Active Learning: Phygital Snakes & Ladders &bull; นวัตกรรมการเรียนรู้เชิงรุก
   </footer>
 
+  <!-- ================= JAVASCRIPT APP LOGIC ================= -->
   <script>
-    lucide.createIcons();
+    // State
+    let currentRoomPin = null;
+    let currentTeamId = null;
+    let selectedTempTeamId = null;
+    let selectedTempAvatar = null;
+    let roomData = null;
+    let activeStation = null;
+    let timerInterval = null;
+    let stationRemainingSeconds = 0;
+    let stationTotalSeconds = 0;
+    let previousPositions = {};
+    const ADMIN_PASSCODE = "1234";
+
+    // All Available Mascots (48 Curated HD Emojis)
+    const ALL_MASCOTS = [
+      '🦁', '🐯', '🐉', '🦅', '🦚', '🐬', '🦊', '🐼', 
+      '🦄', '🦖', '🐺', '🐻', '🐸', '🦉', '🐙', '🦈', 
+      '🧙‍♂️', '🥷', '🦸‍♂️', '🤖', '👑', '💎', '⚔️', '🛡️', 
+      '🚀', '🛸', '🪐', '🌌', '⚡', '🔥', '🌊', '🌱'
+    ];
+
+    // Web Audio Synthesizer
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep(freq = 600, duration = 0.15, type = 'sine') {
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    function playFanfare() {
+      [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+        setTimeout(() => playBeep(freq, 0.25, 'triangle'), idx * 120);
+      });
+    }
+
+    // Modal Helpers
+    function openModal(id) {
+      const el = document.getElementById(id);
+      el.classList.remove('hidden');
+      el.classList.add('flex');
+      lucide.createIcons();
+    }
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      el.classList.add('hidden');
+      el.classList.remove('flex');
+    }
+    function closeQueueModal() {
+      closeModal('queueModal');
+    }
+
+    // On Load
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      initFirebaseApp();
+
+      const params = new URLSearchParams(window.location.search);
+      const urlPin = params.get('pin');
+      const savedPin = localStorage.getItem('STUDENT_ROOM_PIN') || localStorage.getItem('PHYGITAL_CURRENT_ROOM_PIN');
+      const savedTeam = localStorage.getItem('STUDENT_TEAM_ID');
+
+      const pinToUse = urlPin || savedPin;
+      if (pinToUse) {
+        document.getElementById('joinPinInput').value = pinToUse;
+        checkAndLoadRoom(savedTeam);
+      }
+    });
+
+    function initFirebaseApp() {
+      const stored = PhygitalDB.getStoredConfig();
+      if (stored) {
+        PhygitalDB.initFirebase(stored);
+      }
+    }
+
+    // Secret Admin Passcode Prompt on 🎲 Emoji Click
+    async function promptAdminPasscode() {
+      const { value: password } = await Swal.fire({
+        title: '🔐 ระบบควบคุมครูผู้สอน (Admin)',
+        text: 'กรุณากรอกรหัสผ่านเพื่อเข้าสู่ Admin Panel (รหัสเริ่มต้น: 1234)',
+        input: 'password',
+        inputPlaceholder: 'กรอกรหัสผ่าน...',
+        showCancelButton: true,
+        confirmButtonText: 'เข้าสู่ระบบ',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#6366f1'
+      });
+
+      if (password === ADMIN_PASSCODE || password === 'admin' || password === 'krusos') {
+        Swal.fire({
+          icon: 'success',
+          title: 'ยินดีต้อนรับคุณครู!',
+          timer: 1000,
+          showConfirmButton: false
+        });
+        setTimeout(() => {
+          window.location.href = `admin.html${currentRoomPin ? '?pin=' + currentRoomPin : ''}`;
+        }, 1000);
+      } else if (password !== undefined) {
+        Swal.fire('รหัสผ่านไม่ถูกต้อง', 'กรุณาลองใหม่อีกครั้ง (รหัสเริ่มต้นคือ 1234)', 'error');
+      }
+    }
+
+    // Check & Load Room
+    async function checkAndLoadRoom(autoSelectTeamId = null) {
+      const pin = document.getElementById('joinPinInput').value.trim();
+      if (!pin) {
+        Swal.fire('กรุณากรอกรหัส PIN', '', 'warning');
+        return;
+      }
+
+      currentRoomPin = pin;
+      localStorage.setItem('STUDENT_ROOM_PIN', pin);
+      document.getElementById('topRoomPinText').textContent = `PIN: ${pin}`;
+
+      // Subscribe to Realtime Database
+      PhygitalDB.listenToRoom(pin, (data) => {
+        if (!data) {
+          Swal.fire('ไม่พบห้องเกม', `ไม่พบห้อง PIN: ${pin} ในระบบ`, 'error');
+          document.getElementById('stage-join').classList.remove('hidden');
+          document.getElementById('stage-gameplay').classList.add('hidden');
+          return;
+        }
+
+        roomData = data;
+        handleRoomStateChange(autoSelectTeamId);
+      });
+    }
+
+    // Handle Realtime Room Updates
+    function handleRoomStateChange(autoSelectTeamId = null) {
+      if (!roomData) return;
+      const config = roomData.config || {};
+      const teams = roomData.teams || {};
+      const stations = roomData.stations || {};
+
+      document.getElementById('topGameTitle').textContent = config.title || 'Phygital Snakes & Ladders';
+
+      // If user hasn't confirmed entering with a team yet
+      if (!currentTeamId) {
+        if (autoSelectTeamId && teams[autoSelectTeamId]) {
+          currentTeamId = autoSelectTeamId;
+        } else {
+          renderOnboardingStep2(teams, config);
+          document.getElementById('stage-join').classList.remove('hidden');
+          document.getElementById('stage-gameplay').classList.add('hidden');
+          return;
+        }
+      }
+
+      const myTeam = teams[currentTeamId];
+      if (!myTeam) {
+        currentTeamId = null;
+        renderOnboardingStep2(teams, config);
+        document.getElementById('stage-join').classList.remove('hidden');
+        document.getElementById('stage-gameplay').classList.add('hidden');
+        return;
+      }
+
+      // User has joined a team: Show Live Gameplay View!
+      document.getElementById('stage-join').classList.add('hidden');
+      document.getElementById('stage-gameplay').classList.remove('hidden');
+
+      // Update Top Nav Team Badge
+      document.getElementById('topTeamBadge').classList.remove('hidden');
+      document.getElementById('topTeamBadge').classList.add('flex');
+      document.getElementById('topTeamAvatar').textContent = myTeam.avatar || '🦁';
+      document.getElementById('topTeamName').textContent = myTeam.name;
+
+      // Render Board & Live Pawns
+      renderBoardCanvas(config, teams);
+
+      // Render Control Dashboard
+      renderControlDashboard(config, myTeam);
+
+      // Check Game State (Finished / Waiting / In Station / Rolling)
+      if (config.game_status === 'finished') {
+        clearInterval(timerInterval);
+        closeModal('stationMissionModal');
+        closeModal('queueModal');
+        renderVictoryModal(config, teams, myTeam);
+        return;
+      }
+
+      if (config.game_status === 'waiting') {
+        clearInterval(timerInterval);
+        document.getElementById('boardWaitingOverlay').classList.remove('hidden');
+        document.getElementById('btnRollDice').disabled = true;
+        document.getElementById('btnRollDice').classList.add('opacity-50', 'cursor-not-allowed');
+        return;
+      } else {
+        document.getElementById('boardWaitingOverlay').classList.add('hidden');
+      }
+
+      // Check if team is currently in a station
+      if (myTeam.current_station_id && stations[myTeam.current_station_id]) {
+        const st = stations[myTeam.current_station_id];
+        setupStationMissionModal(st, myTeam);
+        openModal('stationMissionModal');
+      } else {
+        clearInterval(timerInterval);
+        closeModal('stationMissionModal');
+      }
+    }
+
+    // ================= ONBOARDING STEP 2 & UNIQUE MASCOT PICKER =================
+    function renderOnboardingStep2(teams, config) {
+      document.getElementById('joinStep2-TeamMascot').classList.remove('hidden');
+      document.getElementById('joinRoomTitleBadge').textContent = config.title || `ห้อง ${currentRoomPin}`;
+
+      const totalTeams = Object.keys(teams).length;
+      document.getElementById('activeTeamsCountLabel').textContent = `${totalTeams} กลุ่ม`;
+
+      if (!selectedTempTeamId || !teams[selectedTempTeamId]) {
+        selectedTempTeamId = Object.keys(teams)[0] || 'team_1';
+      }
+
+      // Populate Custom Team Name Input
+      const nameInput = document.getElementById('customTeamNameInput');
+      if (!nameInput.value || nameInput.getAttribute('data-team') !== selectedTempTeamId) {
+        nameInput.value = teams[selectedTempTeamId]?.name || `กลุ่ม ${selectedTempTeamId}`;
+        nameInput.setAttribute('data-team', selectedTempTeamId);
+      }
+
+      // Render Team Grid
+      const teamsGrid = document.getElementById('joinTeamsGrid');
+      teamsGrid.innerHTML = Object.keys(teams).map(key => {
+        const t = teams[key];
+        const isSelected = key === selectedTempTeamId;
+        return `
+          <button type="button" onclick="selectTempTeam('${key}')" class="p-3 rounded-2xl border text-left transition-all flex items-center space-x-2.5 ${
+            isSelected 
+              ? 'bg-indigo-950/80 border-indigo-500 ring-2 ring-indigo-500/50 shadow-lg shadow-indigo-500/20' 
+              : 'bg-slate-900/80 border-slate-700 hover:border-slate-600'
+          }">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xl shadow border border-white/10" style="background-color: ${t.color}22">
+              ${t.avatar || '🦁'}
+            </div>
+            <div class="truncate">
+              <h4 class="font-bold text-xs text-white truncate font-heading">${t.name}</h4>
+              <span class="text-[10px] ${isSelected ? 'text-indigo-400 font-bold' : 'text-slate-400'}">${isSelected ? 'เลือกกลุ่มนี้ ✓' : 'คลิกเลือก'}</span>
+            </div>
+          </button>
+        `;
+      }).join('');
+
+      // Render Unique Mascot Grid with Live Locks
+      renderUniqueMascots(teams);
+      lucide.createIcons();
+    }
+
+    function selectTempTeam(teamId) {
+      selectedTempTeamId = teamId;
+      selectedTempAvatar = null;
+      playBeep(600, 0.1);
+      if (roomData?.teams) {
+        const nameInput = document.getElementById('customTeamNameInput');
+        nameInput.value = roomData.teams[teamId]?.name || `กลุ่ม ${teamId}`;
+        nameInput.setAttribute('data-team', teamId);
+        renderOnboardingStep2(roomData.teams, roomData.config);
+      }
+    }
+
+    // Render Unique Mascot Grid (No Duplicates Allowed across Teams!)
+    function renderUniqueMascots(teams) {
+      // Map which avatars are claimed by WHICH team
+      const claimedAvatars = {};
+      Object.keys(teams).forEach(k => {
+        if (k !== selectedTempTeamId && teams[k].avatar) {
+          claimedAvatars[teams[k].avatar] = teams[k].name || `กลุ่ม ${k}`;
+        }
+      });
+
+      const currentTeamAvatar = teams[selectedTempTeamId]?.avatar || '🦁';
+      if (!selectedTempAvatar) selectedTempAvatar = currentTeamAvatar;
+
+      const container = document.getElementById('uniqueMascotsGrid');
+      container.innerHTML = ALL_MASCOTS.map(mascot => {
+        const isOccupied = !!claimedAvatars[mascot];
+        const isSelected = mascot === selectedTempAvatar;
+
+        if (isOccupied) {
+          // Locked by another team
+          return `
+            <div title="ตัวละครนี้ถูกเลือกโดย ${claimedAvatars[mascot]} แล้ว" class="w-11 h-11 rounded-xl bg-slate-900/40 border border-slate-800/80 text-xl flex flex-col items-center justify-center opacity-30 cursor-not-allowed relative">
+              <span>${mascot}</span>
+              <span class="absolute -bottom-1 -right-1 bg-rose-600 text-white rounded-full text-[8px] px-0.5">🔒</span>
+            </div>
+          `;
+        } else {
+          // Available to pick
+          return `
+            <button type="button" onclick="selectTempMascot('${mascot}')" class="w-11 h-11 rounded-xl border text-xl flex items-center justify-center shadow transition-all hover:scale-110 active:scale-95 ${
+              isSelected 
+                ? 'bg-indigo-600 border-amber-400 ring-2 ring-amber-400 shadow-md shadow-indigo-500/40' 
+                : 'bg-slate-900/90 border-slate-700 hover:border-indigo-400'
+            }">
+              ${mascot}
+            </button>
+          `;
+        }
+      }).join('');
+    }
+
+    function selectTempMascot(mascot) {
+      selectedTempAvatar = mascot;
+      playBeep(750, 0.15);
+      if (roomData?.teams) {
+        renderUniqueMascots(roomData.teams);
+      }
+    }
+
+    // Confirm Onboarding & Enter Game
+    async function confirmEnterGame() {
+      if (!currentRoomPin || !selectedTempTeamId) return;
+
+      const avatarToUse = selectedTempAvatar || roomData?.teams?.[selectedTempTeamId]?.avatar || '🦁';
+      const customName = document.getElementById('customTeamNameInput').value.trim() || roomData?.teams?.[selectedTempTeamId]?.name || `กลุ่ม ${selectedTempTeamId}`;
+
+      // Check race condition: Verify mascot is not claimed by another team right now
+      const teams = roomData?.teams || {};
+      const isTaken = Object.keys(teams).some(k => k !== selectedTempTeamId && teams[k].avatar === avatarToUse);
+
+      if (isTaken) {
+        Swal.fire('ตัวละครนี้ถูกเลือกไปแล้ว', 'มีเพื่อนกลุ่มอื่นเพิ่งเลือกตัวละครนี้ กรุณาเลือกตัวละครอื่นที่ยังว่างอยู่ครับ', 'warning');
+        renderUniqueMascots(teams);
+        return;
+      }
+
+      try {
+        Swal.fire({
+          title: 'กำลังเข้าสู่เกม...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+
+        // Save selected unique mascot & custom team name in Firebase
+        await PhygitalDB.updateTeamData(currentRoomPin, selectedTempTeamId, {
+          name: customName,
+          avatar: avatarToUse
+        });
+
+        currentTeamId = selectedTempTeamId;
+        localStorage.setItem('STUDENT_TEAM_ID', currentTeamId);
+
+        Swal.close();
+        playFanfare();
+        confetti({ particleCount: 70, spread: 60 });
+
+        handleRoomStateChange();
+      } catch (e) {
+        Swal.fire('เกิดข้อผิดพลาด', e.message, 'error');
+      }
+    }
+          avatar: avatarToUse
+        });
+
+        currentTeamId = selectedTempTeamId;
+        localStorage.setItem('STUDENT_TEAM_ID', currentTeamId);
+
+        Swal.close();
+        playFanfare();
+        confetti({ particleCount: 70, spread: 60 });
+
+        handleRoomStateChange();
+      } catch (e) {
+        Swal.fire('เกิดข้อผิดพลาด', e.message, 'error');
+      }
+    }
+
+    // Mascot Picker Modal (During Active Game)
+    function openMascotPickerModal() {
+      if (!roomData?.teams || !currentTeamId) return;
+
+      const teams = roomData.teams;
+      const claimedAvatars = {};
+      Object.keys(teams).forEach(k => {
+        if (k !== currentTeamId && teams[k].avatar) {
+          claimedAvatars[teams[k].avatar] = teams[k].name;
+        }
+      });
+
+      const currentAvatar = teams[currentTeamId]?.avatar || '🦁';
+
+      const container = document.getElementById('modalMascotGrid');
+      container.innerHTML = ALL_MASCOTS.map(mascot => {
+        const isOccupied = !!claimedAvatars[mascot];
+        const isSelected = mascot === currentAvatar;
+
+        if (isOccupied) {
+          return `
+            <div title="ตัวละครนี้ถูกเลือกโดย ${claimedAvatars[mascot]} แล้ว" class="w-12 h-12 rounded-2xl bg-slate-900/40 border border-slate-800 text-2xl flex flex-col items-center justify-center opacity-30 cursor-not-allowed relative">
+              <span>${mascot}</span>
+              <span class="absolute -bottom-1 -right-1 bg-rose-600 text-white rounded-full text-[9px] px-1">🔒</span>
+            </div>
+          `;
+        } else {
+          return `
+            <button type="button" onclick="changePawnMascot('${mascot}')" class="w-12 h-12 rounded-2xl border text-2xl flex items-center justify-center shadow transition-all hover:scale-125 active:scale-95 ${
+              isSelected 
+                ? 'bg-indigo-600 border-amber-400 ring-2 ring-amber-400' 
+                : 'bg-slate-900/90 border-slate-700 hover:border-indigo-400'
+            }">
+              ${mascot}
+            </button>
+          `;
+        }
+      }).join('');
+
+      openModal('mascotPickerModal');
+    }
+
+    async function changePawnMascot(newMascot) {
+      if (!currentRoomPin || !currentTeamId) return;
+      try {
+        await PhygitalDB.updateTeamData(currentRoomPin, currentTeamId, {
+          avatar: newMascot
+        });
+        playBeep(880, 0.2);
+        closeModal('mascotPickerModal');
+        Swal.fire({
+          icon: 'success',
+          title: `เปลี่ยนตัวเดินเป็น ${newMascot} สำเร็จ!`,
+          timer: 1200,
+          showConfirmButton: false
+        });
+      } catch (e) {
+        Swal.fire('ข้อผิดพลาด', e.message, 'error');
+      }
+    }
+
+    async function confirmLeaveTeam() {
+      const res = await Swal.fire({
+        title: 'เปลี่ยนกลุ่มหรือออกจากห้อง?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'ออกจากกลุ่ม',
+        cancelButtonText: 'ยกเลิก'
+      });
+      if (res.isConfirmed) {
+        currentTeamId = null;
+        localStorage.removeItem('STUDENT_TEAM_ID');
+        document.getElementById('topTeamBadge').classList.add('hidden');
+        if (roomData) renderOnboardingStep2(roomData.teams, roomData.config);
+        document.getElementById('stage-join').classList.remove('hidden');
+        document.getElementById('stage-gameplay').classList.add('hidden');
+      }
+    }
+
+    // ================= COORDINATE MAPPING (SERPENTINE MATRIX) =================
+    function getTileCoordinate(tileNumber, totalTiles) {
+      if (tileNumber <= 0) return { x: 5, y: 94 };
+
+      let cols = 8;
+      if (totalTiles <= 20) cols = 5;
+      else if (totalTiles <= 30) cols = 6;
+      else if (totalTiles <= 50) cols = 10;
+      else if (totalTiles <= 100) cols = 10;
+
+      const rows = Math.ceil(totalTiles / cols);
+      const index = Math.min(tileNumber, totalTiles) - 1;
+      const rowIndex = Math.floor(index / cols);
+      const colInRow = index % cols;
+      let colPos = (rowIndex % 2 === 0) ? colInRow : (cols - 1 - colInRow);
+
+      const xPadding = 7;
+      const yPadding = 9;
+      const usableWidth = 100 - (xPadding * 2);
+      const usableHeight = 100 - (yPadding * 2);
+      const cellWidth = usableWidth / cols;
+      const cellHeight = usableHeight / rows;
+
+      const x = xPadding + (colPos * cellWidth) + (cellWidth / 2);
+      const y = (100 - yPadding) - (rowIndex * cellHeight) - (cellHeight / 2);
+
+      return { x, y };
+    }
+
+    // Render Board Canvas with Tiles & Pawns
+    function renderBoardCanvas(config, teams) {
+      const totalTiles = parseInt(config.total_tiles) || 40;
+      document.getElementById('boardTotalTilesLabel').textContent = totalTiles;
+
+      const bgImg = document.getElementById('boardBgImage');
+      if (config.board_image_url && bgImg.src !== config.board_image_url) {
+        bgImg.src = config.board_image_url;
+      }
+
+      // 1. Render Tiles Grid
+      const tilesContainer = document.getElementById('boardTilesOverlay');
+      tilesContainer.innerHTML = '';
+      for (let i = 1; i <= totalTiles; i++) {
+        const coord = getTileCoordinate(i, totalTiles);
+        const isFinish = i === totalTiles;
+        const isStart = i === 1;
+        const tileEl = document.createElement('div');
+        tileEl.className = `board-tile flex items-center justify-center rounded-lg font-mono font-bold ${
+          isFinish 
+            ? 'w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-amber-400 to-yellow-600 text-slate-950 text-xs sm:text-sm shadow-lg border-2 border-yellow-200 animate-pulse' 
+            : isStart 
+              ? 'w-8 h-8 sm:w-9 sm:h-9 bg-indigo-600 text-white text-[10px] sm:text-xs shadow-md' 
+              : 'w-6 h-6 sm:w-8 sm:h-8 bg-slate-900/65 text-slate-300 text-[9px] sm:text-[11px] border border-white/20'
+        }`;
+        tileEl.style.left = `${coord.x}%`;
+        tileEl.style.top = `${coord.y}%`;
+        tileEl.innerHTML = isFinish ? `🏁${i}` : `${i}`;
+        tilesContainer.appendChild(tileEl);
+      }
+
+      // 2. Render Team Pawns
+      const pawnsContainer = document.getElementById('boardPawnsOverlay');
+      const tileClusters = {};
+      Object.keys(teams).forEach(teamKey => {
+        const team = teams[teamKey];
+        const tile = team.current_tile || 0;
+        if (!tileClusters[tile]) tileClusters[tile] = [];
+        tileClusters[tile].push({ key: teamKey, ...team });
+      });
+
+      pawnsContainer.innerHTML = Object.keys(teams).map(teamKey => {
+        const team = teams[teamKey];
+        const currentTile = team.current_tile || 0;
+        const coord = getTileCoordinate(currentTile, totalTiles);
+
+        const cluster = tileClusters[currentTile] || [];
+        const indexInCluster = cluster.findIndex(t => t.key === teamKey);
+        let offsetX = 0;
+        let offsetY = 0;
+        if (cluster.length > 1) {
+          const angle = (indexInCluster / cluster.length) * (2 * Math.PI);
+          offsetX = Math.cos(angle) * 14;
+          offsetY = Math.sin(angle) * 14;
+        }
+
+        const isMyTeam = teamKey === currentTeamId;
+
+        return `
+          <div id="pawn-${teamKey}" class="team-pawn flex flex-col items-center cursor-pointer ${isMyTeam ? 'scale-110 z-40' : ''}" style="left: calc(${coord.x}% + ${offsetX}px); top: calc(${coord.y}% + ${offsetY}px);">
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-lg sm:text-xl shadow-2xl border-2 ${isMyTeam ? 'border-amber-300 ring-2 ring-amber-400' : 'border-white'}" style="background-color: ${team.color || '#6366f1'}; box-shadow: 0 0 12px ${team.color}88;">
+              ${team.avatar || '🦁'}
+            </div>
+            <span class="text-[8px] sm:text-[9px] font-black text-white px-1 py-0.2 rounded-full bg-slate-950/90 border border-slate-700 whitespace-nowrap mt-0.5">
+              ${team.name}
+            </span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Render Control Dashboard
+    function renderControlDashboard(config, myTeam) {
+      const totalTiles = parseInt(config.total_tiles) || 40;
+      document.getElementById('myTeamNameLabel').textContent = myTeam.name;
+      document.getElementById('myTeamAvatarBox').textContent = myTeam.avatar || '🦁';
+      document.getElementById('myTeamAvatarBox').style.backgroundColor = `${myTeam.color || '#6366f1'}33`;
+      document.getElementById('myTeamTileLabel').textContent = myTeam.current_tile || 0;
+      document.getElementById('myTeamTotalTilesLabel').textContent = totalTiles;
+      document.getElementById('myTeamScoreLabel').textContent = myTeam.score || 0;
+
+      const btn = document.getElementById('btnRollDice');
+      if (config.game_status === 'playing' && !myTeam.current_station_id) {
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+      } else {
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+      }
+    }
+
+    // ================= ROLL DICE ACTION WITH HOPPING WALK =================
+    async function handleRollDice() {
+      if (!currentRoomPin || !currentTeamId) return;
+
+      const btn = document.getElementById('btnRollDice');
+      const diceCube = document.getElementById('diceCube');
+      const diceValueEl = document.getElementById('diceFaceValue');
+      const resultTextEl = document.getElementById('diceResultText');
+
+      btn.disabled = true;
+      btn.classList.add('opacity-50', 'cursor-not-allowed');
+      resultTextEl.textContent = "กำลังทอย...";
+
+      if (navigator.vibrate) navigator.vibrate(100);
+      playBeep(400, 0.1, 'sawtooth');
+
+      diceCube.classList.add('is-rolling');
+
+      const rollSoundInterval = setInterval(() => {
+        diceValueEl.textContent = Math.floor(Math.random() * 6) + 1;
+        playBeep(450 + Math.random() * 200, 0.05, 'square');
+      }, 100);
+
+      setTimeout(async () => {
+        clearInterval(rollSoundInterval);
+        diceCube.classList.remove('is-rolling');
+
+        const diceVal = Math.floor(Math.random() * 6) + 1;
+        diceValueEl.textContent = diceVal;
+        resultTextEl.textContent = `ทอยได้ ${diceVal} แต้ม!`;
+
+        playFanfare();
+        if (navigator.vibrate) navigator.vibrate([100, 50, 150]);
+
+        try {
+          // 1. Move on Board in Firebase
+          const moveRes = await PhygitalDB.rollDiceAndMove(currentRoomPin, currentTeamId, diceVal);
+
+          // Animate Step-by-Step Hopping of Pawn
+          animatePawnHopping(currentTeamId, diceVal);
+
+          if (moveRes.reachedFinish) {
+            confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+            return;
+          }
+
+          // 2. Dynamic Station Assignment Logic!
+          setTimeout(async () => {
+            Swal.fire({
+              title: 'กำลังสแกนหาฐานกิจกรรมว่าง...',
+              text: 'ระบบกำลังจัดสรรฐานว่างที่กลุ่มของคุณยังไม่เคยเล่น',
+              allowOutsideClick: false,
+              didOpen: () => Swal.showLoading()
+            });
+
+            const assignRes = await PhygitalDB.assignVacantStation(currentRoomPin, currentTeamId);
+            Swal.close();
+
+            if (assignRes.success) {
+              confetti({ particleCount: 50, spread: 60, origin: { y: 0.5 } });
+              playBeep(700, 0.3, 'sine');
+            } else if (assignRes.reason === 'none_vacant') {
+              openModal('queueModal');
+              watchForVacantStation();
+            } else if (assignRes.reason === 'all_completed') {
+              Swal.fire({
+                icon: 'success',
+                title: 'ยอดเยี่ยมมาก!',
+                text: 'กลุ่มของคุณผ่านกิจกรรมครบทุกฐานแล้ว สามารถทอยเต๋าเพื่อเดินต่อได้เลย!',
+                timer: 3000
+              });
+              btn.disabled = false;
+              btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+          }, 1200);
+
+        } catch (e) {
+          Swal.fire('เกิดข้อผิดพลาด', e.message, 'error');
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+      }, 1200);
+    }
+
+    function animatePawnHopping(teamKey, steps) {
+      const pawnEl = document.getElementById(`pawn-${teamKey}`);
+      if (!pawnEl) return;
+      pawnEl.classList.add('pawn-hopping');
+      setTimeout(() => pawnEl.classList.remove('pawn-hopping'), steps * 400);
+    }
+
+    function watchForVacantStation() {
+      const interval = setInterval(async () => {
+        if (!currentRoomPin || !currentTeamId) {
+          clearInterval(interval);
+          return;
+        }
+        const assignRes = await PhygitalDB.assignVacantStation(currentRoomPin, currentTeamId);
+        if (assignRes.success) {
+          clearInterval(interval);
+          closeModal('queueModal');
+          confetti({ particleCount: 60, spread: 60 });
+        }
+      }, 3000);
+    }
+
+    // ================= STATION MISSION MODAL =================
+    function setupStationMissionModal(station, myTeam) {
+      activeStation = station;
+      clearInterval(timerInterval);
+
+      document.getElementById('stationIconBox').textContent = station.icon || '🎯';
+      document.getElementById('stationTitle').textContent = station.name;
+      document.getElementById('stationDescription').textContent = station.description || 'ไม่มีคำอธิบาย';
+      document.getElementById('stationMaxScoreBadge').textContent = station.max_score || 100;
+      document.getElementById('stationScoreInput').max = station.max_score || 100;
+      document.getElementById('stationScoreInput').value = station.max_score || 100;
+
+      stationTotalSeconds = (parseInt(station.timer_minutes) || 3) * 60;
+      const startTime = myTeam.station_start_time || Date.now();
+      const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+      stationRemainingSeconds = Math.max(0, stationTotalSeconds - elapsedSeconds);
+
+      updateTimerUI();
+      timerInterval = setInterval(() => {
+        if (stationRemainingSeconds > 0) {
+          stationRemainingSeconds--;
+          updateTimerUI();
+          if (stationRemainingSeconds <= 5 && stationRemainingSeconds > 0) {
+            playBeep(440, 0.1);
+          } else if (stationRemainingSeconds === 0) {
+            playBeep(300, 0.5, 'sawtooth');
+            if (navigator.vibrate) navigator.vibrate(500);
+          }
+        }
+      }, 1000);
+    }
+
+    function updateTimerUI() {
+      const mins = Math.floor(stationRemainingSeconds / 60);
+      const secs = stationRemainingSeconds % 60;
+      const display = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      
+      const timerEl = document.getElementById('stationTimerDisplay');
+      const barEl = document.getElementById('stationTimerBar');
+      
+      timerEl.textContent = display;
+      const percent = stationTotalSeconds > 0 ? (stationRemainingSeconds / stationTotalSeconds) * 100 : 0;
+      barEl.style.width = `${percent}%`;
+
+      if (stationRemainingSeconds <= 30) {
+        timerEl.className = "text-5xl font-black font-mono text-rose-500 tracking-widest animate-pulse";
+        barEl.className = "h-2 rounded-full bg-rose-500 transition-all duration-1000";
+      } else if (stationRemainingSeconds <= 60) {
+        timerEl.className = "text-5xl font-black font-mono text-amber-400 tracking-widest";
+        barEl.className = "h-2 rounded-full bg-amber-400 transition-all duration-1000";
+      } else {
+        timerEl.className = "text-5xl font-black font-mono text-white tracking-widest";
+        barEl.className = "h-2 rounded-full bg-indigo-500 transition-all duration-1000";
+      }
+    }
+
+    function adjustScoreInput(delta) {
+      const input = document.getElementById('stationScoreInput');
+      const max = parseInt(input.max) || 100;
+      input.value = Math.max(0, Math.min(max, (parseInt(input.value) || 0) + delta));
+    }
+
+    function setStationScoreInput(val) {
+      const input = document.getElementById('stationScoreInput');
+      const max = parseInt(input.max) || 100;
+      input.value = Math.min(max, val);
+    }
+
+    async function handleSubmitStationScore() {
+      if (!currentRoomPin || !currentTeamId || !activeStation) return;
+      const score = parseInt(document.getElementById('stationScoreInput').value) || 0;
+
+      const res = await Swal.fire({
+        title: `ยืนยันส่งคะแนน +${score} แต้ม?`,
+        text: 'เมื่อยืนยันแล้ว ระบบจะบันทึกคะแนน ปลดล็อกฐาน และกลับสู่หน้ากระดานเกม',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'ยืนยันส่งคะแนน',
+        cancelButtonText: 'แก้ไข',
+        confirmButtonColor: '#10b981'
+      });
+
+      if (res.isConfirmed) {
+        try {
+          clearInterval(timerInterval);
+          Swal.fire({
+            title: 'กำลังบันทึกคะแนน...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+          });
+
+          await PhygitalDB.submitStationScore(currentRoomPin, currentTeamId, activeStation.id, score);
+          
+          confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+          playFanfare();
+
+          closeModal('stationMissionModal');
+          Swal.fire({
+            icon: 'success',
+            title: 'บันทึกคะแนนสำเร็จ!',
+            text: `คุณได้รับ +${score} คะแนนสำหรับฐานนี้`,
+            timer: 2000,
+            showConfirmButton: false
+          });
+
+        } catch (e) {
+          Swal.fire('เกิดข้อผิดพลาด', e.message, 'error');
+        }
+      }
+    }
+
+    // ================= LEADERBOARD & VICTORY MODALS =================
+    function openLeaderboardModal() {
+      if (!roomData?.teams) {
+        Swal.fire('ยังไม่มีข้อมูลกลุ่ม', '', 'info');
+        return;
+      }
+      const teams = roomData.teams;
+      const sortedTeams = Object.keys(teams).map(key => ({ ...teams[key], key })).sort((a, b) => b.score - a.score);
+
+      document.getElementById('leaderboardModalList').innerHTML = sortedTeams.map((t, idx) => {
+        let badge = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}`;
+        const isMe = t.key === currentTeamId;
+        return `
+          <div class="flex items-center justify-between p-3 rounded-2xl ${isMe ? 'bg-indigo-950/50 border border-indigo-500/60 shadow-md' : 'bg-slate-900/80 border border-slate-800'} text-xs">
+            <div class="flex items-center space-x-3">
+              <span class="font-bold w-5 text-center text-sm">${badge}</span>
+              <span class="text-xl">${t.avatar || '🦁'}</span>
+              <div>
+                <h4 class="font-bold text-white ${isMe ? 'text-indigo-300' : ''}">${t.name} ${isMe ? '(กลุ่มคุณ)' : ''}</h4>
+                <span class="text-[10px] text-slate-400">ช่อง ${t.current_tile || 0}</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="font-black text-amber-400 text-sm font-heading">${t.score || 0}</span>
+              <span class="block text-[9px] text-slate-400">แต้ม</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      openModal('leaderboardModal');
+    }
+
+    function renderVictoryModal(config, teams, myTeam) {
+      confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } });
+      playFanfare();
+
+      const sortedTeams = Object.keys(teams).map(key => ({ ...teams[key], key })).sort((a, b) => b.score - a.score);
+      const winner = sortedTeams[0] || {};
+      document.getElementById('victorySubtitle').textContent = `ขอแสดงความยินดีกับ "${winner.name}" ที่คว้าชัยชนะคะแนนรวมสูงสุด!`;
+
+      document.getElementById('victoryPodiumList').innerHTML = sortedTeams.map((t, idx) => {
+        let badge = idx === 0 ? '🥇 ชนะเลิศอันดับ 1' : idx === 1 ? '🥈 รองชนะเลิศอันดับ 1' : idx === 2 ? '🥉 รองชนะเลิศอันดับ 2' : `อันดับที่ ${idx + 1}`;
+        const isMe = t.key === currentTeamId;
+        return `
+          <div class="flex items-center justify-between p-3 rounded-2xl ${isMe ? 'bg-amber-950/40 border border-amber-500/50' : 'bg-slate-900/80 border border-slate-800'} text-xs">
+            <div class="flex items-center space-x-3">
+              <span class="text-2xl">${t.avatar || '🦁'}</span>
+              <div>
+                <h4 class="font-bold text-white ${isMe ? 'text-amber-300' : ''}">${t.name} ${isMe ? '(กลุ่มคุณ)' : ''}</h4>
+                <span class="text-[10px] text-amber-400 font-semibold">${badge}</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="font-black text-amber-400 text-base font-heading">${t.score || 0}</span>
+              <span class="block text-[9px] text-slate-400">แต้ม</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      openModal('victoryModal');
+    }
   </script>
 </body>
 </html>
