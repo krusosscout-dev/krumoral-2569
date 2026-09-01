@@ -1509,6 +1509,7 @@
       closeModal('stationMissionModal');
       closeModal('queueModal');
       playBeep(600, 0.15);
+      roomData = PhygitalDB.getLocalRoom(currentRoomPin) || roomData;
       handleRoomStateChange();
     }
 
@@ -1634,10 +1635,15 @@
           playFanfare();
 
           closeModal('stationMissionModal');
+
+          // Instantly refresh local state and control dashboard
+          roomData = PhygitalDB.getLocalRoom(currentRoomPin) || roomData;
+          handleRoomStateChange();
+
           Swal.fire({
             icon: 'success',
             title: 'บันทึกคะแนนสำเร็จ!',
-            text: `คุณได้รับ +${score} คะแนนสำหรับฐานนี้`,
+            text: `คุณได้รับ +${score} คะแนนสำหรับฐานนี้ พร้อมทอยเต๋าในรอบถัดไปแล้ว!`,
             timer: 2000,
             showConfirmButton: false
           });
