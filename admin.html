@@ -644,9 +644,9 @@
           <input type="file" id="modalStationImageFileInput" accept="image/*" class="hidden" onchange="handleStationImageFileSelected(event)">
           <input type="text" id="modalStationImageUrl" oninput="updateModalStationImagePreview(this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="เช่น https://... หรือ data:image/...">
           
-          <div id="modalStationImagePreviewBox" class="hidden mt-2 relative rounded-xl overflow-hidden border border-slate-700 bg-slate-900">
-            <img id="modalStationImagePreview" src="" alt="ภาพตัวอย่าง" class="w-full max-h-32 object-cover">
-            <button type="button" onclick="clearModalStationImage()" class="absolute top-1.5 right-1.5 p-1 rounded-full bg-slate-900/80 hover:bg-rose-600 text-white text-xs transition-all cursor-pointer">
+          <div id="modalStationImagePreviewBox" class="hidden mt-2 relative rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 p-1 flex items-center justify-center">
+            <img id="modalStationImagePreview" src="" alt="ภาพตัวอย่าง" class="max-w-full max-h-48 object-contain rounded-xl">
+            <button type="button" onclick="clearModalStationImage()" class="absolute top-2 right-2 p-1.5 rounded-full bg-slate-900/80 hover:bg-rose-600 text-white text-xs transition-all cursor-pointer shadow-md">
               <i data-lucide="x" class="w-3.5 h-3.5"></i>
             </button>
           </div>
@@ -1166,8 +1166,8 @@
             </div>
 
             ${st.image_url ? `
-              <div class="rounded-xl overflow-hidden border border-slate-700 bg-slate-950 max-h-28">
-                <img src="${st.image_url}" alt="ภาพกติกา" class="w-full h-28 object-cover cursor-pointer hover:opacity-90 transition-opacity" onclick="window.open('${st.image_url}', '_blank')">
+              <div class="rounded-xl overflow-hidden border border-slate-700 bg-slate-950 flex items-center justify-center p-1 max-h-36">
+                <img src="${st.image_url}" alt="ภาพกติกา" class="max-w-full max-h-32 object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity" onclick="window.open('${st.image_url}', '_blank')" title="🔍 คลิกดูภาพเต็ม">
               </div>
             ` : ''}
 

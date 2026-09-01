@@ -607,9 +607,9 @@
           <span id="stationMaxScoreBadge" class="text-base font-black text-amber-400 font-heading">100</span>
           <span class="block text-[8px] text-slate-400 font-semibold">คะแนนเต็ม</span>
         </div>
-      <!-- Station Image / Infographic (if available) -->
-      <div id="stationImageBox" class="hidden rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 shadow-inner">
-        <img id="stationImagePreview" src="" alt="ภาพกติกาฐาน" class="w-full max-h-40 object-cover cursor-pointer hover:opacity-90 transition-opacity" onclick="zoomStationImage(this.src)" title="คลิกเพื่อดูภาพขยาย">
+      <!-- Station Image / Infographic (if available - รองรับทุกอัตราส่วนภาพ แนวนอน/แนวตั้ง/จัตุรัส) -->
+      <div id="stationImageBox" class="hidden rounded-2xl overflow-hidden border border-slate-700 bg-slate-950/90 shadow-inner flex items-center justify-center p-1.5">
+        <img id="stationImagePreview" src="" alt="ภาพกติกาฐาน" class="max-w-full max-h-52 object-contain rounded-xl cursor-pointer hover:opacity-90 transition-opacity" onclick="zoomStationImage(this.src)" title="🔍 คลิกเพื่อดูภาพขยายเต็มจอ">
       </div>
 
       <!-- Description / Rules -->
@@ -1105,6 +1105,13 @@
 
       // Update Master Room Timer (40 Minutes or Admin-defined time limit)
       updateMasterRoomTimer(config);
+
+      // Check if entering via Station QR Code URL directly
+      const urlStationId = new URLSearchParams(window.location.search).get('station');
+      if (urlStationId && !window._stationCheckedOnce) {
+        window._stationCheckedOnce = true;
+        handleDirectStationQrEntry(urlStationId, myTeam);
+      }
 
       // Check Game State (Finished / Waiting / In Station / Rolling)
       if (config.game_status === 'finished') {
@@ -1827,19 +1834,27 @@
             playFanfare();
           }
 
-          // 2. Dynamic Station Assignment Logic (Guaranteed & Direct for Every Roll!)
+          // 2. Dynamic Station Assignment Logic (Uncompleted Stations Only - ห้ามเข้าซ้ำฐานที่ผ่านแล้ว)
           const assignRes = await PhygitalDB.assignVacantStation(currentRoomPin, currentTeamId);
           roomData = PhygitalDB.getLocalRoom(currentRoomPin) || roomData;
           const myTeam = roomData?.teams?.[currentTeamId] || {};
 
-          // 3. Immediately launch Station Mission Modal
+          // 3. Immediately launch Station Mission Modal or Notify
           if (assignRes && assignRes.success && assignRes.station) {
             confetti({ particleCount: 80, spread: 70, origin: { y: 0.5 } });
             playBeep(700, 0.3, 'sine');
             setupStationMissionModal(assignRes.station, myTeam);
             openModal('stationMissionModal');
             
-            if (moveRes.reachedFinish) {
+            if (assignRes.isNewCycle) {
+              Swal.fire({
+                title: `🏆 ปลดล็อกการหมุนเวียนรอบที่ ${assignRes.cycleNumber}!`,
+                text: `กลุ่มของคุณเล่นครบทุกฐานแล้ว และเริ่มเปิดให้สะสมแต้มวนรอบใหม่ได้อีกครั้ง!`,
+                icon: 'success',
+                timer: 2500,
+                showConfirmButton: false
+              });
+            } else if (moveRes.reachedFinish) {
               Swal.fire({
                 title: `🏆 เข้าเส้นชัยรอบที่ ${moveRes.lapsCompleted}! (+${moveRes.finishBonus} แต้ม)`,
                 text: `รับโบนัสสำเร็จ และเข้าสู่ภารกิจ "${assignRes.station.name}" ทันที!`,
@@ -1848,6 +1863,10 @@
                 showConfirmButton: false
               });
             }
+          } else if (assignRes && assignRes.reason === 'occupied') {
+            // Uncompleted stations in this cycle are currently occupied
+            openModal('queueModal');
+            watchForVacantStation();
           } else if (moveRes.reachedFinish) {
             Swal.fire({
               title: `🏆 เข้าเส้นชัยรอบที่ ${moveRes.lapsCompleted}! (+${moveRes.finishBonus} แต้ม)`,
@@ -1921,8 +1940,48 @@
           const myTeam = roomData?.teams?.[currentTeamId] || {};
           setupStationMissionModal(assignRes.station, myTeam);
           openModal('stationMissionModal');
+        } else if (assignRes.reason === 'all_stations_completed') {
+          clearInterval(interval);
+          closeModal('queueModal');
         }
       }, 3000);
+    }
+
+    // Handle Direct Station QR Code Entry (ห้ามเข้าซ้ำฐานที่เคยส่งคะแนนแล้ว)
+    async function handleDirectStationQrEntry(stationId, myTeam) {
+      if (!currentRoomPin || !currentTeamId) return;
+      try {
+        const res = await PhygitalDB.checkAndEnterStation(currentRoomPin, currentTeamId, stationId);
+        if (!res.success) {
+          if (res.alreadyCompleted) {
+            Swal.fire({
+              title: '🚫 เคยผ่านฐานนี้แล้ว',
+              text: res.message,
+              icon: 'warning',
+              confirmButtonText: 'ไปทำภารกิจฐานอื่น',
+              confirmButtonColor: '#6366f1'
+            });
+          } else if (res.isOccupied) {
+            Swal.fire({
+              title: '🔒 ฐานกิจกรรมไม่ว่าง',
+              text: res.message,
+              icon: 'info',
+              confirmButtonText: 'ตกลง',
+              confirmButtonColor: '#6366f1'
+            });
+          } else {
+            Swal.fire('ข้อผิดพลาด', res.message || 'ไม่สามารถเข้าฐานได้', 'error');
+          }
+          return;
+        }
+
+        // Success: Launch mission
+        confetti({ particleCount: 80, spread: 70 });
+        setupStationMissionModal(res.station, myTeam);
+        openModal('stationMissionModal');
+      } catch (e) {
+        console.error("Direct Station QR error:", e);
+      }
     }
 
     // ================= STATION MISSION MODAL =================
