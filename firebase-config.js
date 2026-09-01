@@ -1,12 +1,13 @@
 /**
  * Active Learning: Phygital Snakes and Ladders
  * Firebase Configuration & Database Manager
+ * เพจตามติดชีวิต KruSos Edition
  */
 
 const DEFAULT_FIREBASE_CONFIG_KEY = 'PHYGITAL_FIREBASE_CONFIG';
 const DEFAULT_SAVED_ROOM_KEY = 'PHYGITAL_CURRENT_ROOM_PIN';
 
-// Default Demo Configuration (ครูสามารถแก้ไขหรือใส่ Config ของตนเองผ่านหน้าเว็บได้)
+// Default Demo Configuration
 const SAMPLE_FIREBASE_CONFIG = {
   apiKey: "AIzaSyDemoKeyExampleOnlyForPreview123",
   authDomain: "phygital-snakes-ladders.firebaseapp.com",
@@ -74,8 +75,8 @@ const SAMPLE_ACTIVE_LEARNING_STATIONS = [
   },
   {
     id: "station_2",
-    name: "ฐานที่ 2: ปริศนาวิทยาศาสตร์แสนกล",
-    description: "ทำการทดลองสั้นและตอบคำถามปรากฏการณ์วิทยาศาสตร์ให้ถูกต้อง",
+    name: "ฐานที่ 2: ตอบคำถามวิทย์ปริศนา",
+    description: "สืบค้นและตอบคำถามการทดลองทางวิทยาศาสตร์ 3 ข้อ พร้อมอธิบายเหตุผล",
     timer_minutes: 4,
     max_score: 100,
     is_vacant: true,
@@ -85,30 +86,52 @@ const SAMPLE_ACTIVE_LEARNING_STATIONS = [
   },
   {
     id: "station_3",
-    name: "ฐานที่ 3: ต่อคำศัพท์ภาษาอังกฤษ",
-    description: "ต่อบล็อกหรือเขียนคำศัพท์ภาษาอังกฤษตามหมวดหมู่ให้ได้มากที่สุดอย่างน้อย 10 คำ",
+    name: "ฐานที่ 3: สะกดคำภาษาไทยพาสนุก",
+    description: "เรียงการ์ดคำศัพท์และเขียนสะกดคำภาษาไทยให้ถูกต้องครบ 10 คำ",
     timer_minutes: 3,
     max_score: 100,
     is_vacant: true,
     current_team_id: null,
     occupied_at: null,
-    icon: "🔤"
+    icon: "📖"
   },
   {
     id: "station_4",
-    name: "ฐานที่ 4: นักสืบประวัติศาสตร์และท้องถิ่น",
-    description: "เรียงลำดับเหตุการณ์สำคัญทางประวัติศาสตร์และภูมิปัญญาไทยให้ถูกต้อง",
+    name: "ฐานที่ 4: ใบ้คำภาษาอังกฤษ (Charades)",
+    description: "ส่งตัวแทน 1 คนแสดงท่าทางใบ้คำศัพท์ภาษาอังกฤษ ให้เพื่อนในกลุ่มทายถูก 5 คำ",
     timer_minutes: 3,
     max_score: 100,
     is_vacant: true,
     current_team_id: null,
     occupied_at: null,
-    icon: "📜"
+    icon: "🗣️"
   },
   {
     id: "station_5",
-    name: "ฐานที่ 5: ท้าทายโค้ดดิ้ง Unplugged",
-    description: "เขียนชุดคำสั่งการ์ดลูกศร พาน้องหุ่นยนต์เดินผ่านอุปสรรคไปยังเป้าหมาย",
+    name: "ฐานที่ 5: แผนที่ภูมิศาสตร์และประวัติศาสตร์",
+    description: "ปักหมุดตำแหน่งสถานที่สำคัญทางประวัติศาสตร์และภูมิศาสตร์ลงบนแผนที่",
+    timer_minutes: 4,
+    max_score: 100,
+    is_vacant: true,
+    current_team_id: null,
+    occupied_at: null,
+    icon: "🗺️"
+  },
+  {
+    id: "station_6",
+    name: "ฐานที่ 6: ต่อเลโก้จำลองโครงสร้างวิศวกรรม",
+    description: "ออกแบบและต่อตัวต่อโครงสร้างสะพานหรือหอคอยให้แข็งแรงและมั่นคง",
+    timer_minutes: 5,
+    max_score: 100,
+    is_vacant: true,
+    current_team_id: null,
+    occupied_at: null,
+    icon: "🧱"
+  },
+  {
+    id: "station_7",
+    name: "ฐานที่ 7: ภารกิจเขียนโค้ด Unplugged Coding",
+    description: "วางการ์ดคำสั่งลูกศรนำทางพาหุ่นยนต์เดินทางผ่านเขาวงกตให้ถึงเป้าหมาย",
     timer_minutes: 4,
     max_score: 100,
     is_vacant: true,
@@ -117,31 +140,9 @@ const SAMPLE_ACTIVE_LEARNING_STATIONS = [
     icon: "🤖"
   },
   {
-    id: "station_6",
-    name: "ฐานที่ 6: ศิลปะสร้างสรรค์และจินตนาการ",
-    description: "ร่วมกันวาดภาพต่อเติมตามคีย์เวิร์ดที่ครูกำหนดและอธิบายความหมาย",
-    timer_minutes: 3,
-    max_score: 100,
-    is_vacant: true,
-    current_team_id: null,
-    occupied_at: null,
-    icon: "🎨"
-  },
-  {
-    id: "station_7",
-    name: "ฐานที่ 7: ขยับกายฟิตแอนด์เฟิร์ม",
-    description: "ทำกิจกรรมเคลื่อนไหวร่างกาย กระโดดเชือกหรือต่อตัวสามัคคีตามโจทย์",
-    timer_minutes: 2,
-    max_score: 100,
-    is_vacant: true,
-    current_team_id: null,
-    occupied_at: null,
-    icon: "🏃"
-  },
-  {
     id: "station_8",
-    name: "ฐานที่ 8: จิตอาสาพิทักษ์สิ่งแวดล้อม",
-    description: "แยกขยะและตอบคำถามเกี่ยวกับการอนุรักษ์พลังงานในชีวิตประจำวัน",
+    name: "ฐานที่ 8: คัดแยกขยะรักษ์โลก (Green Earth)",
+    description: "คัดแยกประเภทขยะลงถังขยะ 4 สีให้ถูกต้องและตอบคำถามเรื่องสิ่งแวดล้อม",
     timer_minutes: 3,
     max_score: 100,
     is_vacant: true,
@@ -173,7 +174,7 @@ const SAMPLE_ACTIVE_LEARNING_STATIONS = [
   }
 ];
 
-// รูปภาพกระดานบันไดงูสำเร็จรูป (Curated Free Educational Boards)
+// รูปภาพกระดานบันไดงูสำเร็จรูป
 const SAMPLE_BOARD_PRESETS = [
   {
     name: "กระดานแฟนตาซีเวทมนตร์ (Fantasy World)",
@@ -301,14 +302,16 @@ class PhygitalFirebaseManager {
     const config = customConfig || this.getStoredConfig() || SAMPLE_FIREBASE_CONFIG;
 
     try {
-      if (firebase.apps.length > 0) {
-        this.app = firebase.apps[0];
-      } else if (config) {
-        this.app = firebase.initializeApp(config);
-      }
-      if (this.app) {
-        this.db = firebase.database();
-        this.connected = true;
+      if (typeof firebase !== 'undefined' && firebase.apps) {
+        if (firebase.apps.length > 0) {
+          this.app = firebase.apps[0];
+        } else if (config) {
+          this.app = firebase.initializeApp(config);
+        }
+        if (this.app && typeof firebase.database === 'function') {
+          this.db = firebase.database();
+          this.connected = true;
+        }
       }
       return { success: true, db: this.db, config };
     } catch (error) {
@@ -348,7 +351,6 @@ class PhygitalFirebaseManager {
 
   // สร้างห้องใหม่ (กำหนดจำนวนกลุ่ม 2-12 และจำนวนฐาน 2-12 ได้อย่างยืดหยุ่น)
   async createRoom(roomPin, roomData) {
-    // แปลง Array ของ Stations ให้เป็น Object Key (ตามจำนวนฐานที่ระบุ)
     const stationsObj = {};
     let stationsList = roomData.stations || SAMPLE_ACTIVE_LEARNING_STATIONS;
     if (roomData.total_stations && parseInt(roomData.total_stations) > 0) {
@@ -371,7 +373,6 @@ class PhygitalFirebaseManager {
       };
     });
 
-    // กำหนดกลุ่มตามจำนวนที่เลือก (เช่น 2 - 12 กลุ่ม)
     const totalTeamsCount = parseInt(roomData.total_teams) || 6;
     const teamsObj = roomData.teams || generateDefaultTeams(totalTeamsCount);
 
@@ -445,7 +446,6 @@ class PhygitalFirebaseManager {
             this.saveLocalRoom(roomPin, val);
             callback(val);
           } else if (!localData) {
-            // สร้างอัตโนมัติหากเป็น PIN 999999
             if (roomPin === '999999' || roomPin === '123456') {
               this.createDemoRoomIfNotExist(roomPin).then(d => {
                 if (d) callback(d);
@@ -475,14 +475,11 @@ class PhygitalFirebaseManager {
 
     return null;
   }
-    this.listeners.push({ ref: roomRef, listener });
-    return listener;
-  }
 
   // ยกเลิก Listeners ทั้งหมด
   detachAllListeners() {
     this.listeners.forEach(({ ref, listener }) => {
-      ref.off("value", listener);
+      try { ref.off("value", listener); } catch(e) {}
     });
     this.listeners = [];
   }
@@ -490,32 +487,44 @@ class PhygitalFirebaseManager {
   // เพิ่ม Activity Log
   async addLog(roomPin, logData) {
     if (!this.db) return;
-    const logsRef = this.getLogsRef(roomPin);
-    const newLogRef = logsRef.push();
-    return newLogRef.set({
-      ...logData,
-      timestamp: firebase.database.ServerValue.TIMESTAMP
-    });
+    try {
+      const logsRef = this.getLogsRef(roomPin);
+      const newLogRef = logsRef.push();
+      return newLogRef.set({
+        ...logData,
+        timestamp: Date.now()
+      });
+    } catch(e) {}
   }
 
   // อัปเดตสถานะเกม (waiting / playing / finished)
   async updateGameStatus(roomPin, status, winnerTeamId = null) {
-    const updateObj = {
-      'config/game_status': status,
-      'config/updated_at': firebase.database.ServerValue.TIMESTAMP
-    };
+    const local = this.getLocalRoom(roomPin) || {};
+    if (!local.config) local.config = {};
+    local.config.game_status = status;
+    local.config.updated_at = Date.now();
     if (winnerTeamId !== undefined) {
-      updateObj['config/winner_team_id'] = winnerTeamId;
+      local.config.winner_team_id = winnerTeamId;
     }
-    return this.getRoomRef(roomPin).update(updateObj);
+    this.saveLocalRoom(roomPin, local);
+
+    if (this.db) {
+      try {
+        const updateObj = {
+          'config/game_status': status,
+          'config/updated_at': Date.now()
+        };
+        if (winnerTeamId !== undefined) {
+          updateObj['config/winner_team_id'] = winnerTeamId;
+        }
+        await this.getRoomRef(roomPin).update(updateObj);
+      } catch(e) {}
+    }
   }
 
   // รีเซ็ตเกมใหม่ (เคลียร์คะแนน, ตำแหน่ง, ประวัติฐาน)
   async resetGame(roomPin) {
-    if (!this.db) return;
-    const roomRef = this.getRoomRef(roomPin);
-    const snapshot = await roomRef.once('value');
-    const data = snapshot.val();
+    const data = this.getLocalRoom(roomPin);
     if (!data) return;
 
     // รีเซ็ตทีม
@@ -546,46 +555,73 @@ class PhygitalFirebaseManager {
       };
     });
 
-    await roomRef.update({
-      'config/game_status': 'waiting',
-      'config/winner_team_id': null,
-      'config/updated_at': firebase.database.ServerValue.TIMESTAMP,
-      teams: resetTeams,
-      stations: resetStations
-    });
+    data.config.game_status = 'playing';
+    data.config.winner_team_id = null;
+    data.config.updated_at = Date.now();
+    data.teams = resetTeams;
+    data.stations = resetStations;
+    this.saveLocalRoom(roomPin, data);
 
-    await this.addLog(roomPin, {
-      team_id: "system",
-      type: "system",
-      message: "🔄 รีเซ็ตข้อมูลเกมและคะแนนทั้งหมด พร้อมเริ่มรอบใหม่!"
-    });
+    if (this.db) {
+      try {
+        const roomRef = this.getRoomRef(roomPin);
+        await roomRef.update({
+          'config/game_status': 'playing',
+          'config/winner_team_id': null,
+          'config/updated_at': Date.now(),
+          teams: resetTeams,
+          stations: resetStations
+        });
+      } catch(e) {}
+    }
   }
 
   // ปลดล็อกฐาน (Force Vacant / Reset Lock)
   async forceUnlockStation(roomPin, stationId) {
-    const updates = {};
-    updates[`stations/${stationId}/is_vacant`] = true;
-    updates[`stations/${stationId}/current_team_id`] = null;
-    updates[`stations/${stationId}/occupied_at`] = null;
-    return this.getRoomRef(roomPin).update(updates);
+    const data = this.getLocalRoom(roomPin);
+    if (data?.stations?.[stationId]) {
+      data.stations[stationId].is_vacant = true;
+      data.stations[stationId].current_team_id = null;
+      data.stations[stationId].occupied_at = null;
+      this.saveLocalRoom(roomPin, data);
+    }
+
+    if (this.db) {
+      try {
+        const updates = {};
+        updates[`stations/${stationId}/is_vacant`] = true;
+        updates[`stations/${stationId}/current_team_id`] = null;
+        updates[`stations/${stationId}/occupied_at`] = null;
+        await this.getRoomRef(roomPin).update(updates);
+      } catch(e) {}
+    }
   }
 
-  // ปรับคะแนนหรือช่องเดินของทีมโดยครูผู้สอน (Manual Override)
+  // ปรับคะแนนหรือข้อมูลทีม
   async updateTeamData(roomPin, teamId, updateFields) {
-    const updates = {};
-    Object.keys(updateFields).forEach(k => {
-      updates[`teams/${teamId}/${k}`] = updateFields[k];
-    });
-    return this.getRoomRef(roomPin).update(updates);
+    const data = this.getLocalRoom(roomPin);
+    if (data?.teams?.[teamId]) {
+      Object.keys(updateFields).forEach(k => {
+        data.teams[teamId][k] = updateFields[k];
+      });
+      this.saveLocalRoom(roomPin, data);
+    }
+
+    if (this.db) {
+      try {
+        const updates = {};
+        Object.keys(updateFields).forEach(k => {
+          updates[`teams/${teamId}/${k}`] = updateFields[k];
+        });
+        await this.getRoomRef(roomPin).update(updates);
+      } catch(e) {}
+    }
   }
 
-  // ทอยลูกเต๋าและเดินตัวหมาก (สำหรับนักเรียน)
+  // ทอยลูกเต๋าและเดินตัวหมาก
   async rollDiceAndMove(roomPin, teamId, diceValue) {
-    if (!this.db) throw new Error("Firebase ยังไม่ได้เชื่อมต่อ");
-    const roomRef = this.getRoomRef(roomPin);
-    const snap = await roomRef.once('value');
-    const data = snap.val();
-    if (!data) throw new Error("ไม่พบห้องเกม");
+    let data = this.getLocalRoom(roomPin);
+    if (!data) data = await this.createDemoRoomIfNotExist(roomPin);
 
     const config = data.config || {};
     const team = data.teams?.[teamId];
@@ -596,40 +632,44 @@ class PhygitalFirebaseManager {
     const newTile = Math.min(totalTiles, oldTile + diceValue);
     const history = team.dice_history ? [...team.dice_history, diceValue] : [diceValue];
 
-    const updates = {};
-    updates[`teams/${teamId}/current_tile`] = newTile;
-    updates[`teams/${teamId}/dice_history`] = history;
+    team.current_tile = newTile;
+    team.dice_history = history;
 
     let reachedFinish = false;
     let finishBonus = 0;
 
-    // ตรวจสอบว่าเข้าเส้นชัยหรือไม่
     if (newTile >= totalTiles && !team.is_finished) {
       reachedFinish = true;
       finishBonus = parseInt(config.finish_bonus) || 500;
-      const newScore = (team.score || 0) + finishBonus;
-      
-      updates[`teams/${teamId}/score`] = newScore;
-      updates[`teams/${teamId}/is_finished`] = true;
-      updates[`teams/${teamId}/finish_time`] = firebase.database.ServerValue.TIMESTAMP;
+      team.score = (team.score || 0) + finishBonus;
+      team.is_finished = true;
+      team.finish_time = Date.now();
 
-      // ถ้ายังไม่มีผู้ชนะ ให้ทีมนี้เป็นผู้ชนะและสั่งจบเกม
       if (!config.winner_team_id) {
-        updates['config/game_status'] = 'finished';
-        updates['config/winner_team_id'] = teamId;
+        config.game_status = 'finished';
+        config.winner_team_id = teamId;
       }
     }
 
-    await roomRef.update(updates);
+    this.saveLocalRoom(roomPin, data);
 
-    // บันทึก Activity Log
-    await this.addLog(roomPin, {
-      team_id: teamId,
-      type: reachedFinish ? 'finish' : 'dice',
-      message: reachedFinish
-        ? `🏁 ${team.name} ทอยได้ ${diceValue} ก้าวสู่เส้นชัยช่อง ${newTile}! รับโบนัส +${finishBonus} คะแนน!`
-        : `🎲 ${team.name} ทอยได้ ${diceValue} แต้ม เดินจากช่อง ${oldTile} ไปยังช่อง ${newTile}`
-    });
+    if (this.db) {
+      try {
+        const updates = {};
+        updates[`teams/${teamId}/current_tile`] = newTile;
+        updates[`teams/${teamId}/dice_history`] = history;
+        if (reachedFinish) {
+          updates[`teams/${teamId}/score`] = team.score;
+          updates[`teams/${teamId}/is_finished`] = true;
+          updates[`teams/${teamId}/finish_time`] = team.finish_time;
+          if (config.winner_team_id === teamId) {
+            updates['config/game_status'] = 'finished';
+            updates['config/winner_team_id'] = teamId;
+          }
+        }
+        await this.getRoomRef(roomPin).update(updates);
+      } catch(e) {}
+    }
 
     return {
       newTile,
@@ -638,13 +678,10 @@ class PhygitalFirebaseManager {
     };
   }
 
-  // ระบบจัดสรรฐานว่างอัจฉริยะ (Dynamic Station Assignment)
+  // จัดสรรฐานกิจกรรมว่าง
   async assignVacantStation(roomPin, teamId) {
-    if (!this.db) throw new Error("Firebase ยังไม่ได้เชื่อมต่อ");
-    const roomRef = this.getRoomRef(roomPin);
-    const snap = await roomRef.once('value');
-    const data = snap.val();
-    if (!data) throw new Error("ไม่พบห้องเกม");
+    let data = this.getLocalRoom(roomPin);
+    if (!data) data = await this.createDemoRoomIfNotExist(roomPin);
 
     const team = data.teams?.[teamId];
     if (!team) throw new Error("ไม่พบข้อมูลกลุ่ม");
@@ -652,13 +689,11 @@ class PhygitalFirebaseManager {
     const stations = data.stations || {};
     const completed = team.completed_stations || {};
 
-    // กรองหาฐานที่: 1) ว่างอยู่ (is_vacant === true) และ 2) กลุ่มนี้ยังไม่เคยเล่น (!completed[id])
     const availableStations = Object.values(stations).filter(st => {
       return st.is_vacant === true && !completed[st.id];
     });
 
     if (availableStations.length === 0) {
-      // ตรวจสอบว่าเล่นครบทุกฐานแล้วหรือไม่
       const totalStationsCount = Object.keys(stations).length;
       const completedCount = Object.keys(completed).length;
       
@@ -677,26 +712,28 @@ class PhygitalFirebaseManager {
       }
     }
 
-    // สุ่มเลือก 1 ฐานจากฐานที่ว่าง
     const chosenStation = availableStations[Math.floor(Math.random() * availableStations.length)];
 
-    // Atomic Lock ฐานใน Firebase
-    const updates = {};
-    updates[`stations/${chosenStation.id}/is_vacant`] = false;
-    updates[`stations/${chosenStation.id}/current_team_id`] = teamId;
-    updates[`stations/${chosenStation.id}/occupied_at`] = firebase.database.ServerValue.TIMESTAMP;
+    chosenStation.is_vacant = false;
+    chosenStation.current_team_id = teamId;
+    chosenStation.occupied_at = Date.now();
 
-    updates[`teams/${teamId}/current_station_id`] = chosenStation.id;
-    updates[`teams/${teamId}/station_start_time`] = firebase.database.ServerValue.TIMESTAMP;
+    team.current_station_id = chosenStation.id;
+    team.station_start_time = Date.now();
 
-    await roomRef.update(updates);
+    this.saveLocalRoom(roomPin, data);
 
-    // บันทึก Log การเข้าฐาน
-    await this.addLog(roomPin, {
-      team_id: teamId,
-      type: 'station_enter',
-      message: `🎯 ${team.name} เข้าสู่ "${chosenStation.name}"`
-    });
+    if (this.db) {
+      try {
+        const updates = {};
+        updates[`stations/${chosenStation.id}/is_vacant`] = false;
+        updates[`stations/${chosenStation.id}/current_team_id`] = teamId;
+        updates[`stations/${chosenStation.id}/occupied_at`] = Date.now();
+        updates[`teams/${teamId}/current_station_id`] = chosenStation.id;
+        updates[`teams/${teamId}/station_start_time`] = Date.now();
+        await this.getRoomRef(roomPin).update(updates);
+      } catch(e) {}
+    }
 
     return {
       success: true,
@@ -704,13 +741,10 @@ class PhygitalFirebaseManager {
     };
   }
 
-  // ส่งผลคะแนนฐานกิจกรรม ปลดล็อกฐาน และกลับสู่หน้าทอยเต๋า
+  // ส่งคะแนนและปลดล็อกฐาน
   async submitStationScore(roomPin, teamId, stationId, score) {
-    if (!this.db) throw new Error("Firebase ยังไม่ได้เชื่อมต่อ");
-    const roomRef = this.getRoomRef(roomPin);
-    const snap = await roomRef.once('value');
-    const data = snap.val();
-    if (!data) throw new Error("ไม่พบห้องเกม");
+    let data = this.getLocalRoom(roomPin);
+    if (!data) data = await this.createDemoRoomIfNotExist(roomPin);
 
     const team = data.teams?.[teamId];
     const station = data.stations?.[stationId];
@@ -719,31 +753,43 @@ class PhygitalFirebaseManager {
     const earnedScore = Math.max(0, parseInt(score) || 0);
     const newTotalScore = (team.score || 0) + earnedScore;
 
-    const updates = {};
-    // อัปเดตคะแนนและบันทึกฐานที่ทำสำเร็จ
-    updates[`teams/${teamId}/score`] = newTotalScore;
-    updates[`teams/${teamId}/completed_stations/${stationId}`] = {
+    team.score = newTotalScore;
+    if (!team.completed_stations) team.completed_stations = {};
+    team.completed_stations[stationId] = {
       score: earnedScore,
-      completed_at: firebase.database.ServerValue.TIMESTAMP
+      completed_at: Date.now()
     };
-    updates[`teams/${teamId}/current_station_id`] = null;
-    updates[`teams/${teamId}/station_start_time`] = null;
+    team.current_station_id = null;
+    team.station_start_time = null;
 
-    // ปลดล็อกฐานให้ว่าง
     if (station) {
-      updates[`stations/${stationId}/is_vacant`] = true;
-      updates[`stations/${stationId}/current_team_id`] = null;
-      updates[`stations/${stationId}/occupied_at`] = null;
+      station.is_vacant = true;
+      station.current_team_id = null;
+      station.occupied_at = null;
     }
 
-    await roomRef.update(updates);
+    this.saveLocalRoom(roomPin, data);
 
-    // บันทึก Log การบันทึกคะแนน
-    await this.addLog(roomPin, {
-      team_id: teamId,
-      type: 'score',
-      message: `⭐ ${team.name} ทำกิจกรรม "${station?.name || stationId}" ได้รับ +${earnedScore} คะแนน (รวม ${newTotalScore} แต้ม)`
-    });
+    if (this.db) {
+      try {
+        const updates = {};
+        updates[`teams/${teamId}/score`] = newTotalScore;
+        updates[`teams/${teamId}/completed_stations/${stationId}`] = {
+          score: earnedScore,
+          completed_at: Date.now()
+        };
+        updates[`teams/${teamId}/current_station_id`] = null;
+        updates[`teams/${teamId}/station_start_time`] = null;
+
+        if (station) {
+          updates[`stations/${stationId}/is_vacant`] = true;
+          updates[`stations/${stationId}/current_team_id`] = null;
+          updates[`stations/${stationId}/occupied_at`] = null;
+        }
+
+        await this.getRoomRef(roomPin).update(updates);
+      } catch(e) {}
+    }
 
     return {
       success: true,
