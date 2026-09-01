@@ -174,59 +174,115 @@ const SAMPLE_ACTIVE_LEARNING_STATIONS = [
   }
 ];
 
-// รูปภาพกระดานบันไดงูสำเร็จรูป
+// รูปภาพกระดานบันไดงูสำเร็จรูป (ระบบสร้างช่องเดิน ตัวเลข และบันได/งูให้อัตโนมัติ)
 const SAMPLE_BOARD_PRESETS = [
   {
-    name: "🏴‍☠️ ล่าขุมทรัพย์ราชาโจรสลัด (1-100 ช่อง)",
-    url: "pirate_board_100.jpg",
-    tiles: 100,
-    grid_cols: 10,
+    name: "🏰 ปราสาทแฟนตาซีเวทมนตร์ (40 ช่อง)",
+    url: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1400&q=80",
+    tiles: 40,
+    grid_cols: 8,
     grid_direction: "serpentine_bottom_lr",
-    tile_display_mode: "hide_numbers",
-    padding_x: 12.5,
-    padding_y: 11.5,
+    tile_display_mode: "show_all",
+    padding_x: 7,
+    padding_y: 9,
     snakes_ladders: {
-      "4": { to: 14, type: "ladder", message: "🧭 เจอเข็มทิศวิเศษ! แล่นเรือลัดไปช่อง 14" },
-      "28": { to: 84, type: "ladder", message: "🌊 เจอกระแสน้ำอุ่นนำทาง! ลอยลำขึ้นไปช่อง 84" },
-      "51": { to: 67, type: "ladder", message: "🗺️ แย่งชิ้นส่วนแผนที่สำเร็จ! รุดหน้าไปช่อง 67" },
-      "72": { to: 91, type: "ladder", message: "🧜‍♀️ นางเงือกช่วยนำทาง! แล่นเรือขึ้นไปช่อง 91" },
-      "16": { to: 6, type: "snake", message: "🍺 ลูกเรือเมาเหล้ารัม! ถอยหลังกลับไปช่อง 6" },
-      "48": { to: 26, type: "snake", message: "🪨 เรือชนหินโสโครก! ถอยกลับไปซ่อมเรือที่ช่อง 26" },
-      "62": { to: 19, type: "snake", message: "🐙 สัตว์ประหลาดคราเคนโจมตี! โดนซัดถอยไปช่อง 19" },
-      "88": { to: 24, type: "snake", message: "🌀 พายุหมุน Whirlpool! โดนดูดถอยไปช่อง 24" },
-      "95": { to: 75, type: "snake", message: "⚔️ เรือรบหลวงลาดตระเวนสกัดจับ! ถอยไปช่อง 75" },
-      "99": { to: 78, type: "snake", message: "💀 กับดักวิหารต้องสาป! ถอยไปตั้งหลักช่อง 78" }
+      "5": { to: 18, type: "ladder", message: "🧗‍♂️ ขึ้นบันไดเวทมนตร์! ลัดไปช่อง 18" },
+      "14": { to: 32, type: "ladder", message: "🧗‍♂️ เจอประตูมิติ! วาร์ปไปช่อง 32" },
+      "23": { to: 37, type: "ladder", message: "🧗‍♂️ ลิฟต์ปราสาทพาเหาะ! ลอยไปช่อง 37" },
+      "17": { to: 4, type: "snake", message: "🐍 ตกบ่วงงูยักษ์! รูดลงไปช่อง 4" },
+      "28": { to: 11, type: "snake", message: "🐍 กับดักห้องใต้ดิน! ถอยไปช่อง 11" },
+      "38": { to: 19, type: "snake", message: "🐍 มังกรพ่นลมหมุน! ปลิวกลับไปช่อง 19" }
     }
   },
   {
-    name: "กระดานแฟนตาซีเวทมนตร์ (Fantasy World)",
-    url: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
-    tiles: 40,
-    grid_cols: 8,
+    name: "🌌 กาแล็กซีอวกาศพิศวง (50 ช่อง)",
+    url: "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1400&q=80",
+    tiles: 50,
+    grid_cols: 10,
     grid_direction: "serpentine_bottom_lr",
     tile_display_mode: "show_all",
     padding_x: 7,
-    padding_y: 9
+    padding_y: 9,
+    snakes_ladders: {
+      "7": { to: 22, type: "ladder", message: "🚀 อุโมงค์รูหนอน! วาร์ปไปช่อง 22" },
+      "19": { to: 38, type: "ladder", message: "🚀 ไอพ่นความเร็วแสง! ทะยานไปช่อง 38" },
+      "30": { to: 46, type: "ladder", message: "🚀 ยานแม่นำทาง! ลอยลำไปช่อง 46" },
+      "24": { to: 9, type: "snake", message: "🛸 หลุมดำดูดกลืน! โดนดูดกลับไปช่อง 9" },
+      "36": { to: 15, type: "snake", message: "🛸 ฝนดาวตกสกัด! ถอยไปตั้งหลักช่อง 15" },
+      "48": { to: 26, type: "snake", message: "🛸 พายุสุริยะพัดกระหน่ำ! ถอยไปช่อง 26" }
+    }
   },
   {
-    name: "กระดานผจญภัยอวกาศ (Cosmic Galaxy)",
-    url: "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1200&q=80",
-    tiles: 40,
-    grid_cols: 8,
-    grid_direction: "serpentine_bottom_lr",
-    tile_display_mode: "show_all",
-    padding_x: 7,
-    padding_y: 9
-  },
-  {
-    name: "กระดานป่ามหาสนุก (Jungle Adventure)",
-    url: "https://images.unsplash.com/photo-1511497584788-87676104235f?auto=format&fit=crop&w=1200&q=80",
+    name: "🌴 ผจญภัยป่าดึกดำบรรพ์ (36 ช่อง)",
+    url: "https://images.unsplash.com/photo-1511497584788-87676104235f?auto=format&fit=crop&w=1400&q=80",
     tiles: 36,
     grid_cols: 6,
     grid_direction: "serpentine_bottom_lr",
     tile_display_mode: "show_all",
     padding_x: 7,
-    padding_y: 9
+    padding_y: 9,
+    snakes_ladders: {
+      "4": { to: 16, type: "ladder", message: "🧗‍♂️ ปีนเถาวัลย์ยักษ์! ไต่ขึ้นไปช่อง 16" },
+      "15": { to: 28, type: "ladder", message: "🧗‍♂️ เจอทางลับโบราณ! ลัดไปช่อง 28" },
+      "21": { to: 34, type: "ladder", message: "🧗‍♂️ นกยักษ์โฉบพาบิน! เหินไปช่อง 34" },
+      "18": { to: 6, type: "snake", message: "🐍 งูเหลือมยักษ์รัด! ถอยหลังกลับช่อง 6" },
+      "26": { to: 10, type: "snake", message: "🐍 ตกบึงโคลนดูด! สไลด์ลงช่อง 10" },
+      "33": { to: 19, type: "snake", message: "🐍 ไดโนเสาร์ไล่กวด! วิ่งหนีถอยไปช่อง 19" }
+    }
+  },
+  {
+    name: "🌊 ใต้ท้องทะเลลึกแอตแลนติส (40 ช่อง)",
+    url: "https://images.unsplash.com/photo-1682687220063-4742bd7fd538?auto=format&fit=crop&w=1400&q=80",
+    tiles: 40,
+    grid_cols: 8,
+    grid_direction: "serpentine_bottom_lr",
+    tile_display_mode: "show_all",
+    padding_x: 7,
+    padding_y: 9,
+    snakes_ladders: {
+      "6": { to: 19, type: "ladder", message: "🌊 กระแสน้ำอุ่นผลักดัน! ลอยลำไปช่อง 19" },
+      "15": { to: 31, type: "ladder", message: "🧜‍♀️ นางเงือกช่วยว่ายน้ำ! พาลัดไปช่อง 31" },
+      "22": { to: 38, type: "ladder", message: "🐬 โลมาพาเหาะข้ามคลื่น! วาร์ปไปช่อง 38" },
+      "18": { to: 5, type: "snake", message: "🐙 หมึกยักษ์พ่นหมึกดำ! หลงทางถอยไปช่อง 5" },
+      "27": { to: 12, type: "snake", message: "🌀 วังน้ำวนดูดดิ่ง! หมุนถอยลงไปช่อง 12" },
+      "37": { to: 20, type: "snake", message: "🦈 ฉลามขาวไล่ล่า! หนีถอยกลับไปช่อง 20" }
+    }
+  },
+  {
+    name: "🏙️ เมืองไซเบอร์อนาคต (40 ช่อง)",
+    url: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1400&q=80",
+    tiles: 40,
+    grid_cols: 8,
+    grid_direction: "serpentine_bottom_lr",
+    tile_display_mode: "show_all",
+    padding_x: 7,
+    padding_y: 9,
+    snakes_ladders: {
+      "3": { to: 17, type: "ladder", message: "⚡ เครือข่ายไฮเปอร์ลูป! พุ่งทะยานไปช่อง 17" },
+      "13": { to: 30, type: "ladder", message: "⚡ สัญญาณควอนตัมบูสต์! วาร์ปไปช่อง 30" },
+      "24": { to: 38, type: "ladder", message: "⚡ แท็กซี่โดรนบินด่วน! รุดหน้าไปช่อง 38" },
+      "16": { to: 4, type: "snake", message: "⚠️ ไวรัสระบบโจมตี! โดนรีเซ็ตถอยไปช่อง 4" },
+      "29": { to: 11, type: "snake", message: "⚠️ ไฟฟ้าลัดวงจรขัดข้อง! ถอยไปช่อง 11" },
+      "36": { to: 18, type: "snake", message: "⚠️ สัญญาณตัดขาดกะทันหัน! ถอยกลับช่อง 18" }
+    }
+  },
+  {
+    name: "🏴‍☠️ เกาะมหาสมบัติโจรสลัด (40 ช่อง)",
+    url: "pirate_board_100.jpg",
+    tiles: 40,
+    grid_cols: 8,
+    grid_direction: "serpentine_bottom_lr",
+    tile_display_mode: "show_all",
+    padding_x: 7,
+    padding_y: 9,
+    snakes_ladders: {
+      "4": { to: 18, type: "ladder", message: "🧭 เข็มทิศโจรสลัดนำทาง! ลัดไปช่อง 18" },
+      "14": { to: 32, type: "ladder", message: "🗺️ แผนที่ลับนำทาง! วาร์ปไปช่อง 32" },
+      "23": { to: 37, type: "ladder", message: "⛵ ลมมรสุมส่งท้าย! แล่นฉิวไปช่อง 37" },
+      "17": { to: 6, type: "snake", message: "🍺 ลูกเรือเมาเหล้ารัม! ถอยหลังกลับช่อง 6" },
+      "28": { to: 12, type: "snake", message: "🪨 เรือชนหินโสโครก! ถอยไปช่อง 12" },
+      "38": { to: 20, type: "snake", message: "🐙 คราเคนฟาดหาง! โดนซัดถอยไปช่อง 20" }
+    }
   }
 ];
 
@@ -319,20 +375,20 @@ class PhygitalFirebaseManager {
       };
     });
 
-    const piratePreset = SAMPLE_BOARD_PRESETS[0];
+    const defaultPreset = SAMPLE_BOARD_PRESETS[0];
 
     return {
       config: {
         room_pin: roomPin,
-        title: `ล่าขุมทรัพย์ราชาโจรสลัด (${roomPin})`,
-        board_image_url: piratePreset.url,
-        total_tiles: piratePreset.tiles || 100,
-        grid_cols: piratePreset.grid_cols || 10,
-        grid_direction: piratePreset.grid_direction || "serpentine_bottom_lr",
-        tile_display_mode: piratePreset.tile_display_mode || "hide_numbers",
-        padding_x: piratePreset.padding_x || 12.5,
-        padding_y: piratePreset.padding_y || 11.5,
-        snakes_ladders: piratePreset.snakes_ladders || {},
+        title: `ห้องเรียน Active Learning (${roomPin})`,
+        board_image_url: defaultPreset.url,
+        total_tiles: defaultPreset.tiles || 40,
+        grid_cols: defaultPreset.grid_cols || 8,
+        grid_direction: defaultPreset.grid_direction || "serpentine_bottom_lr",
+        tile_display_mode: defaultPreset.tile_display_mode || "show_all",
+        padding_x: defaultPreset.padding_x || 7,
+        padding_y: defaultPreset.padding_y || 9,
+        snakes_ladders: defaultPreset.snakes_ladders || {},
         total_teams: 6,
         total_stations: 10,
         finish_bonus: 500,

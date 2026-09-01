@@ -76,10 +76,19 @@
       transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
       z-index: 30;
       pointer-events: auto;
+      cursor: pointer;
     }
     .team-pawn:hover {
       transform: translate(-50%, -50%) scale(1.35);
-      z-index: 40;
+      z-index: 45;
+    }
+    @keyframes spotlight-pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1.25); filter: drop-shadow(0 0 20px #38bdf8) drop-shadow(0 0 35px #818cf8); }
+      50% { transform: translate(-50%, -65%) scale(1.55); filter: drop-shadow(0 0 30px #ec4899) drop-shadow(0 0 45px #f43f5e); }
+    }
+    .pawn-spotlight {
+      animation: spotlight-pulse 1s infinite ease-in-out !important;
+      z-index: 60 !important;
     }
     @keyframes bounce-pawn {
       0%, 100% { transform: translate(-50%, -50%) scale(1); }
@@ -162,16 +171,16 @@
     <div class="lg:col-span-3 space-y-3">
       
       <!-- Board Area Container -->
-      <div class="glass-card p-3 rounded-3xl border border-slate-800 shadow-2xl relative flex flex-col items-center">
+      <div class="glass-card p-3 rounded-3xl border border-slate-800 shadow-2xl relative">
         
-        <!-- Board Background & Active Tile Canvas (Uncropped Square Display) -->
-        <div id="boardCanvas" class="board-container w-full max-w-[840px] aspect-square max-h-[78vh] rounded-2xl overflow-hidden border border-white/15 relative bg-slate-950 mx-auto">
+        <!-- Board Background & Active Tile Canvas (Widescreen Scenic Arena) -->
+        <div id="boardCanvas" class="board-container w-full aspect-[16/9.5] sm:aspect-[16/9] max-h-[74vh] rounded-2xl overflow-hidden border border-white/15 relative bg-slate-950">
           
           <!-- Board Background Image Overlay -->
-          <img id="boardBgImage" src="pirate_board_100.jpg" alt="Snakes and Ladders Board" class="w-full h-full object-contain bg-slate-950">
+          <img id="boardBgImage" src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1400&q=80" alt="Active Learning Game Board" class="w-full h-full object-cover">
           
-          <!-- Subtle Dark Gradient for Tile Visibility -->
-          <div class="absolute inset-0 pointer-events-none"></div>
+          <!-- Subtle Dark Overlay for Tile Visibility -->
+          <div class="absolute inset-0 bg-slate-950/20 pointer-events-none"></div>
 
           <!-- Dynamic Tiles Overlay -->
           <div id="tilesContainer" class="absolute inset-0 pointer-events-none">
@@ -404,37 +413,9 @@
 
     // ================= COORDINATE MAPPING ALGORITHM =================
     function getTileCoordinate(tileNumber, totalTiles, config = {}) {
-      const total = parseInt(totalTiles) || 100;
-      const isPirate = (config.board_image_url && config.board_image_url.includes('pirate')) || total === 100;
+      if (tileNumber <= 0) return { x: 5, y: 88 };
 
-      if (tileNumber <= 0) {
-        return isPirate ? { x: 7.5, y: 88.0 } : { x: 7.0, y: 84.0 };
-      }
-
-      if (isPirate && total === 100) {
-        const cols = 10;
-        const rows = 10;
-        const index = Math.min(tileNumber, 100) - 1;
-        const rowIndex = Math.floor(index / cols); // 0 = row 1 (bottom), 9 = row 10 (top)
-        const colInRow = index % cols;
-
-        // Serpentine: even rows (0, 2, 4, 6, 8) go Left->Right, odd rows (1, 3, 5, 7, 9) go Right->Left
-        const colPos = (rowIndex % 2 === 0) ? colInRow : (cols - 1 - colInRow);
-
-        // Precise Pirate Map Anchor Points on 1:1 Square
-        const xMin = 19.5;
-        const xMax = 83.5;
-        const xStep = (xMax - xMin) / (cols - 1);
-        const x = xMin + (colPos * xStep);
-
-        const yMin = 17.6; // Top row 10
-        const yMax = 90.5; // Bottom row 1
-        const yStep = (yMax - yMin) / (rows - 1);
-        const y = yMax - (rowIndex * yStep);
-
-        return { x, y };
-      }
-
+      const total = parseInt(totalTiles) || 40;
       let cols = 8;
       if (config.grid_cols && config.grid_cols !== 'auto') {
         cols = parseInt(config.grid_cols) || 8;
@@ -442,6 +423,7 @@
         if (total <= 20) cols = 5;
         else if (total <= 30) cols = 6;
         else if (total <= 50) cols = 8;
+        else if (total <= 60) cols = 10;
         else cols = 10;
       }
 
@@ -468,8 +450,8 @@
         rowPos = rows - 1 - rowIndex;
       }
 
-      const xPadding = config.padding_x !== undefined ? parseFloat(config.padding_x) : 7;
-      const yPadding = config.padding_y !== undefined ? parseFloat(config.padding_y) : 9;
+      const xPadding = config.padding_x !== undefined ? parseFloat(config.padding_x) : 6.5;
+      const yPadding = config.padding_y !== undefined ? parseFloat(config.padding_y) : 8.5;
       const usableWidth = 100 - (xPadding * 2);
       const usableHeight = 100 - (yPadding * 2);
 
@@ -538,11 +520,12 @@
       lucide.createIcons();
     }
 
-    // Render Tiles Overlay (Zigzag numbering)
+    // Render Tiles Overlay (Glowing System Badges)
     function renderTilesOverlay(totalTiles, config = {}) {
       const container = document.getElementById('tilesContainer');
       container.innerHTML = '';
 
+      const snakesLadders = config.snakes_ladders || {};
       const tileMode = config.tile_display_mode || 'show_all';
       if (tileMode === 'hide_numbers') return;
 
@@ -550,23 +533,33 @@
         const coord = getTileCoordinate(i, totalTiles, config);
         const isFinish = i === totalTiles;
         const isStart = i === 1;
+        const warp = snakesLadders[String(i)] || snakesLadders[i];
 
-        if (tileMode === 'show_key_only' && !isFinish && !isStart) {
+        if (tileMode === 'show_key_only' && !isFinish && !isStart && !warp) {
           continue;
         }
 
         const tileEl = document.createElement('div');
-        tileEl.className = `board-tile flex flex-col items-center justify-center rounded-xl font-mono font-bold transition-all ${
-          isFinish 
-            ? 'w-12 h-12 bg-gradient-to-br from-amber-400 to-yellow-600 text-slate-950 text-base shadow-lg shadow-amber-400/50 border-2 border-yellow-200 animate-pulse'
-            : isStart 
-              ? 'w-10 h-10 bg-indigo-600/80 text-white text-xs border border-indigo-400/50 shadow-md' 
-              : 'w-8 h-8 bg-slate-900/60 text-slate-300 text-[11px] border border-white/20'
-        }`;
+        
+        if (isFinish) {
+          tileEl.className = 'board-tile flex items-center justify-center rounded-2xl font-mono font-black text-slate-950 text-sm shadow-2xl bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-600 border-2 border-yellow-200 animate-pulse px-3 py-1.5 min-w-[50px]';
+          tileEl.innerHTML = `🏆 ${i}`;
+        } else if (isStart) {
+          tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-bold text-white text-xs shadow-lg bg-indigo-600/90 border border-indigo-400 px-2.5 py-1 min-w-[38px]';
+          tileEl.innerHTML = `🚩 ${i}`;
+        } else if (warp && warp.type === 'ladder') {
+          tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-emerald-300 text-xs shadow-lg bg-emerald-950/85 border-2 border-emerald-400 px-2.5 py-1 min-w-[42px]';
+          tileEl.innerHTML = `🧗‍♂️ ${i}`;
+        } else if (warp && warp.type === 'snake') {
+          tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-rose-300 text-xs shadow-lg bg-rose-950/85 border-2 border-rose-400 px-2.5 py-1 min-w-[42px]';
+          tileEl.innerHTML = `🐍 ${i}`;
+        } else {
+          tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-bold text-white text-xs shadow-md bg-slate-900/80 backdrop-blur-sm border border-white/20 px-2 py-1 min-w-[32px]';
+          tileEl.innerHTML = `${i}`;
+        }
+
         tileEl.style.left = `${coord.x}%`;
         tileEl.style.top = `${coord.y}%`;
-        
-        tileEl.innerHTML = isFinish ? `🏁 ${i}` : `${i}`;
         container.appendChild(tileEl);
       }
     }
@@ -624,12 +617,12 @@
             </div>
 
             <!-- Pawn Avatar Bubble -->
-            <div class="w-11 h-11 rounded-2xl flex items-center justify-center text-2xl shadow-2xl border-2 border-white transform transition-transform group-hover:scale-125" style="background-color: ${team.color || '#6366f1'}; box-shadow: 0 0 15px ${team.color}88;">
+            <div onclick="inspectTeamPawn('${teamKey}')" class="w-11 h-11 rounded-2xl flex items-center justify-center text-2xl shadow-2xl border-2 border-white transform transition-transform group-hover:scale-125" style="background-color: ${team.color || '#6366f1'}; box-shadow: 0 0 15px ${team.color}88;">
               ${team.avatar || '🦁'}
             </div>
 
             <!-- Tile Number Indicator -->
-            <span class="text-[9px] font-black text-white px-1.5 py-0.2 rounded-full bg-slate-950/80 border border-slate-700 mt-0.5">
+            <span onclick="inspectTeamPawn('${teamKey}')" class="text-[9px] font-black text-white px-1.5 py-0.2 rounded-full bg-slate-950/90 border border-slate-700 mt-0.5 shadow cursor-pointer">
               ช่อง ${currentTile}
             </span>
 
@@ -638,8 +631,64 @@
       }).join('');
     }
 
+    // Inspect / Spotlight Team on Projector Screen
+    let boardSpotlightTimeout = null;
+    function inspectTeamPawn(teamKey) {
+      if (!roomData?.teams?.[teamKey]) return;
+      const team = roomData.teams[teamKey];
+      const config = roomData.config || {};
+      const totalTiles = parseInt(config.total_tiles) || 40;
+      const currentTile = team.current_tile || 0;
+
+      // 1. Spotlight pawn
+      document.querySelectorAll('.team-pawn').forEach(p => p.classList.remove('pawn-spotlight'));
+      const targetPawn = document.getElementById(`pawn-${teamKey}`);
+      if (targetPawn) {
+        targetPawn.classList.add('pawn-spotlight');
+        if (boardSpotlightTimeout) clearTimeout(boardSpotlightTimeout);
+        boardSpotlightTimeout = setTimeout(() => {
+          targetPawn.classList.remove('pawn-spotlight');
+        }, 5000);
+      }
+
+      playChime(750, 0.2, 'sine');
+
+      // 2. Station mission info
+      let stationInfo = 'พร้อมทอยเต๋า';
+      if (team.is_finished) {
+        stationInfo = '🏆 เข้าเส้นชัยแล้ว!';
+      } else if (team.current_station_id && roomData.stations?.[team.current_station_id]) {
+        const st = roomData.stations[team.current_station_id];
+        stationInfo = `${st.icon || '🎯'} กำลังทำ "${st.name}"`;
+      }
+
+      // 3. Show SweetAlert Inspection Card on Projector Screen
+      Swal.fire({
+        title: `<div class="flex items-center justify-center space-x-3 text-2xl font-bold"><span class="text-3xl">${team.avatar || '🦁'}</span><span>${team.name}</span></div>`,
+        html: `
+          <div class="space-y-3 text-left p-2 text-sm">
+            <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-900 border border-slate-700">
+              <span class="text-slate-400">📍 ตำแหน่งช่องปัจจุบัน:</span>
+              <span class="text-base font-black font-mono text-amber-400">ช่อง ${currentTile} / ${totalTiles}</span>
+            </div>
+            <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-900 border border-slate-700">
+              <span class="text-slate-400">🏆 คะแนนสะสม:</span>
+              <span class="text-base font-black font-mono text-emerald-400">${(team.score || 0).toLocaleString()} แต้ม</span>
+            </div>
+            <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-900 border border-slate-700">
+              <span class="text-slate-400">🎯 สถานะกิจกรรม:</span>
+              <span class="font-bold text-indigo-300 truncate max-w-[220px]">${stationInfo}</span>
+            </div>
+          </div>
+        `,
+        showConfirmButton: false,
+        showCloseButton: true,
+        timer: 5000
+      });
+    }
+
     // Render Real-time Leaderboard
-    function renderLeaderboard(teams, config) {
+    function renderLeaderboard(teams, config = {}) {
       const container = document.getElementById('leaderboardList');
       const totalTiles = config.total_tiles || 40;
 
@@ -658,7 +707,7 @@
         const completedCount = Object.keys(team.completed_stations || {}).length;
 
         return `
-          <div class="p-3 rounded-2xl border transition-all flex items-center justify-between ${idx === 0 && team.score > 0 ? 'bg-amber-500/10 border-amber-500/40 shadow-md shadow-amber-500/10' : 'bg-slate-900/80 border-slate-800'}">
+          <div onclick="inspectTeamPawn('${team.key}')" title="คลิกเพื่อส่องตำแหน่ง ${team.name} บนกระดาน" class="p-3 rounded-2xl border transition-all flex items-center justify-between cursor-pointer hover:border-indigo-500 hover:scale-[1.02] ${idx === 0 && team.score > 0 ? 'bg-amber-500/10 border-amber-500/40 shadow-md shadow-amber-500/10' : 'bg-slate-900/80 border-slate-800'}">
             
             <div class="flex items-center space-x-3">
               <span class="text-base font-black w-6 text-center">${rankBadge}</span>
@@ -668,7 +717,7 @@
               <div>
                 <h4 class="font-bold text-xs text-white font-heading truncate max-w-[120px]">${team.name}</h4>
                 <div class="flex items-center space-x-1.5 text-[10px] text-slate-400">
-                  <span>ช่อง <strong>${team.current_tile || 0}</strong>/${totalTiles}</span>
+                  <span class="text-amber-400 font-bold">ช่อง ${team.current_tile || 0}</span>
                   <span>&bull;</span>
                   <span class="text-emerald-400 font-semibold">${completedCount} ฐาน</span>
                 </div>

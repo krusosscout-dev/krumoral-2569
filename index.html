@@ -108,6 +108,14 @@
       z-index: 30;
       pointer-events: auto;
     }
+    @keyframes spotlight-pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1.2); filter: drop-shadow(0 0 15px #38bdf8) drop-shadow(0 0 25px #818cf8); }
+      50% { transform: translate(-50%, -65%) scale(1.45); filter: drop-shadow(0 0 25px #ec4899) drop-shadow(0 0 35px #f43f5e); }
+    }
+    .pawn-spotlight {
+      animation: spotlight-pulse 1s infinite ease-in-out !important;
+      z-index: 60 !important;
+    }
     @keyframes hop-animation {
       0%, 100% { transform: translate(-50%, -50%) scale(1); }
       50% { transform: translate(-50%, -85%) scale(1.3); }
@@ -374,16 +382,16 @@
     <!-- ================= STAGE 2: LIVE BOARD + INTERACTIVE DICE GAMEPLAY ================= -->
     <div id="stage-gameplay" class="hidden space-y-3 w-full my-auto">
       
-      <!-- 1. MAIN LIVE BOARD CANVAS (Adaptive Uncropped Square Display) -->
-      <div class="glass-panel p-2 sm:p-3 rounded-2xl space-y-1.5 relative flex flex-col items-center">
+      <!-- 1. MAIN LIVE BOARD CANVAS (Adaptive Widescreen Scenic Arena) -->
+      <div class="glass-panel p-2 sm:p-3 rounded-2xl space-y-1.5 relative">
         
-        <!-- Board Container: Square Aspect Ratio for Complete Uncropped View -->
-        <div id="boardCanvasContainer" class="board-container w-full max-w-[640px] aspect-square max-h-[66vh] rounded-2xl overflow-hidden border border-white/15 relative transition-all duration-300 shadow-2xl mx-auto bg-slate-950">
+        <!-- Board Container: Widescreen HD Scenic Arena -->
+        <div id="boardCanvasContainer" class="board-container w-full aspect-[16/9] sm:aspect-[16/8.5] max-h-[64vh] rounded-2xl overflow-hidden border border-white/15 relative transition-all duration-300 shadow-2xl mx-auto bg-slate-950">
           <!-- Background Board Image -->
-          <img id="boardBgImage" src="pirate_board_100.jpg" alt="Snakes and Ladders Board" class="w-full h-full object-contain bg-slate-950">
-          <div class="absolute inset-0 pointer-events-none"></div>
+          <img id="boardBgImage" src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1400&q=80" alt="Snakes and Ladders Board" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-slate-950/20 pointer-events-none"></div>
           
-          <!-- Tiles Layer -->
+          <!-- Tiles Layer (System-Generated Glowing 3D Tiles) -->
           <div id="boardTilesOverlay" class="absolute inset-0 pointer-events-none"></div>
 
           <!-- Pawns Layer (All Teams Moving Live) -->
@@ -400,10 +408,10 @@
         </div>
 
         <!-- Board Mini Info Bar -->
-        <div class="w-full max-w-[640px] flex items-center justify-between text-[10px] text-slate-400 px-1 pt-1">
+        <div class="flex items-center justify-between text-[10px] text-slate-400 px-1 pt-0.5">
           <div class="flex items-center space-x-3">
-            <span>🚩 เริ่ม: ท่าเรือ ➔ ช่อง 1</span>
-            <span>🏁 เส้นชัย: ช่อง <strong id="boardTotalTilesLabel" class="text-amber-400">100</strong> (+500 โบนัส)</span>
+            <span>🚩 เริ่ม: ช่อง 1</span>
+            <span>🏁 เส้นชัย: ช่อง <strong id="boardTotalTilesLabel" class="text-amber-400">40</strong> (+500 โบนัส)</span>
           </div>
           <div class="flex items-center space-x-2">
             <button type="button" onclick="toggleBoardExpand()" class="px-2.5 py-0.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white flex items-center space-x-1 text-[9px] font-semibold transition-all cursor-pointer">
@@ -413,6 +421,20 @@
             <div id="boardCurrentStatusPill" class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
               🟢 กำลังแข่งขัน
             </div>
+          </div>
+        </div>
+
+        <!-- Team Positions Quick-Tracker Strip (คลิกส่องตำแหน่งเพื่อนบนกระดาน) -->
+        <div class="w-full pt-1.5 border-t border-white/10">
+          <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1 px-1">
+            <span class="font-semibold text-slate-300 flex items-center space-x-1">
+              <i data-lucide="crosshair" class="w-3 h-3 text-amber-400"></i>
+              <span>คลิกเพื่อส่องตำแหน่งกลุ่มเพื่อนบนกระดาน:</span>
+            </span>
+            <span class="text-[9px] text-indigo-400">กดที่กลุ่มเพื่อดูช่อง</span>
+          </div>
+          <div id="teamsQuickTrackerBar" class="flex items-center space-x-1.5 overflow-x-auto custom-scrollbar pb-0.5">
+            <!-- Injected by JS: 6 team buttons -->
           </div>
         </div>
 
@@ -504,8 +526,8 @@
     </div>
   </div>
 
-  <!-- ================= MODAL 1: STATION MISSION & COUNTDOWN OVERLAY ================= -->
-  <div id="stationMissionModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center p-4">
+  <!-- ================= MODAL 1: STATION MISSION & SCORE SUBMISSION ================= -->
+  <div id="stationMissionModal" class="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-md hidden items-center justify-center p-4">
     <div class="max-w-md w-full glass-panel p-5 rounded-3xl border border-indigo-500/40 shadow-2xl space-y-3 relative overflow-hidden animate-fadeIn">
       
       <div class="flex items-start justify-between border-b border-slate-800 pb-2.5">
@@ -863,6 +885,10 @@
 
     // Handle Realtime Room Updates
     function handleRoomStateChange(autoSelectTeamId = null) {
+      if (currentRoomPin) {
+        const fresh = PhygitalDB.getLocalRoom(currentRoomPin);
+        if (fresh) roomData = fresh;
+      }
       if (!roomData) return;
       const config = roomData.config || {};
       const teams = roomData.teams || {};
@@ -934,9 +960,6 @@
         const st = stations[myTeam.current_station_id];
         setupStationMissionModal(st, myTeam);
         openModal('stationMissionModal');
-      } else {
-        clearInterval(timerInterval);
-        closeModal('stationMissionModal');
       }
     }
 
@@ -1171,50 +1194,22 @@
       isBoardExpanded = !isBoardExpanded;
 
       if (isBoardExpanded) {
-        container.classList.remove('max-h-[66vh]', 'max-w-[640px]');
-        container.classList.add('max-h-[88vh]', 'max-w-[850px]');
+        container.classList.remove('max-h-[64vh]');
+        container.classList.add('max-h-[86vh]');
         label.textContent = "ย่อกระดาน";
       } else {
-        container.classList.remove('max-h-[88vh]', 'max-w-[850px]');
-        container.classList.add('max-h-[66vh]', 'max-w-[640px]');
+        container.classList.remove('max-h-[86vh]');
+        container.classList.add('max-h-[64vh]');
         label.textContent = "ขยายกระดานใหญ่";
       }
       lucide.createIcons();
     }
 
-    // ================= COORDINATE MAPPING (SERPENTINE MATRIX & CALIBRATION) =================
+    // ================= COORDINATE MAPPING (SYSTEM AUTO-GENERATED TILES) =================
     function getTileCoordinate(tileNumber, totalTiles, config = {}) {
-      const total = parseInt(totalTiles) || 100;
-      const isPirate = (config.board_image_url && config.board_image_url.includes('pirate')) || total === 100;
+      if (tileNumber <= 0) return { x: 5, y: 88 };
 
-      if (tileNumber <= 0) {
-        return isPirate ? { x: 7.5, y: 88.0 } : { x: 7.0, y: 84.0 };
-      }
-
-      if (isPirate && total === 100) {
-        const cols = 10;
-        const rows = 10;
-        const index = Math.min(tileNumber, 100) - 1;
-        const rowIndex = Math.floor(index / cols); // 0 = row 1 (bottom), 9 = row 10 (top)
-        const colInRow = index % cols;
-
-        // Serpentine: even rows (0, 2, 4, 6, 8) go Left->Right, odd rows (1, 3, 5, 7, 9) go Right->Left
-        const colPos = (rowIndex % 2 === 0) ? colInRow : (cols - 1 - colInRow);
-
-        // Precise Pirate Map Anchor Points on 1:1 Square
-        const xMin = 19.5;
-        const xMax = 83.5;
-        const xStep = (xMax - xMin) / (cols - 1);
-        const x = xMin + (colPos * xStep);
-
-        const yMin = 17.6; // Top row 10
-        const yMax = 90.5; // Bottom row 1
-        const yStep = (yMax - yMin) / (rows - 1);
-        const y = yMax - (rowIndex * yStep);
-
-        return { x, y };
-      }
-
+      const total = parseInt(totalTiles) || 40;
       let cols = 8;
       if (config.grid_cols && config.grid_cols !== 'auto') {
         cols = parseInt(config.grid_cols) || 8;
@@ -1222,6 +1217,7 @@
         if (total <= 20) cols = 5;
         else if (total <= 30) cols = 6;
         else if (total <= 50) cols = 8;
+        else if (total <= 60) cols = 10;
         else cols = 10;
       }
 
@@ -1248,8 +1244,8 @@
         rowPos = rows - 1 - rowIndex;
       }
 
-      const xPadding = config.padding_x !== undefined ? parseFloat(config.padding_x) : 7;
-      const yPadding = config.padding_y !== undefined ? parseFloat(config.padding_y) : 9;
+      const xPadding = config.padding_x !== undefined ? parseFloat(config.padding_x) : 6.5;
+      const yPadding = config.padding_y !== undefined ? parseFloat(config.padding_y) : 8.5;
       const usableWidth = 100 - (xPadding * 2);
       const usableHeight = 100 - (yPadding * 2);
       const cellWidth = usableWidth / cols;
@@ -1271,32 +1267,47 @@
         bgImg.src = config.board_image_url;
       }
 
-      // 1. Render Tiles Grid
+      // 1. Render Tiles Grid (System-Generated Glowing 3D Badges)
       const tilesContainer = document.getElementById('boardTilesOverlay');
       tilesContainer.innerHTML = '';
 
+      const snakesLadders = config.snakes_ladders || {};
       const tileMode = config.tile_display_mode || 'show_all';
+
       if (tileMode !== 'hide_numbers') {
         for (let i = 1; i <= totalTiles; i++) {
           const coord = getTileCoordinate(i, totalTiles, config);
           const isFinish = i === totalTiles;
           const isStart = i === 1;
+          const warp = snakesLadders[String(i)] || snakesLadders[i];
 
-          if (tileMode === 'show_key_only' && !isFinish && !isStart) {
+          if (tileMode === 'show_key_only' && !isFinish && !isStart && !warp) {
             continue;
           }
 
           const tileEl = document.createElement('div');
-          tileEl.className = `board-tile flex items-center justify-center rounded-lg font-mono font-bold ${
-            isFinish 
-              ? 'w-9 h-9 sm:w-11 sm:h-11 bg-gradient-to-br from-amber-400 to-yellow-600 text-slate-950 text-xs sm:text-sm shadow-lg border-2 border-yellow-200 animate-pulse' 
-              : isStart 
-                ? 'w-7 h-7 sm:w-8 sm:h-8 bg-indigo-600 text-white text-[9px] sm:text-xs shadow-md' 
-                : 'w-5 h-5 sm:w-7 sm:h-7 bg-slate-900/65 text-slate-300 text-[8px] sm:text-[10px] border border-white/20'
-          }`;
+          
+          if (isFinish) {
+            tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-slate-950 text-[11px] sm:text-xs shadow-2xl bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-600 border-2 border-yellow-200 animate-pulse px-2 py-1 min-w-[34px] sm:min-w-[42px]';
+            tileEl.innerHTML = `🏆 ${i}`;
+          } else if (isStart) {
+            tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-bold text-white text-[10px] sm:text-xs shadow-lg bg-indigo-600/90 border border-indigo-400 px-1.5 py-0.5 min-w-[28px] sm:min-w-[34px]';
+            tileEl.innerHTML = `🚩 ${i}`;
+          } else if (warp && warp.type === 'ladder') {
+            tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-emerald-300 text-[10px] sm:text-xs shadow-lg bg-emerald-950/85 border-2 border-emerald-400 px-1.5 py-0.5 min-w-[32px] sm:min-w-[38px]';
+            tileEl.innerHTML = `🧗‍♂️ ${i}`;
+            tileEl.title = `บันไดลัดไปช่อง ${warp.to}`;
+          } else if (warp && warp.type === 'snake') {
+            tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-rose-300 text-[10px] sm:text-xs shadow-lg bg-rose-950/85 border-2 border-rose-400 px-1.5 py-0.5 min-w-[32px] sm:min-w-[38px]';
+            tileEl.innerHTML = `🐍 ${i}`;
+            tileEl.title = `งู/กับดักถอยไปช่อง ${warp.to}`;
+          } else {
+            tileEl.className = 'board-tile flex items-center justify-center rounded-lg font-mono font-bold text-slate-100 text-[9px] sm:text-[11px] shadow-md bg-slate-900/80 backdrop-blur-sm border border-white/25 px-1 py-0.5 min-w-[24px] sm:min-w-[30px]';
+            tileEl.innerHTML = `${i}`;
+          }
+
           tileEl.style.left = `${coord.x}%`;
           tileEl.style.top = `${coord.y}%`;
-          tileEl.innerHTML = isFinish ? `🏁${i}` : `${i}`;
           tilesContainer.appendChild(tileEl);
         }
       }
@@ -1307,10 +1318,6 @@
       Object.keys(teams).forEach(teamKey => {
         const team = teams[teamKey];
         const tile = team.current_tile || 0;
-        if (!tileClusters[tile]) tileClusters[tile] = [];
-        tileClusters[tile].push({ key: teamKey, ...team });
-      });
-
       pawnsContainer.innerHTML = Object.keys(teams).map(teamKey => {
         const team = teams[teamKey];
         const currentTile = team.current_tile || 0;
@@ -1327,23 +1334,102 @@
           offsetY = (row === 0) ? -14 : 8;
         } else if (cluster.length > 1) {
           const angle = (indexInCluster / cluster.length) * (2 * Math.PI);
-          offsetX = Math.cos(angle) * 12;
-          offsetY = Math.sin(angle) * 12;
+          offsetX = Math.cos(angle) * 14;
+          offsetY = Math.sin(angle) * 14;
         }
 
         const isMyTeam = teamKey === currentTeamId;
 
         return `
-          <div id="pawn-${teamKey}" class="team-pawn flex flex-col items-center cursor-pointer ${isMyTeam ? 'scale-110 z-40' : ''}" style="left: calc(${coord.x}% + ${offsetX}px); top: calc(${coord.y}% + ${offsetY}px);">
-            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-base sm:text-lg shadow-2xl border-2 ${isMyTeam ? 'border-amber-300 ring-2 ring-amber-400' : 'border-white'}" style="background-color: ${team.color || '#6366f1'}; box-shadow: 0 0 10px ${team.color}88;">
+          <div id="pawn-${teamKey}" onclick="inspectTeamPawn('${teamKey}')" title="คลิกดูข้อมูล ${team.name} (ช่อง ${currentTile})" class="team-pawn flex flex-col items-center cursor-pointer ${isMyTeam ? 'scale-110 z-40' : ''}" style="left: calc(${coord.x}% + ${offsetX}px); top: calc(${coord.y}% + ${offsetY}px);">
+            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-base sm:text-lg shadow-2xl border-2 ${isMyTeam ? 'border-amber-300 ring-2 ring-amber-400' : 'border-white'} transition-transform hover:scale-125" style="background-color: ${team.color || '#6366f1'}; box-shadow: 0 0 10px ${team.color}88;">
               ${team.avatar || '🦁'}
             </div>
-            <span class="text-[7px] sm:text-[8px] font-black text-white px-1 rounded-full bg-slate-950/90 border border-slate-700 whitespace-nowrap mt-0.5 max-w-[70px] truncate">
+            <span class="text-[7px] sm:text-[8px] font-black text-white px-1 rounded-full bg-slate-950/90 border border-slate-700 whitespace-nowrap mt-0.5 max-w-[70px] truncate shadow">
               ${team.name}
             </span>
           </div>
         `;
       }).join('');
+
+      // 3. Render Quick-Tracker Buttons Bar
+      renderTeamsQuickTracker(teams, config);
+    }
+
+    // Render Quick-Tracker Strip
+    function renderTeamsQuickTracker(teams, config) {
+      const container = document.getElementById('teamsQuickTrackerBar');
+      if (!container) return;
+      
+      const totalTiles = parseInt(config.total_tiles) || 40;
+      container.innerHTML = Object.keys(teams).map(key => {
+        const t = teams[key];
+        const tile = t.current_tile || 0;
+        const isMyTeam = key === currentTeamId;
+        return `
+          <button type="button" onclick="inspectTeamPawn('${key}')" class="px-2 py-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 border ${isMyTeam ? 'border-amber-400 ring-1 ring-amber-400/50' : 'border-slate-700'} flex items-center space-x-1.5 text-[10px] font-semibold text-slate-200 hover:text-white transition-all cursor-pointer whitespace-nowrap flex-shrink-0 shadow">
+            <span>${t.avatar || '🦁'}</span>
+            <span class="truncate max-w-[65px]">${t.name}</span>
+            <span class="px-1.5 py-0.2 rounded bg-indigo-600/80 text-white font-mono text-[9px] font-bold">ช่อง ${tile}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    // Spotlight / Inspect Any Team Pawn
+    let spotlightTimeout = null;
+    function inspectTeamPawn(teamKey) {
+      if (!roomData?.teams?.[teamKey]) return;
+      const team = roomData.teams[teamKey];
+      const config = roomData.config || {};
+      const totalTiles = parseInt(config.total_tiles) || 40;
+      const currentTile = team.current_tile || 0;
+
+      // 1. Highlight pawn with glowing spotlight
+      document.querySelectorAll('.team-pawn').forEach(p => p.classList.remove('pawn-spotlight'));
+      const targetPawn = document.getElementById(`pawn-${teamKey}`);
+      if (targetPawn) {
+        targetPawn.classList.add('pawn-spotlight');
+        if (spotlightTimeout) clearTimeout(spotlightTimeout);
+        spotlightTimeout = setTimeout(() => {
+          targetPawn.classList.remove('pawn-spotlight');
+        }, 5000);
+      }
+
+      playBeep(880, 0.12, 'sine');
+
+      // 2. Station mission info
+      let stationInfo = 'พร้อมทอยเต๋า';
+      if (team.is_finished) {
+        stationInfo = '🏆 เข้าเส้นชัยแล้ว!';
+      } else if (team.current_station_id && roomData.stations?.[team.current_station_id]) {
+        const st = roomData.stations[team.current_station_id];
+        stationInfo = `${st.icon || '🎯'} กำลังทำ "${st.name}"`;
+      }
+
+      // 3. Show inspection modal
+      Swal.fire({
+        title: `<div class="flex items-center justify-center space-x-2 text-base font-bold"><span class="text-2xl">${team.avatar || '🦁'}</span><span>${team.name}</span></div>`,
+        html: `
+          <div class="space-y-2 text-left p-1 text-xs">
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-slate-700">
+              <span class="text-slate-400">📍 ตำแหน่งช่องปัจจุบัน:</span>
+              <span class="text-sm font-black font-mono text-amber-400">ช่อง ${currentTile} / ${totalTiles}</span>
+            </div>
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-slate-700">
+              <span class="text-slate-400">🏆 คะแนนสะสม:</span>
+              <span class="text-sm font-black font-mono text-emerald-400">${(team.score || 0).toLocaleString()} แต้ม</span>
+            </div>
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-slate-700">
+              <span class="text-slate-400">🎯 สถานะภารกิจ:</span>
+              <span class="font-bold text-indigo-300 truncate max-w-[170px]">${stationInfo}</span>
+            </div>
+          </div>
+        `,
+        showConfirmButton: false,
+        showCloseButton: true,
+        timer: 4000
+      });
     }
 
     // Render Control Dashboard (Intelligent Dynamic Button)
@@ -1432,59 +1518,40 @@
           // Animate Step-by-Step Hopping of Pawn
           animatePawnHopping(currentTeamId, diceVal);
 
-          if (moveRes.warpEvent) {
-            const w = moveRes.warpEvent;
-            setTimeout(() => {
-              if (w.type === 'ladder') {
-                playFanfare();
-                confetti({ particleCount: 80, spread: 70 });
-                Swal.fire({
-                  icon: 'success',
-                  title: '🧗‍♂️ ขึ้นบันไดลัด!',
-                  text: w.message,
-                  timer: 2500,
-                  showConfirmButton: false
-                });
-              } else {
-                playBeep(200, 0.4, 'sawtooth');
-                Swal.fire({
-                  icon: 'warning',
-                  title: '⚠️ ตกช่องอุปสรรค!',
-                  text: w.message,
-                  timer: 2500,
-                  showConfirmButton: false
-                });
-              }
-            }, 600);
-          }
-
           if (moveRes.reachedFinish) {
             confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+            playFanfare();
+            handleRoomStateChange();
             return;
           }
 
-          // 2. Dynamic Station Assignment Logic (Instant & Direct!)
-          setTimeout(async () => {
-            try {
-              const assignRes = await PhygitalDB.assignVacantStation(currentRoomPin, currentTeamId);
+          // 2. Dynamic Station Assignment Logic (Guaranteed & Direct!)
+          const assignRes = await PhygitalDB.assignVacantStation(currentRoomPin, currentTeamId);
+          roomData = PhygitalDB.getLocalRoom(currentRoomPin) || roomData;
+          const myTeam = roomData?.teams?.[currentTeamId] || {};
 
-              if (assignRes && assignRes.success && assignRes.station) {
-                confetti({ particleCount: 60, spread: 60, origin: { y: 0.5 } });
-                playBeep(700, 0.3, 'sine');
-                const updatedData = PhygitalDB.getLocalRoom(currentRoomPin) || roomData;
-                const myTeam = updatedData?.teams?.[currentTeamId] || {};
-                setupStationMissionModal(assignRes.station, myTeam);
-                openModal('stationMissionModal');
-              }
-            } catch(err) {
-              console.log("Station assignment fallback:", err);
+          // 3. Immediately launch Station Mission Modal
+          if (assignRes && assignRes.success && assignRes.station) {
+            confetti({ particleCount: 60, spread: 60, origin: { y: 0.5 } });
+            playBeep(700, 0.3, 'sine');
+            setupStationMissionModal(assignRes.station, myTeam);
+            openModal('stationMissionModal');
+          }
+
+          // 4. Update Board & UI
+          handleRoomStateChange();
+
+          // 5. Warp feedback if any
+          if (moveRes.warpEvent) {
+            const w = moveRes.warpEvent;
+            if (w.type === 'ladder') {
+              playFanfare();
+              confetti({ particleCount: 80, spread: 70 });
             }
-
-            // Always update control dashboard so button is active and ready
-            handleRoomStateChange();
-          }, 800);
+          }
 
         } catch (e) {
+          console.error("Roll dice error:", e);
           Swal.fire('เกิดข้อผิดพลาด', e.message, 'error');
           btn.disabled = false;
           btn.classList.remove('opacity-50', 'cursor-not-allowed');
