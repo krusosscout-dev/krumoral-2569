@@ -234,27 +234,86 @@ class PhygitalFirebaseManager {
     return config;
   }
 
-  // เริ่มต้นเชื่อมต่อ Firebase
-  initFirebase(customConfig = null) {
-    const config = customConfig || this.getStoredConfig();
-    if (!config) {
-      return { success: false, message: "ยังไม่ได้ตั้งค่า Firebase Database URL" };
+  // ดึงข้อมูลห้องจาก Local Simulation Store
+  getLocalRoom(roomPin) {
+    try {
+      const raw = localStorage.getItem(`PHYGITAL_LOCAL_ROOM_${roomPin}`);
+      if (raw) return JSON.parse(raw);
+    } catch(e) {}
+
+    // สร้างห้องจำลองอัตโนมัติหากเป็น PIN 999999 หรือ 123456
+    if (roomPin === '999999' || roomPin === '123456') {
+      const demoData = this.generateDemoRoomData(roomPin);
+      this.saveLocalRoom(roomPin, demoData);
+      return demoData;
     }
+    return null;
+  }
+
+  // บันทึกห้องลง Local Simulation Store
+  saveLocalRoom(roomPin, data) {
+    try {
+      localStorage.setItem(`PHYGITAL_LOCAL_ROOM_${roomPin}`, JSON.stringify(data));
+      window.dispatchEvent(new CustomEvent('phygital_room_update', { detail: { pin: roomPin, data } }));
+    } catch(e) {}
+  }
+
+  // สร้างโครงสร้างข้อมูลห้องจำลอง
+  generateDemoRoomData(roomPin) {
+    const stationsObj = {};
+    SAMPLE_ACTIVE_LEARNING_STATIONS.forEach((st, idx) => {
+      const stId = st.id || `station_${idx + 1}`;
+      stationsObj[stId] = {
+        id: stId,
+        name: st.name,
+        description: st.description,
+        timer_minutes: st.timer_minutes || 3,
+        max_score: st.max_score || 100,
+        is_vacant: true,
+        current_team_id: null,
+        occupied_at: null,
+        icon: st.icon || "🎯"
+      };
+    });
+
+    return {
+      config: {
+        room_pin: roomPin,
+        title: `ห้องทดลอง Active Learning (${roomPin})`,
+        board_image_url: SAMPLE_BOARD_PRESETS[0].url,
+        total_tiles: 40,
+        total_teams: 6,
+        total_stations: 10,
+        finish_bonus: 500,
+        game_status: "playing",
+        winner_team_id: null,
+        created_at: Date.now(),
+        updated_at: Date.now()
+      },
+      stations: stationsObj,
+      teams: generateDefaultTeams(6),
+      logs: {}
+    };
+  }
+
+  // เริ่มต้นเชื่อมต่อ Firebase (มี Fallback อัตโนมัติ)
+  initFirebase(customConfig = null) {
+    const config = customConfig || this.getStoredConfig() || SAMPLE_FIREBASE_CONFIG;
 
     try {
       if (firebase.apps.length > 0) {
-        // ลบแอปเดิมออกเพื่อ Re-initialize
-        firebase.app().delete();
+        this.app = firebase.apps[0];
+      } else if (config) {
+        this.app = firebase.initializeApp(config);
       }
-
-      this.app = firebase.initializeApp(config);
-      this.db = firebase.database();
-      this.connected = true;
-
+      if (this.app) {
+        this.db = firebase.database();
+        this.connected = true;
+      }
       return { success: true, db: this.db, config };
     } catch (error) {
       this.connected = false;
-      console.error("Firebase init error:", error);
+      console.warn("Firebase init note (using local/cloud hybrid):", error);
       return { success: false, error: error.message };
     }
   }
@@ -262,29 +321,33 @@ class PhygitalFirebaseManager {
   // ทดสอบสถานะการเชื่อมต่อ (.info/connected)
   watchConnectionState(callback) {
     if (!this.db) return;
-    const connectedRef = this.db.ref(".info/connected");
-    connectedRef.on("value", (snap) => {
-      this.connected = snap.val() === true;
-      if (callback) callback(this.connected);
-    });
+    try {
+      const connectedRef = this.db.ref(".info/connected");
+      connectedRef.on("value", (snap) => {
+        this.connected = snap.val() === true;
+        if (callback) callback(this.connected);
+      });
+    } catch(e) {}
   }
 
   // ดึง Reference ของ Room
   getRoomRef(roomPin) {
-    if (!this.db) throw new Error("Firebase ยังไม่ได้เชื่อมต่อ");
-    return this.db.ref(`rooms/${roomPin}`);
+    if (this.db) {
+      return this.db.ref(`rooms/${roomPin}`);
+    }
+    return null;
   }
 
   // ดึง Reference ของ Logs
   getLogsRef(roomPin) {
-    return this.getRoomRef(roomPin).child('logs');
+    if (this.db) {
+      return this.getRoomRef(roomPin).child('logs');
+    }
+    return null;
   }
 
   // สร้างห้องใหม่ (กำหนดจำนวนกลุ่ม 2-12 และจำนวนฐาน 2-12 ได้อย่างยืดหยุ่น)
   async createRoom(roomPin, roomData) {
-    if (!this.db) throw new Error("Firebase ยังไม่ได้เชื่อมต่อ");
-    const roomRef = this.getRoomRef(roomPin);
-    
     // แปลง Array ของ Stations ให้เป็น Object Key (ตามจำนวนฐานที่ระบุ)
     const stationsObj = {};
     let stationsList = roomData.stations || SAMPLE_ACTIVE_LEARNING_STATIONS;
@@ -321,53 +384,97 @@ class PhygitalFirebaseManager {
         total_teams: totalTeamsCount,
         total_stations: Object.keys(stationsObj).length,
         finish_bonus: parseInt(roomData.finish_bonus) || 500,
-        game_status: "waiting", // "waiting" | "playing" | "finished"
+        game_status: "playing",
         winner_team_id: null,
-        created_at: firebase.database.ServerValue.TIMESTAMP,
-        updated_at: firebase.database.ServerValue.TIMESTAMP
+        created_at: Date.now(),
+        updated_at: Date.now()
       },
       stations: stationsObj,
       teams: teamsObj,
       logs: {}
     };
 
-    await roomRef.set(initialData);
+    // บันทึกลง Local Storage เสมอ
+    this.saveLocalRoom(roomPin, initialData);
 
-    // บันทึก Log เริ่มสร้างห้อง
-    await this.addLog(roomPin, {
-      team_id: "system",
-      type: "system",
-      message: `สร้างห้องเล่นเกม ${roomPin} สำเร็จ (${totalTeamsCount} กลุ่ม, ${Object.keys(stationsObj).length} ฐาน) พร้อมเริ่มการเรียนรู้!`
-    });
+    // บันทึกลง Firebase (ถ้ามี)
+    if (this.db) {
+      try {
+        const roomRef = this.getRoomRef(roomPin);
+        await roomRef.set(initialData);
+        await this.addLog(roomPin, {
+          team_id: "system",
+          type: "system",
+          message: `สร้างห้องเล่นเกม ${roomPin} สำเร็จ (${totalTeamsCount} กลุ่ม, ${Object.keys(stationsObj).length} ฐาน)`
+        });
+      } catch (e) {
+        console.warn("Firebase createRoom sync warning:", e);
+      }
+    }
 
     return initialData;
   }
 
   // สร้างหรือตรวจสอบห้องจำลองเริ่มต้น (Demo Simulation Room)
   async createDemoRoomIfNotExist(roomPin = '999999') {
-    if (!this.db) return null;
-    const roomRef = this.getRoomRef(roomPin);
-    const snap = await roomRef.once('value');
-    if (!snap.exists()) {
-      return await this.createRoom(roomPin, {
-        title: `ห้องทดลอง Active Learning (${roomPin})`,
-        total_tiles: 40,
-        total_teams: 6,
-        total_stations: 10,
-        finish_bonus: 500
-      });
-    }
-    return snap.val();
+    const local = this.getLocalRoom(roomPin);
+    if (local) return local;
+
+    return await this.createRoom(roomPin, {
+      title: `ห้องทดลอง Active Learning (${roomPin})`,
+      total_tiles: 40,
+      total_teams: 6,
+      total_stations: 10,
+      finish_bonus: 500
+    });
   }
 
-  // ดึงข้อมูลห้องเกมแบบ Realtime (Listener)
+  // ดึงข้อมูลห้องเกมแบบ Realtime (Listener พร้อม Local Fallback ทันที)
   listenToRoom(roomPin, callback) {
-    if (!this.db) return null;
-    const roomRef = this.getRoomRef(roomPin);
-    const listener = roomRef.on("value", (snapshot) => {
-      const val = snapshot.val();
-      callback(val);
-    });
+    let localData = this.getLocalRoom(roomPin);
+    if (localData) {
+      callback(localData);
+    }
+
+    if (this.db) {
+      try {
+        const roomRef = this.getRoomRef(roomPin);
+        const listener = roomRef.on("value", (snapshot) => {
+          const val = snapshot.val();
+          if (val) {
+            this.saveLocalRoom(roomPin, val);
+            callback(val);
+          } else if (!localData) {
+            // สร้างอัตโนมัติหากเป็น PIN 999999
+            if (roomPin === '999999' || roomPin === '123456') {
+              this.createDemoRoomIfNotExist(roomPin).then(d => {
+                if (d) callback(d);
+              });
+            } else {
+              callback(null);
+            }
+          }
+        }, (err) => {
+          console.warn("Firebase listener network fallback:", err);
+          if (localData) callback(localData);
+        });
+        this.listeners.push({ ref: roomRef, listener });
+        return listener;
+      } catch(e) {
+        console.warn("Firebase listener error:", e);
+      }
+    }
+
+    // Local Storage Listener
+    const onLocalUpdate = (e) => {
+      if (e.detail?.pin === roomPin && e.detail?.data) {
+        callback(e.detail.data);
+      }
+    };
+    window.addEventListener('phygital_room_update', onLocalUpdate);
+
+    return null;
+  }
     this.listeners.push({ ref: roomRef, listener });
     return listener;
   }

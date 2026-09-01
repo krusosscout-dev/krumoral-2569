@@ -754,10 +754,7 @@
     });
 
     function initFirebaseApp() {
-      const stored = PhygitalDB.getStoredConfig();
-      if (stored) {
-        PhygitalDB.initFirebase(stored);
-      }
+      PhygitalDB.initFirebase();
     }
 
     // Admin Passcode Prompt with customizable passcode support
@@ -802,17 +799,21 @@
       localStorage.setItem('STUDENT_ROOM_PIN', pin);
       document.getElementById('topRoomPinText').textContent = `ห้อง PIN: ${pin}`;
 
-      // If demo room 999999 or 123456, ensure created
+      // Ensure demo room is created if 999999 or 123456
       if (pin === '999999' || pin === '123456') {
         try {
           await PhygitalDB.createDemoRoomIfNotExist(pin);
         } catch(e) {}
       }
 
+      // Hide Landing, Show Join Stage
+      document.getElementById('stage-landing').classList.add('hidden');
+      document.getElementById('stage-join').classList.remove('hidden');
+
       // Subscribe to Realtime Database
       PhygitalDB.listenToRoom(pin, (data) => {
         if (!data) {
-          Swal.fire('ไม่พบห้องเกม', `ไม่พบห้อง PIN: ${pin} ในระบบ`, 'error');
+          Swal.fire('ไม่พบห้องเกม', `ไม่พบห้อง PIN: ${pin} ในระบบ กรุณาตรวจสอบรหัส PIN หรือสร้างห้องผ่านระบบแอดมิน`, 'error');
           document.getElementById('stage-landing').classList.add('hidden');
           document.getElementById('stage-join').classList.remove('hidden');
           document.getElementById('stage-gameplay').classList.add('hidden');
