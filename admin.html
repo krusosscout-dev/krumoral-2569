@@ -441,7 +441,7 @@
         <div class="flex items-center justify-between">
           <h3 class="text-lg font-bold font-heading text-white flex items-center space-x-2">
             <i data-lucide="users" class="w-5 h-5 text-purple-400"></i>
-            <span>ปรับแต่งชื่อและไอคอน 6 กลุ่ม (Team Customization)</span>
+            <span>ปรับแต่งชื่อและไอคอนกลุ่มผู้เล่น (Team Customization)</span>
           </h3>
           <button onclick="saveTeamsSettings()" class="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs shadow-md shadow-purple-600/30 flex items-center space-x-1.5 transition-all">
             <i data-lucide="save" class="w-3.5 h-3.5"></i>
@@ -451,6 +451,30 @@
 
         <div id="teamsSettingGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <!-- Team Settings inputs injected by JS -->
+        </div>
+      </div>
+
+      <!-- Change Admin Passcode Card -->
+      <div class="glass-card rounded-2xl p-6 border border-slate-800 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold font-heading text-white flex items-center space-x-2">
+            <i data-lucide="key" class="w-5 h-5 text-amber-400"></i>
+            <span>รหัสผ่านเข้าสู่ระบบแอดมิน (Admin Passcode)</span>
+          </h3>
+          <span class="text-xs text-slate-400">กำหนดรหัสผ่านสำหรับคุณครู</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">รหัสผ่านแอดมินใหม่ (ปัจจุบัน: <span id="currentPasscodeLabel" class="text-amber-400 font-mono font-bold">1234</span>)</label>
+            <input type="text" id="newAdminPasscodeInput" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-amber-500" placeholder="กรอกรหัสผ่านใหม่ เช่น 1234 หรือ mypass2026">
+          </div>
+          <div>
+            <button onclick="saveCustomAdminPasscode()" class="w-full mt-5 sm:mt-0 py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-xs shadow-md shadow-amber-600/30 flex items-center justify-center space-x-2 transition-all">
+              <i data-lucide="check" class="w-4 h-4"></i>
+              <span>บันทึกรหัสผ่านใหม่</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1322,6 +1346,30 @@
           </div>
         `;
       }).join('');
+
+      // Admin Passcode display
+      const savedPass = localStorage.getItem('PHYGITAL_ADMIN_PASSCODE') || '1234';
+      const passLabel = document.getElementById('currentPasscodeLabel');
+      if (passLabel) passLabel.textContent = savedPass;
+      const passInput = document.getElementById('newAdminPasscodeInput');
+      if (passInput) passInput.value = savedPass;
+    }
+
+    function saveCustomAdminPasscode() {
+      const newPass = document.getElementById('newAdminPasscodeInput').value.trim();
+      if (!newPass) {
+        Swal.fire('กรุณากรอกรหัสผ่านใหม่', '', 'warning');
+        return;
+      }
+      localStorage.setItem('PHYGITAL_ADMIN_PASSCODE', newPass);
+      const passLabel = document.getElementById('currentPasscodeLabel');
+      if (passLabel) passLabel.textContent = newPass;
+      Swal.fire({
+        icon: 'success',
+        title: 'เปลี่ยนรหัสผ่านแอดมินสำเร็จ!',
+        text: `รหัสผ่านใหม่ของคุณครูคือ: ${newPass}`,
+        confirmButtonColor: '#6366f1'
+      });
     }
 
     function setBoardSettingPreset(url, tiles) {

@@ -343,6 +343,23 @@ class PhygitalFirebaseManager {
     return initialData;
   }
 
+  // สร้างหรือตรวจสอบห้องจำลองเริ่มต้น (Demo Simulation Room)
+  async createDemoRoomIfNotExist(roomPin = '999999') {
+    if (!this.db) return null;
+    const roomRef = this.getRoomRef(roomPin);
+    const snap = await roomRef.once('value');
+    if (!snap.exists()) {
+      return await this.createRoom(roomPin, {
+        title: `ห้องทดลอง Active Learning (${roomPin})`,
+        total_tiles: 40,
+        total_teams: 6,
+        total_stations: 10,
+        finish_bonus: 500
+      });
+    }
+    return snap.val();
+  }
+
   // ดึงข้อมูลห้องเกมแบบ Realtime (Listener)
   listenToRoom(roomPin, callback) {
     if (!this.db) return null;
