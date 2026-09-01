@@ -778,13 +778,21 @@ class PhygitalFirebaseManager {
     }
   }
 
-  // ปลดล็อกฐาน (Force Vacant / Reset Lock)
+  // ปลดล็อกฐานเดี่ยว (Force Vacant / Reset Lock)
   async forceUnlockStation(roomPin, stationId) {
     const data = this.getLocalRoom(roomPin);
     if (data?.stations?.[stationId]) {
+      const occupantTeamId = data.stations[stationId].current_team_id;
       data.stations[stationId].is_vacant = true;
       data.stations[stationId].current_team_id = null;
       data.stations[stationId].occupied_at = null;
+
+      if (occupantTeamId && data.teams?.[occupantTeamId]) {
+        if (data.teams[occupantTeamId].current_station_id === stationId) {
+          data.teams[occupantTeamId].current_station_id = null;
+          data.teams[occupantTeamId].station_start_time = null;
+        }
+      }
       this.saveLocalRoom(roomPin, data);
     }
 
@@ -797,6 +805,43 @@ class PhygitalFirebaseManager {
         this.withTimeout(this.getRoomRef(roomPin).update(updates));
       } catch(e) {}
     }
+  }
+
+  // ปลดล็อกทุกฐานในห้องให้ว่างทั้งหมดทันที (Unlock All Stations)
+  async unlockAllStations(roomPin) {
+    const data = this.getLocalRoom(roomPin);
+    if (!data) return;
+
+    const updates = {};
+    if (data.stations) {
+      Object.keys(data.stations).forEach(stId => {
+        data.stations[stId].is_vacant = true;
+        data.stations[stId].current_team_id = null;
+        data.stations[stId].occupied_at = null;
+        updates[`stations/${stId}/is_vacant`] = true;
+        updates[`stations/${stId}/current_team_id`] = null;
+        updates[`stations/${stId}/occupied_at`] = null;
+      });
+    }
+
+    if (data.teams) {
+      Object.keys(data.teams).forEach(teamId => {
+        data.teams[teamId].current_station_id = null;
+        data.teams[teamId].station_start_time = null;
+        updates[`teams/${teamId}/current_station_id`] = null;
+        updates[`teams/${teamId}/station_start_time`] = null;
+      });
+    }
+
+    this.saveLocalRoom(roomPin, data);
+
+    if (this.db) {
+      try {
+        await this.withTimeout(this.getRoomRef(roomPin).update(updates));
+      } catch(e) {}
+    }
+
+    return { success: true };
   }
 
   // ปรับคะแนนหรือข้อมูลทีม
@@ -904,7 +949,7 @@ class PhygitalFirebaseManager {
     };
   }
 
-  // จัดสรรฐานกิจกรรมว่าง
+  // จัดสรรฐานกิจกรรมว่าง (พร้อมระบบปลดล็อกฐานเดิมอัตโนมัติ: 1 กลุ่ม = 1 ฐานเท่านั้น)
   async assignVacantStation(roomPin, teamId) {
     let data = this.getLocalRoom(roomPin);
     if (!data) data = await this.createDemoRoomIfNotExist(roomPin);
@@ -913,6 +958,20 @@ class PhygitalFirebaseManager {
     if (!team) throw new Error("ไม่พบข้อมูลกลุ่ม");
 
     const stations = data.stations || {};
+    const updates = {};
+
+    // 1. ปลดล็อกฐานเดิมทั้งหมดที่กลุ่มนี้อาจเคยถือครองอยู่ก่อนให้ว่าง 100%
+    Object.keys(stations).forEach(stId => {
+      if (stations[stId].current_team_id === teamId) {
+        stations[stId].is_vacant = true;
+        stations[stId].current_team_id = null;
+        stations[stId].occupied_at = null;
+        updates[`stations/${stId}/is_vacant`] = true;
+        updates[`stations/${stId}/current_team_id`] = null;
+        updates[`stations/${stId}/occupied_at`] = null;
+      }
+    });
+
     const completed = team.completed_stations || {};
 
     let availableStations = Object.values(stations).filter(st => {
@@ -945,16 +1004,16 @@ class PhygitalFirebaseManager {
     team.current_station_id = chosenStation.id;
     team.station_start_time = Date.now();
 
+    updates[`stations/${chosenStation.id}/is_vacant`] = false;
+    updates[`stations/${chosenStation.id}/current_team_id`] = teamId;
+    updates[`stations/${chosenStation.id}/occupied_at`] = Date.now();
+    updates[`teams/${teamId}/current_station_id`] = chosenStation.id;
+    updates[`teams/${teamId}/station_start_time`] = Date.now();
+
     this.saveLocalRoom(roomPin, data);
 
     if (this.db) {
       try {
-        const updates = {};
-        updates[`stations/${chosenStation.id}/is_vacant`] = false;
-        updates[`stations/${chosenStation.id}/current_team_id`] = teamId;
-        updates[`stations/${chosenStation.id}/occupied_at`] = Date.now();
-        updates[`teams/${teamId}/current_station_id`] = chosenStation.id;
-        updates[`teams/${teamId}/station_start_time`] = Date.now();
         this.withTimeout(this.getRoomRef(roomPin).update(updates));
       } catch(e) {}
     }
@@ -965,13 +1024,13 @@ class PhygitalFirebaseManager {
     };
   }
 
-  // ส่งคะแนนและปลดล็อกฐาน
+  // ส่งคะแนนและปลดล็อกฐานอัตโนมัติ
   async submitStationScore(roomPin, teamId, stationId, score) {
     let data = this.getLocalRoom(roomPin);
     if (!data) data = await this.createDemoRoomIfNotExist(roomPin);
 
     const team = data.teams?.[teamId];
-    const station = data.stations?.[stationId];
+    const stations = data.stations || {};
     if (!team) throw new Error("ไม่พบข้อมูลกลุ่ม");
 
     const earnedScore = Math.max(0, parseInt(score) || 0);
@@ -986,39 +1045,39 @@ class PhygitalFirebaseManager {
     team.current_station_id = null;
     team.station_start_time = null;
 
-    if (station) {
-      station.is_vacant = true;
-      station.current_team_id = null;
-      station.occupied_at = null;
-    }
+    const updates = {};
+    updates[`teams/${teamId}/score`] = newTotalScore;
+    updates[`teams/${teamId}/completed_stations/${stationId}`] = {
+      score: earnedScore,
+      completed_at: Date.now()
+    };
+    updates[`teams/${teamId}/current_station_id`] = null;
+    updates[`teams/${teamId}/station_start_time`] = null;
+
+    // ปลดล็อกฐานทั้งหมดที่กลุ่มนี้ถือครองอยู่
+    Object.keys(stations).forEach(stId => {
+      if (stId === stationId || stations[stId].current_team_id === teamId) {
+        stations[stId].is_vacant = true;
+        stations[stId].current_team_id = null;
+        stations[stId].occupied_at = null;
+        updates[`stations/${stId}/is_vacant`] = true;
+        updates[`stations/${stId}/current_team_id`] = null;
+        updates[`stations/${stId}/occupied_at`] = null;
+      }
+    });
 
     this.saveLocalRoom(roomPin, data);
 
     if (this.db) {
       try {
-        const updates = {};
-        updates[`teams/${teamId}/score`] = newTotalScore;
-        updates[`teams/${teamId}/completed_stations/${stationId}`] = {
-          score: earnedScore,
-          completed_at: Date.now()
-        };
-        updates[`teams/${teamId}/current_station_id`] = null;
-        updates[`teams/${teamId}/station_start_time`] = null;
-
-        if (station) {
-          updates[`stations/${stationId}/is_vacant`] = true;
-          updates[`stations/${stationId}/current_team_id`] = null;
-          updates[`stations/${stationId}/occupied_at`] = null;
-        }
-
         this.withTimeout(this.getRoomRef(roomPin).update(updates));
       } catch(e) {}
     }
 
     return {
       success: true,
-      earnedScore,
-      newTotalScore
+      score: earnedScore,
+      totalScore: newTotalScore
     };
   }
 }

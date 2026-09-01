@@ -126,24 +126,36 @@
       </div>
 
       <!-- Right Action Controls -->
-      <div class="flex items-center space-x-2 sm:space-x-3">
+      <div class="flex items-center space-x-2 sm:space-x-2.5">
+        <!-- Go to Student Screen (หน้านักเรียน) -->
+        <a id="navGoToStudentBtn" href="index.html" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/50 text-xs font-bold text-emerald-300 hover:text-white transition-all shadow-sm">
+          <i data-lucide="gamepad-2" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <span>หน้านักเรียน</span>
+        </a>
+
+        <!-- Open Live Projector Screen (จอโปรเจกเตอร์) -->
+        <a id="navGoToBoardBtn" href="board.html" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-500/50 text-xs font-bold text-indigo-300 hover:text-white transition-all shadow-sm">
+          <i data-lucide="presentation" class="w-3.5 h-3.5 text-indigo-400"></i>
+          <span class="hidden sm:inline">จอโปรเจกเตอร์</span>
+        </a>
+
         <!-- Firebase Status Indicator -->
-        <button id="btnOpenFirebaseModal" onclick="openFirebaseConfigModal()" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all text-xs font-medium text-slate-300 hover:text-white">
+        <button id="btnOpenFirebaseModal" onclick="openFirebaseConfigModal()" class="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all text-xs font-medium text-slate-300 hover:text-white">
           <span id="firebaseStatusDot" class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
-          <span id="firebaseStatusText">Firebase: ไม่ได้เชื่อมต่อ</span>
+          <span id="firebaseStatusText" class="hidden md:inline">Firebase</span>
           <i data-lucide="settings" class="w-3.5 h-3.5 text-slate-400"></i>
         </button>
 
         <!-- Room Selector / Switcher -->
         <button onclick="openSelectRoomModal()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all text-xs font-medium text-slate-300 hover:text-white">
-          <i data-lucide="door-open" class="w-4 h-4 text-amber-400"></i>
+          <i data-lucide="door-open" class="w-3.5 h-3.5 text-amber-400"></i>
           <span>เลือกห้อง</span>
         </button>
 
         <!-- Create Room Button -->
-        <button onclick="openCreateRoomModal()" class="flex items-center space-x-1.5 px-4 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium text-xs shadow-md shadow-indigo-600/30 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i>
-          <span>สร้างห้องใหม่</span>
+        <button onclick="openCreateRoomModal()" class="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+          <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">สร้างห้องใหม่</span>
         </button>
       </div>
 
@@ -224,17 +236,15 @@
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           
           <!-- Open Board View -->
-          <a id="btnOpenBoard" href="board.html" target="_blank" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-medium text-xs text-indigo-300 hover:text-white flex items-center justify-center space-x-2 transition-all">
-            <i data-lucide="monitor" class="w-4 h-4 text-indigo-400"></i>
-            <span>เปิดหน้าจอกระดานรวม (Board View)</span>
-            <i data-lucide="external-link" class="w-3 h-3"></i>
+          <a id="btnOpenBoard" href="board.html" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-xs text-indigo-300 hover:text-white flex items-center justify-center space-x-2 transition-all">
+            <i data-lucide="presentation" class="w-4 h-4 text-indigo-400"></i>
+            <span>เปิดหน้าจอกระดานรวม (Board)</span>
           </a>
 
-          <!-- Open Student Preview -->
-          <a id="btnOpenStudent" href="student.html" target="_blank" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-medium text-xs text-emerald-300 hover:text-white flex items-center justify-center space-x-2 transition-all">
-            <i data-lucide="smartphone" class="w-4 h-4 text-emerald-400"></i>
+          <!-- Open Student View -->
+          <a id="btnOpenStudent" href="index.html" class="px-4 py-2.5 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/50 font-bold text-xs text-emerald-300 hover:text-white flex items-center justify-center space-x-2 transition-all">
+            <i data-lucide="gamepad-2" class="w-4 h-4 text-emerald-400"></i>
             <span>เปิดหน้าจอนักเรียน (Student)</span>
-            <i data-lucide="external-link" class="w-3 h-3"></i>
           </a>
 
           <!-- Master Game Status Actions -->
@@ -336,12 +346,18 @@
 
       <!-- Live Station Occupancy Status Matrix -->
       <div class="glass-card rounded-2xl p-5 border border-slate-800">
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
           <h3 class="text-base font-bold font-heading text-white flex items-center space-x-2">
             <i data-lucide="map-pin" class="w-4 h-4 text-indigo-400"></i>
             <span>สถานะการครอบครองฐานกิจกรรม (Live Station Occupancy)</span>
           </h3>
-          <span class="text-xs text-slate-400">หากเกิดปัญหานักเรียนกดค้าง สามารถกด "ปลดล็อก" ฐานได้</span>
+          <div class="flex items-center space-x-2">
+            <span class="text-xs text-slate-400 hidden lg:inline">ระบบปลดล็อกให้อัตโนมัติเมื่อส่งคะแนน</span>
+            <button onclick="handleUnlockAllStations()" class="px-3 py-1.5 rounded-lg bg-rose-950/80 hover:bg-rose-900 border border-rose-500/50 text-rose-300 hover:text-white text-xs font-bold flex items-center space-x-1.5 transition-all shadow-sm active:scale-95 cursor-pointer">
+              <i data-lucide="unlock" class="w-3.5 h-3.5"></i>
+              <span>ปลดล็อกทุกฐานให้ว่าง</span>
+            </button>
+          </div>
         </div>
         <div id="stationsStatusList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <!-- Station Badges injected by JS -->
@@ -1132,6 +1148,9 @@
       currentRoomPin = pin;
       localStorage.setItem(DEFAULT_SAVED_ROOM_KEY, pin);
 
+      if (document.getElementById('navGoToStudentBtn')) document.getElementById('navGoToStudentBtn').href = `index.html?pin=${pin}`;
+      if (document.getElementById('navGoToBoardBtn')) document.getElementById('navGoToBoardBtn').href = `board.html?pin=${pin}`;
+
       // Update URL query without reload
       const newUrl = new URL(window.location);
       newUrl.searchParams.set('pin', pin);
@@ -1185,9 +1204,11 @@
 
       // Update External Links
       const baseBoardUrl = `board.html?pin=${currentRoomPin}`;
-      const baseStudentUrl = `student.html?pin=${currentRoomPin}`;
-      document.getElementById('btnOpenBoard').href = baseBoardUrl;
-      document.getElementById('btnOpenStudent').href = baseStudentUrl;
+      const baseStudentUrl = `index.html?pin=${currentRoomPin}`;
+      if (document.getElementById('btnOpenBoard')) document.getElementById('btnOpenBoard').href = baseBoardUrl;
+      if (document.getElementById('btnOpenStudent')) document.getElementById('btnOpenStudent').href = baseStudentUrl;
+      if (document.getElementById('navGoToStudentBtn')) document.getElementById('navGoToStudentBtn').href = baseStudentUrl;
+      if (document.getElementById('navGoToBoardBtn')) document.getElementById('navGoToBoardBtn').href = baseBoardUrl;
 
       // 3. Stats Summary
       const vacantCount = stationsList.filter(s => s.is_vacant).length;
@@ -1616,9 +1637,27 @@
 
     // Game Status Controller
     async function setRoomGameStatus(status) {
+    // Start / Pause Game Controller
+    async function setRoomGameStatus(status) {
       if (!currentRoomPin) return;
       try {
-        await PhygitalDB.updateGameStatus(currentRoomPin, status);
+        const updatePayload = {
+          game_status: status,
+          updated_at: Date.now()
+        };
+        if (status === 'playing' && currentRoomData?.config?.game_status === 'finished') {
+          updatePayload.game_started_at = Date.now();
+        }
+
+        if (PhygitalDB.db) {
+          await PhygitalDB.getRoomRef(currentRoomPin).child('config').update(updatePayload);
+        }
+        const local = PhygitalDB.getLocalRoom(currentRoomPin);
+        if (local?.config) {
+          Object.assign(local.config, updatePayload);
+          PhygitalDB.saveLocalRoom(currentRoomPin, local);
+        }
+
         await PhygitalDB.addLog(currentRoomPin, {
           team_id: 'system',
           type: 'system',
@@ -1657,7 +1696,7 @@
       }
     }
 
-    // Force Unlock Station
+    // Force Unlock Single Station
     async function forceUnlockStation(stationId) {
       if (!currentRoomPin) return;
       try {
@@ -1675,6 +1714,40 @@
         });
       } catch (e) {
         Swal.fire('ข้อผิดพลาด', e.message, 'error');
+      }
+    }
+
+    // Force Unlock All Stations at once
+    async function handleUnlockAllStations() {
+      if (!currentRoomPin) return;
+      const res = await Swal.fire({
+        title: 'ปลดล็อกทุกฐานกิจกรรมให้ว่าง?',
+        text: 'ระบบจะรีเซ็ตทุกฐานที่กำลังเล่นอยู่ให้กลับมาเป็นสถานะ "ว่าง" พร้อมกันทั้งหมดทันที',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'ปลดล็อกทั้งหมด',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#e11d48'
+      });
+
+      if (res.isConfirmed) {
+        try {
+          await PhygitalDB.unlockAllStations(currentRoomPin);
+          await PhygitalDB.addLog(currentRoomPin, {
+            team_id: 'system',
+            type: 'system',
+            message: `🔓 ครูผู้สอนสั่งปลดล็อกทุกฐานกิจกรรมให้เป็นสถานะว่างทั้งหมด`
+          });
+          Swal.fire({
+            icon: 'success',
+            title: 'ปลดล็อกทุกฐานสำเร็จ!',
+            text: 'ทุกฐานกิจกรรมกลับมาว่างพร้อมให้นักเรียนเข้าทำภารกิจแล้วครับ',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        } catch (e) {
+          Swal.fire('ข้อผิดพลาด', e.message, 'error');
+        }
       }
     }
 

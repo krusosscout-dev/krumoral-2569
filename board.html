@@ -139,13 +139,21 @@
 
       <!-- Right Controls -->
       <div class="flex items-center space-x-2">
-        <button onclick="toggleSound()" id="btnSoundToggle" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all text-xs flex items-center space-x-1.5">
+        <a id="boardNavStudentBtn" href="index.html" class="px-3 py-2 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 hover:text-white border border-emerald-500/50 transition-all text-xs font-bold flex items-center space-x-1.5 shadow-sm">
+          <i data-lucide="gamepad-2" class="w-4 h-4 text-emerald-400"></i>
+          <span>หน้านักเรียน</span>
+        </a>
+        <a id="boardNavAdminBtn" href="admin.html" class="px-3 py-2 rounded-xl bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 hover:text-white border border-indigo-500/50 transition-all text-xs font-bold flex items-center space-x-1.5 shadow-sm">
+          <i data-lucide="shield-check" class="w-4 h-4 text-indigo-400"></i>
+          <span class="hidden sm:inline">ระบบแอดมิน</span>
+        </a>
+        <button onclick="toggleSound()" id="btnSoundToggle" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all text-xs flex items-center space-x-1.5 cursor-pointer">
           <i data-lucide="volume-2" class="w-4 h-4 text-emerald-400"></i>
           <span class="hidden md:inline font-semibold">เปิดเสียง</span>
         </button>
-        <button onclick="toggleFullScreen()" class="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 transition-all text-xs font-semibold flex items-center space-x-1.5">
+        <button onclick="toggleFullScreen()" class="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 transition-all text-xs font-semibold flex items-center space-x-1.5 cursor-pointer">
           <i data-lucide="maximize" class="w-4 h-4"></i>
-          <span class="hidden md:inline">เต็มจอ (Full Screen)</span>
+          <span class="hidden md:inline">เต็มจอ</span>
         </button>
       </div>
 
@@ -402,6 +410,9 @@
       document.getElementById('noRoomOverlay').classList.add('hidden');
       document.getElementById('boardRoomPin').textContent = pin;
 
+      if (document.getElementById('boardNavStudentBtn')) document.getElementById('boardNavStudentBtn').href = `index.html?pin=${pin}`;
+      if (document.getElementById('boardNavAdminBtn')) document.getElementById('boardNavAdminBtn').href = `admin.html?pin=${pin}`;
+
       // Update URL query
       const newUrl = new URL(window.location);
       newUrl.searchParams.set('pin', pin);
@@ -583,22 +594,24 @@
           continue;
         }
 
-        const tileEl = document.createElement('div');
+        const baseBox = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-xs sm:text-sm md:text-base shadow-md border-2 transition-all w-10 sm:w-12 h-7 sm:h-8.5';
         
         if (isFinish) {
-          tileEl.className = 'board-tile flex items-center justify-center rounded-2xl font-mono font-black text-slate-950 text-base shadow-2xl bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 border-2 border-white animate-pulse px-4 py-2 min-w-[65px]';
+          tileEl.className = `${baseBox} bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 text-slate-950 border-white ring-2 ring-amber-300 animate-pulse`;
           tileEl.innerHTML = `🏆 ${i}`;
         } else if (isStart) {
-          tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-white text-sm shadow-xl bg-indigo-600 border-2 border-indigo-300 px-3 py-1.5 min-w-[50px]';
+          tileEl.className = `${baseBox} bg-indigo-600 text-white border-indigo-300 shadow-indigo-600/40`;
           tileEl.innerHTML = `🚩 ${i}`;
         } else if (warp && warp.type === 'ladder') {
-          tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-emerald-200 text-sm shadow-xl bg-emerald-950/90 border-2 border-emerald-400 px-3 py-1.5 min-w-[55px]';
+          tileEl.className = `${baseBox} bg-emerald-950/90 text-emerald-300 border-emerald-400 shadow-emerald-950/50`;
           tileEl.innerHTML = `🧗‍♂️ ${i}`;
+          tileEl.title = `บันไดลัดไปช่อง ${warp.to}`;
         } else if (warp && warp.type === 'snake') {
-          tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-rose-200 text-sm shadow-xl bg-rose-950/90 border-2 border-rose-400 px-3 py-1.5 min-w-[55px]';
+          tileEl.className = `${baseBox} bg-rose-950/90 text-rose-300 border-rose-400 shadow-rose-950/50`;
           tileEl.innerHTML = `🐍 ${i}`;
+          tileEl.title = `งู/กับดักถอยไปช่อง ${warp.to}`;
         } else {
-          tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-white text-sm shadow-lg bg-slate-950/85 backdrop-blur-md border-2 border-white/35 px-3 py-1.5 min-w-[44px]';
+          tileEl.className = `${baseBox} bg-slate-950/85 backdrop-blur-md text-slate-100 border-white/30`;
           tileEl.innerHTML = `${i}`;
         }
 
