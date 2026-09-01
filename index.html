@@ -1318,6 +1318,10 @@
       Object.keys(teams).forEach(teamKey => {
         const team = teams[teamKey];
         const tile = team.current_tile || 0;
+        if (!tileClusters[tile]) tileClusters[tile] = [];
+        tileClusters[tile].push({ key: teamKey, ...team });
+      });
+
       pawnsContainer.innerHTML = Object.keys(teams).map(teamKey => {
         const team = teams[teamKey];
         const currentTile = team.current_tile || 0;
