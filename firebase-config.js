@@ -177,24 +177,56 @@ const SAMPLE_ACTIVE_LEARNING_STATIONS = [
 // รูปภาพกระดานบันไดงูสำเร็จรูป
 const SAMPLE_BOARD_PRESETS = [
   {
+    name: "🏴‍☠️ ล่าขุมทรัพย์ราชาโจรสลัด (1-100 ช่อง)",
+    url: "pirate_board_100.jpg",
+    tiles: 100,
+    grid_cols: 10,
+    grid_direction: "serpentine_bottom_lr",
+    tile_display_mode: "hide_numbers",
+    padding_x: 12.5,
+    padding_y: 11.5,
+    snakes_ladders: {
+      "4": { to: 14, type: "ladder", message: "🧭 เจอเข็มทิศวิเศษ! แล่นเรือลัดไปช่อง 14" },
+      "28": { to: 84, type: "ladder", message: "🌊 เจอกระแสน้ำอุ่นนำทาง! ลอยลำขึ้นไปช่อง 84" },
+      "51": { to: 67, type: "ladder", message: "🗺️ แย่งชิ้นส่วนแผนที่สำเร็จ! รุดหน้าไปช่อง 67" },
+      "72": { to: 91, type: "ladder", message: "🧜‍♀️ นางเงือกช่วยนำทาง! แล่นเรือขึ้นไปช่อง 91" },
+      "16": { to: 6, type: "snake", message: "🍺 ลูกเรือเมาเหล้ารัม! ถอยหลังกลับไปช่อง 6" },
+      "48": { to: 26, type: "snake", message: "🪨 เรือชนหินโสโครก! ถอยกลับไปซ่อมเรือที่ช่อง 26" },
+      "62": { to: 19, type: "snake", message: "🐙 สัตว์ประหลาดคราเคนโจมตี! โดนซัดถอยไปช่อง 19" },
+      "88": { to: 24, type: "snake", message: "🌀 พายุหมุน Whirlpool! โดนดูดถอยไปช่อง 24" },
+      "95": { to: 75, type: "snake", message: "⚔️ เรือรบหลวงลาดตระเวนสกัดจับ! ถอยไปช่อง 75" },
+      "99": { to: 78, type: "snake", message: "💀 กับดักวิหารต้องสาป! ถอยไปตั้งหลักช่อง 78" }
+    }
+  },
+  {
     name: "กระดานแฟนตาซีเวทมนตร์ (Fantasy World)",
     url: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
-    tiles: 40
+    tiles: 40,
+    grid_cols: 8,
+    grid_direction: "serpentine_bottom_lr",
+    tile_display_mode: "show_all",
+    padding_x: 7,
+    padding_y: 9
   },
   {
     name: "กระดานผจญภัยอวกาศ (Cosmic Galaxy)",
     url: "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1200&q=80",
-    tiles: 40
+    tiles: 40,
+    grid_cols: 8,
+    grid_direction: "serpentine_bottom_lr",
+    tile_display_mode: "show_all",
+    padding_x: 7,
+    padding_y: 9
   },
   {
     name: "กระดานป่ามหาสนุก (Jungle Adventure)",
     url: "https://images.unsplash.com/photo-1511497584788-87676104235f?auto=format&fit=crop&w=1200&q=80",
-    tiles: 36
-  },
-  {
-    name: "กระดานมินิมอลโมเดิร์น (Clean Geometric)",
-    url: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1200&q=80",
-    tiles: 50
+    tiles: 36,
+    grid_cols: 6,
+    grid_direction: "serpentine_bottom_lr",
+    tile_display_mode: "show_all",
+    padding_x: 7,
+    padding_y: 9
   }
 ];
 
@@ -287,12 +319,20 @@ class PhygitalFirebaseManager {
       };
     });
 
+    const piratePreset = SAMPLE_BOARD_PRESETS[0];
+
     return {
       config: {
         room_pin: roomPin,
-        title: `ห้องทดลอง Active Learning (${roomPin})`,
-        board_image_url: SAMPLE_BOARD_PRESETS[0].url,
-        total_tiles: 40,
+        title: `ล่าขุมทรัพย์ราชาโจรสลัด (${roomPin})`,
+        board_image_url: piratePreset.url,
+        total_tiles: piratePreset.tiles || 100,
+        grid_cols: piratePreset.grid_cols || 10,
+        grid_direction: piratePreset.grid_direction || "serpentine_bottom_lr",
+        tile_display_mode: piratePreset.tile_display_mode || "hide_numbers",
+        padding_x: piratePreset.padding_x || 12.5,
+        padding_y: piratePreset.padding_y || 11.5,
+        snakes_ladders: piratePreset.snakes_ladders || {},
         total_teams: 6,
         total_stations: 10,
         finish_bonus: 500,
@@ -634,18 +674,34 @@ class PhygitalFirebaseManager {
     const team = data.teams?.[teamId];
     if (!team) throw new Error("ไม่พบข้อมูลกลุ่ม");
 
-    const totalTiles = parseInt(config.total_tiles) || 40;
+    const totalTiles = parseInt(config.total_tiles) || 100;
     const oldTile = parseInt(team.current_tile) || 0;
-    const newTile = Math.min(totalTiles, oldTile + diceValue);
+    const landedTile = Math.min(totalTiles, oldTile + diceValue);
+    let finalTile = landedTile;
+    let warpEvent = null;
+
+    // Check Snakes and Ladders warp
+    const snakesLadders = config.snakes_ladders || {};
+    if (snakesLadders[String(landedTile)]) {
+      const warp = snakesLadders[String(landedTile)];
+      warpEvent = {
+        from: landedTile,
+        to: warp.to,
+        type: warp.type,
+        message: warp.message
+      };
+      finalTile = warp.to;
+    }
+
     const history = team.dice_history ? [...team.dice_history, diceValue] : [diceValue];
 
-    team.current_tile = newTile;
+    team.current_tile = finalTile;
     team.dice_history = history;
 
     let reachedFinish = false;
     let finishBonus = 0;
 
-    if (newTile >= totalTiles && !team.is_finished) {
+    if (finalTile >= totalTiles && !team.is_finished) {
       reachedFinish = true;
       finishBonus = parseInt(config.finish_bonus) || 500;
       team.score = (team.score || 0) + finishBonus;
@@ -663,7 +719,7 @@ class PhygitalFirebaseManager {
     if (this.db) {
       try {
         const updates = {};
-        updates[`teams/${teamId}/current_tile`] = newTile;
+        updates[`teams/${teamId}/current_tile`] = finalTile;
         updates[`teams/${teamId}/dice_history`] = history;
         if (reachedFinish) {
           updates[`teams/${teamId}/score`] = team.score;
@@ -679,7 +735,9 @@ class PhygitalFirebaseManager {
     }
 
     return {
-      newTile,
+      landedTile,
+      newTile: finalTile,
+      warpEvent,
       reachedFinish,
       finishBonus
     };

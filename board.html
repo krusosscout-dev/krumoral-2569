@@ -10,6 +10,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Kanit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎲</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎲</text></svg>">
+  
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -400,42 +403,55 @@
     }
 
     // ================= COORDINATE MAPPING ALGORITHM =================
-    // Converts tile number (1 to total_tiles) to (X%, Y%) position on board image
-    // Uses Serpentine / Zigzag matrix layout
-    function getTileCoordinate(tileNumber, totalTiles) {
+    function getTileCoordinate(tileNumber, totalTiles, config = {}) {
       if (tileNumber <= 0) {
-        // Start Zone (Bottom Left outside tile 1)
-        return { x: 5, y: 95 };
+        return { x: 7, y: 84 };
       }
 
-      // Calculate Grid Dimensions (e.g. 40 tiles -> 5 rows x 8 cols)
+      const total = parseInt(totalTiles) || 40;
       let cols = 8;
-      if (totalTiles <= 20) cols = 5;
-      else if (totalTiles <= 30) cols = 6;
-      else if (totalTiles <= 50) cols = 10;
-      else if (totalTiles <= 100) cols = 10;
+      if (config.grid_cols && config.grid_cols !== 'auto') {
+        cols = parseInt(config.grid_cols) || 8;
+      } else {
+        if (total <= 20) cols = 5;
+        else if (total <= 30) cols = 6;
+        else if (total <= 50) cols = 8;
+        else cols = 10;
+      }
 
-      const rows = Math.ceil(totalTiles / cols);
-      const index = Math.min(tileNumber, totalTiles) - 1; // 0-based
-      
-      const rowIndex = Math.floor(index / cols); // 0 = bottom row, 1 = second row, etc.
+      const rows = Math.ceil(total / cols);
+      const index = Math.min(tileNumber, total) - 1;
+      const rowIndex = Math.floor(index / cols);
       const colInRow = index % cols;
 
-      // Zigzag logic: Even rows go Left->Right, Odd rows go Right->Left
-      let colPos = (rowIndex % 2 === 0) ? colInRow : (cols - 1 - colInRow);
+      const direction = config.grid_direction || 'serpentine_bottom_lr';
+      let colPos = colInRow;
+      let rowPos = rowIndex;
 
-      // Margin paddings (in percentage)
-      const xPadding = 8;
-      const yPadding = 10;
+      if (direction === 'serpentine_bottom_lr') {
+        colPos = (rowIndex % 2 === 0) ? colInRow : (cols - 1 - colInRow);
+        rowPos = rowIndex;
+      } else if (direction === 'serpentine_bottom_rl') {
+        colPos = (rowIndex % 2 === 0) ? (cols - 1 - colInRow) : colInRow;
+        rowPos = rowIndex;
+      } else if (direction === 'grid_bottom_lr') {
+        colPos = colInRow;
+        rowPos = rowIndex;
+      } else if (direction === 'grid_top_lr') {
+        colPos = colInRow;
+        rowPos = rows - 1 - rowIndex;
+      }
+
+      const xPadding = config.padding_x !== undefined ? parseFloat(config.padding_x) : 7;
+      const yPadding = config.padding_y !== undefined ? parseFloat(config.padding_y) : 9;
       const usableWidth = 100 - (xPadding * 2);
       const usableHeight = 100 - (yPadding * 2);
 
       const cellWidth = usableWidth / cols;
       const cellHeight = usableHeight / rows;
 
-      // Bottom row (rowIndex = 0) is at the bottom (high Y%), Top row (rowIndex = rows-1) is at the top (low Y%)
       const x = xPadding + (colPos * cellWidth) + (cellWidth / 2);
-      const y = (100 - yPadding) - (rowIndex * cellHeight) - (cellHeight / 2);
+      const y = (100 - yPadding) - (rowPos * cellHeight) - (cellHeight / 2);
 
       return { x, y, rows, cols };
     }
@@ -472,10 +488,10 @@
       }
 
       // 3. Render Board Tiles Grid Overlay
-      renderTilesOverlay(totalTiles);
+      renderTilesOverlay(totalTiles, config);
 
       // 4. Render 6 Team Pawns with Coordinate Mapping
-      renderTeamPawns(teams, totalTiles);
+      renderTeamPawns(teams, totalTiles, config);
 
       // 5. Render Leaderboard
       renderLeaderboard(teams, config);
@@ -497,14 +513,21 @@
     }
 
     // Render Tiles Overlay (Zigzag numbering)
-    function renderTilesOverlay(totalTiles) {
+    function renderTilesOverlay(totalTiles, config = {}) {
       const container = document.getElementById('tilesContainer');
       container.innerHTML = '';
 
+      const tileMode = config.tile_display_mode || 'show_all';
+      if (tileMode === 'hide_numbers') return;
+
       for (let i = 1; i <= totalTiles; i++) {
-        const coord = getTileCoordinate(i, totalTiles);
+        const coord = getTileCoordinate(i, totalTiles, config);
         const isFinish = i === totalTiles;
         const isStart = i === 1;
+
+        if (tileMode === 'show_key_only' && !isFinish && !isStart) {
+          continue;
+        }
 
         const tileEl = document.createElement('div');
         tileEl.className = `board-tile flex flex-col items-center justify-center rounded-xl font-mono font-bold transition-all ${
@@ -523,7 +546,7 @@
     }
 
     // Render Team Pawns on Board
-    function renderTeamPawns(teams, totalTiles) {
+    function renderTeamPawns(teams, totalTiles, config = {}) {
       const container = document.getElementById('pawnsContainer');
       
       // Group teams by their current tile to offset multiple pawns on the same square
@@ -547,7 +570,7 @@
       container.innerHTML = Object.keys(teams).map(teamKey => {
         const team = teams[teamKey];
         const currentTile = team.current_tile || 0;
-        const coord = getTileCoordinate(currentTile, totalTiles);
+        const coord = getTileCoordinate(currentTile, totalTiles, config);
 
         // Stagger offset if multiple teams on same tile
         const cluster = tileClusters[currentTile] || [];
@@ -555,7 +578,12 @@
         
         let offsetX = 0;
         let offsetY = 0;
-        if (cluster.length > 1) {
+        if (currentTile <= 0) {
+          const col = indexInCluster % 3;
+          const row = Math.floor(indexInCluster / 3);
+          offsetX = (col - 1) * 22;
+          offsetY = (row === 0) ? -20 : 12;
+        } else if (cluster.length > 1) {
           const angle = (indexInCluster / cluster.length) * (2 * Math.PI);
           offsetX = Math.cos(angle) * 16;
           offsetY = Math.sin(angle) * 16;
