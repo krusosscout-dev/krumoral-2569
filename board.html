@@ -69,6 +69,8 @@
       position: absolute;
       transform: translate(-50%, -50%);
       transition: all 0.3s ease;
+      user-select: none;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.8));
     }
     .team-pawn {
       position: absolute;
@@ -123,10 +125,16 @@
         </div>
       </div>
 
-      <!-- Center: Big PIN Display for Class Projection -->
-      <div class="flex items-center space-x-3 bg-slate-800/90 border border-slate-700 px-5 py-2 rounded-2xl shadow-inner">
-        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">ROOM PIN:</span>
-        <span id="boardRoomPin" class="text-2xl sm:text-3xl font-black text-amber-400 font-mono tracking-widest">------</span>
+      <!-- Center: Big PIN Display & Master Room Timer for Class Projection -->
+      <div class="flex items-center space-x-3 sm:space-x-4">
+        <div class="flex items-center space-x-2 sm:space-x-3 bg-slate-800/90 border border-slate-700 px-3.5 sm:px-5 py-1.5 rounded-2xl shadow-inner">
+          <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">PIN:</span>
+          <span id="boardRoomPin" class="text-xl sm:text-2xl font-black text-amber-400 font-mono tracking-widest">------</span>
+        </div>
+        <div class="flex items-center space-x-2 bg-indigo-950/80 border border-indigo-500/40 px-3.5 sm:px-4 py-1.5 rounded-2xl shadow-inner">
+          <i data-lucide="clock" class="w-4 h-4 text-indigo-400"></i>
+          <span id="boardMasterTimer" class="text-base sm:text-lg font-black text-indigo-200 font-mono">40:00</span>
+        </div>
       </div>
 
       <!-- Right Controls -->
@@ -510,7 +518,10 @@
       // 7. Update Live Ticker from latest log
       updateLiveTicker(logs);
 
-      // 8. Check Victory Trigger
+      // 8. Update Master Room Timer
+      updateBoardMasterTimer(config);
+
+      // 9. Check Victory Trigger
       if (config.game_status === 'finished') {
         showVictoryFinale(teams, config);
       } else {
@@ -518,6 +529,39 @@
       }
 
       lucide.createIcons();
+    }
+
+    // Board Master Room Timer Controller
+    let boardMasterTimerInterval = null;
+    function updateBoardMasterTimer(config) {
+      if (boardMasterTimerInterval) clearInterval(boardMasterTimerInterval);
+
+      const timerEl = document.getElementById('boardMasterTimer');
+      if (!timerEl) return;
+
+      const durationMinutes = parseInt(config.game_duration_minutes) || 40;
+      const totalSeconds = durationMinutes * 60;
+      const startedAt = config.game_started_at || config.created_at || Date.now();
+
+      function tick() {
+        const elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
+        const remainingSeconds = Math.max(0, totalSeconds - elapsedSeconds);
+
+        const mins = Math.floor(remainingSeconds / 60);
+        const secs = remainingSeconds % 60;
+        const timeStr = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        
+        timerEl.textContent = `⏰ ${timeStr}`;
+
+        if (remainingSeconds <= 0 && config.game_status === 'playing') {
+          clearInterval(boardMasterTimerInterval);
+          if (roomData?.config) roomData.config.game_status = 'finished';
+          renderSharedBoard(roomData);
+        }
+      }
+
+      tick();
+      boardMasterTimerInterval = setInterval(tick, 1000);
     }
 
     // Render Tiles Overlay (Glowing System Badges)
@@ -542,19 +586,19 @@
         const tileEl = document.createElement('div');
         
         if (isFinish) {
-          tileEl.className = 'board-tile flex items-center justify-center rounded-2xl font-mono font-black text-slate-950 text-sm shadow-2xl bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-600 border-2 border-yellow-200 animate-pulse px-3 py-1.5 min-w-[50px]';
+          tileEl.className = 'board-tile flex items-center justify-center rounded-2xl font-mono font-black text-slate-950 text-base shadow-2xl bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 border-2 border-white animate-pulse px-4 py-2 min-w-[65px]';
           tileEl.innerHTML = `🏆 ${i}`;
         } else if (isStart) {
-          tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-bold text-white text-xs shadow-lg bg-indigo-600/90 border border-indigo-400 px-2.5 py-1 min-w-[38px]';
+          tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-white text-sm shadow-xl bg-indigo-600 border-2 border-indigo-300 px-3 py-1.5 min-w-[50px]';
           tileEl.innerHTML = `🚩 ${i}`;
         } else if (warp && warp.type === 'ladder') {
-          tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-emerald-300 text-xs shadow-lg bg-emerald-950/85 border-2 border-emerald-400 px-2.5 py-1 min-w-[42px]';
+          tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-emerald-200 text-sm shadow-xl bg-emerald-950/90 border-2 border-emerald-400 px-3 py-1.5 min-w-[55px]';
           tileEl.innerHTML = `🧗‍♂️ ${i}`;
         } else if (warp && warp.type === 'snake') {
-          tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-rose-300 text-xs shadow-lg bg-rose-950/85 border-2 border-rose-400 px-2.5 py-1 min-w-[42px]';
+          tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-rose-200 text-sm shadow-xl bg-rose-950/90 border-2 border-rose-400 px-3 py-1.5 min-w-[55px]';
           tileEl.innerHTML = `🐍 ${i}`;
         } else {
-          tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-bold text-white text-xs shadow-md bg-slate-900/80 backdrop-blur-sm border border-white/20 px-2 py-1 min-w-[32px]';
+          tileEl.className = 'board-tile flex items-center justify-center rounded-xl font-mono font-black text-white text-sm shadow-lg bg-slate-950/85 backdrop-blur-md border-2 border-white/35 px-3 py-1.5 min-w-[44px]';
           tileEl.innerHTML = `${i}`;
         }
 

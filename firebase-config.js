@@ -286,12 +286,101 @@ const SAMPLE_BOARD_PRESETS = [
   }
 ];
 
+// ฟังก์ชันคำนวณสุ่มตำแหน่งบันไดและงูอัตโนมัติอย่างชาญฉลาดและสมดุล (รองรับ 20, 30, 40, 50, 60, 80, 100 ช่อง)
+function generateDynamicSnakesAndLadders(totalTiles = 40) {
+  const total = parseInt(totalTiles) || 40;
+  const result = {};
+  const usedTiles = new Set([1, total]); // ห้ามสุ่มโดนจุดเริ่มและเส้นชัย
+
+  // กำหนดจำนวนคู่บันไดและงูตามขนาดกระดาน
+  let pairCount = 3;
+  if (total <= 25) pairCount = 2;
+  else if (total <= 50) pairCount = 3;
+  else if (total <= 75) pairCount = 4;
+  else pairCount = 5; // สำหรับ 100 ช่อง มี 5 บันได + 5 งู
+
+  const ladderMessages = [
+    "🧗‍♂️ ไต่บันไดลัด! พุ่งขึ้นไปช่อง {to}",
+    "⚡ สัญญาณบูสต์พลัง! วาร์ปข้ามไปช่อง {to}",
+    "🚀 จรวดเร่งความเร็ว! พุ่งทะยานไปช่อง {to}",
+    "🌟 เก็บดาวนำโชค! เหินฟ้าไปช่อง {to}",
+    "🦅 อินทรีย์ช่วยพาบิน! ลอยลำไปช่อง {to}"
+  ];
+
+  const snakeMessages = [
+    "🐍 ตกหลุมพรางงูยักษ์! ถอยหลังกลับไปช่อง {to}",
+    "⚠️ กับดักสกัดทาง! ถอยไปตั้งหลักช่อง {to}",
+    "🌀 วังน้ำวนดูดดิ่ง! สไลด์ลงไปช่อง {to}",
+    "💥 กับระเบิดสะเทือน! ถอยกลับไปช่อง {to}",
+    "🌪️ ลมพายุพัดกระหน่ำ! ถอยหลังไปช่อง {to}"
+  ];
+
+  // 1. สุ่มบันได (Ladders) - เริ่มต้นโซนล่าง/กลาง ปีนขึ้นโซนสูง
+  for (let i = 0; i < pairCount; i++) {
+    let attempts = 0;
+    while (attempts < 60) {
+      attempts++;
+      const minStart = Math.max(3, Math.floor((total / (pairCount + 1)) * i) + 2);
+      const maxStart = Math.min(total - 5, Math.floor((total / (pairCount + 1)) * (i + 1)));
+      const start = Math.floor(Math.random() * (maxStart - minStart + 1)) + minStart;
+
+      const climbDistance = Math.floor(total * (0.18 + Math.random() * 0.25)) + 3;
+      const end = Math.min(total - 1, start + climbDistance);
+
+      if (!usedTiles.has(start) && !usedTiles.has(end) && end > start + 2) {
+        usedTiles.add(start);
+        usedTiles.add(end);
+        const msg = ladderMessages[i % ladderMessages.length].replace('{to}', end);
+        result[String(start)] = {
+          to: end,
+          type: "ladder",
+          message: msg
+        };
+        break;
+      }
+    }
+  }
+
+  // 2. สุ่มงู (Snakes / Traps) - เริ่มต้นโซนกลาง/บน สไลด์ลงโซนล่าง
+  for (let i = 0; i < pairCount; i++) {
+    let attempts = 0;
+    while (attempts < 60) {
+      attempts++;
+      const minStart = Math.max(8, Math.floor(total * 0.35) + Math.floor((total * 0.55 / pairCount) * i));
+      const maxStart = Math.min(total - 2, Math.floor(total * 0.35) + Math.floor((total * 0.55 / pairCount) * (i + 1)));
+      const start = Math.floor(Math.random() * (maxStart - minStart + 1)) + minStart;
+
+      const dropDistance = Math.floor(total * (0.18 + Math.random() * 0.25)) + 3;
+      const end = Math.max(2, start - dropDistance);
+
+      if (!usedTiles.has(start) && !usedTiles.has(end) && start > end + 2) {
+        usedTiles.add(start);
+        usedTiles.add(end);
+        const msg = snakeMessages[i % snakeMessages.length].replace('{to}', end);
+        result[String(start)] = {
+          to: end,
+          type: "snake",
+          message: msg
+        };
+        break;
+      }
+    }
+  }
+
+  return result;
+}
+
 class PhygitalFirebaseManager {
   constructor() {
     this.app = null;
     this.db = null;
     this.connected = false;
     this.listeners = [];
+  }
+
+  // Helper สำหรับเรียกสุ่มจุดงูและบันไดอัตโนมัติ
+  generateDynamicSnakesAndLadders(totalTiles) {
+    return generateDynamicSnakesAndLadders(totalTiles);
   }
 
   // Promise Timeout Wrapper ป้องกัน Network Hang
@@ -383,6 +472,8 @@ class PhygitalFirebaseManager {
         title: `ห้องเรียน Active Learning (${roomPin})`,
         board_image_url: defaultPreset.url,
         total_tiles: defaultPreset.tiles || 40,
+        game_duration_minutes: 40,
+        game_started_at: Date.now(),
         grid_cols: defaultPreset.grid_cols || 8,
         grid_direction: defaultPreset.grid_direction || "serpentine_bottom_lr",
         tile_display_mode: defaultPreset.tile_display_mode || "show_all",
@@ -481,15 +572,24 @@ class PhygitalFirebaseManager {
     const totalTeamsCount = parseInt(roomData.total_teams) || 6;
     const teamsObj = roomData.teams || generateDefaultTeams(totalTeamsCount);
 
+    const totalTiles = parseInt(roomData.total_tiles) || 40;
+    let snakesLadders = roomData.snakes_ladders;
+    if (!snakesLadders || roomData.randomize_snakes_ladders) {
+      snakesLadders = generateDynamicSnakesAndLadders(totalTiles);
+    }
+
     const initialData = {
       config: {
         room_pin: roomPin,
         title: roomData.title || `ห้องเรียนเกมบันไดงู (${roomPin})`,
         board_image_url: roomData.board_image_url || SAMPLE_BOARD_PRESETS[0].url,
-        total_tiles: parseInt(roomData.total_tiles) || 40,
+        total_tiles: totalTiles,
+        game_duration_minutes: parseInt(roomData.game_duration_minutes) || 40,
+        game_started_at: Date.now(),
         total_teams: totalTeamsCount,
         total_stations: Object.keys(stationsObj).length,
         finish_bonus: parseInt(roomData.finish_bonus) || 500,
+        snakes_ladders: snakesLadders,
         game_status: "playing",
         winner_team_id: null,
         created_at: Date.now(),
@@ -722,6 +822,7 @@ class PhygitalFirebaseManager {
   }
 
   // ทอยลูกเต๋าและเดินตัวหมาก
+  // ทอยลูกเต๋าและเดินตัวหมาก (ระบบแข่งขันตามเวลา เล่นวนรอบต่อเนื่องได้ไม่สิ้นสุด)
   async rollDiceAndMove(roomPin, teamId, diceValue) {
     let data = this.getLocalRoom(roomPin);
     if (!data) data = await this.createDemoRoomIfNotExist(roomPin);
@@ -730,18 +831,42 @@ class PhygitalFirebaseManager {
     const team = data.teams?.[teamId];
     if (!team) throw new Error("ไม่พบข้อมูลกลุ่ม");
 
-    const totalTiles = parseInt(config.total_tiles) || 100;
+    const totalTiles = parseInt(config.total_tiles) || 40;
     const oldTile = parseInt(team.current_tile) || 0;
-    const landedTile = Math.min(totalTiles, oldTile + diceValue);
-    let finalTile = landedTile;
+    let rawTile = oldTile + diceValue;
+    let reachedFinish = false;
+    let finishBonus = 0;
+
+    // ตรวจสอบการเข้าเส้นชัย (ได้โบนัส + วนรอบเล่นต่อทันที)
+    if (rawTile >= totalTiles) {
+      reachedFinish = true;
+      finishBonus = parseInt(config.finish_bonus) || 500;
+      team.score = (team.score || 0) + finishBonus;
+      team.laps_completed = (team.laps_completed || 0) + 1;
+      
+      // วนรอบกลับมาเดินต่อที่จุดเริ่มต้น
+      if (rawTile === totalTiles) {
+        rawTile = totalTiles;
+      } else {
+        rawTile = ((rawTile - 1) % totalTiles) + 1;
+      }
+
+      this.addLog(roomPin, {
+        team_id: teamId,
+        type: 'finish',
+        message: `🏆 ${team.name} เข้าเส้นชัยรอบที่ ${team.laps_completed}! (+${finishBonus} แต้มโบนัส) และกำลังเล่นต่อรอบใหม่`
+      });
+    }
+
+    let finalTile = rawTile;
     let warpEvent = null;
 
     // Check Snakes and Ladders warp
     const snakesLadders = config.snakes_ladders || {};
-    if (snakesLadders[String(landedTile)]) {
-      const warp = snakesLadders[String(landedTile)];
+    if (snakesLadders[String(finalTile)]) {
+      const warp = snakesLadders[String(finalTile)];
       warpEvent = {
-        from: landedTile,
+        from: finalTile,
         to: warp.to,
         type: warp.type,
         message: warp.message
@@ -753,22 +878,7 @@ class PhygitalFirebaseManager {
 
     team.current_tile = finalTile;
     team.dice_history = history;
-
-    let reachedFinish = false;
-    let finishBonus = 0;
-
-    if (finalTile >= totalTiles && !team.is_finished) {
-      reachedFinish = true;
-      finishBonus = parseInt(config.finish_bonus) || 500;
-      team.score = (team.score || 0) + finishBonus;
-      team.is_finished = true;
-      team.finish_time = Date.now();
-
-      if (!config.winner_team_id) {
-        config.game_status = 'finished';
-        config.winner_team_id = teamId;
-      }
-    }
+    team.is_finished = false; // เล่นต่อเนื่องได้ตลอดจนหมดเวลาควบคุมของแอดมิน!
 
     this.saveLocalRoom(roomPin, data);
 
@@ -777,25 +887,20 @@ class PhygitalFirebaseManager {
         const updates = {};
         updates[`teams/${teamId}/current_tile`] = finalTile;
         updates[`teams/${teamId}/dice_history`] = history;
-        if (reachedFinish) {
-          updates[`teams/${teamId}/score`] = team.score;
-          updates[`teams/${teamId}/is_finished`] = true;
-          updates[`teams/${teamId}/finish_time`] = team.finish_time;
-          if (config.winner_team_id === teamId) {
-            updates['config/game_status'] = 'finished';
-            updates['config/winner_team_id'] = teamId;
-          }
-        }
+        updates[`teams/${teamId}/score`] = team.score;
+        updates[`teams/${teamId}/laps_completed`] = team.laps_completed || 0;
+        updates[`teams/${teamId}/is_finished`] = false;
         this.withTimeout(this.getRoomRef(roomPin).update(updates));
       } catch(e) {}
     }
 
     return {
-      landedTile,
+      landedTile: rawTile,
       newTile: finalTile,
       warpEvent,
       reachedFinish,
-      finishBonus
+      finishBonus,
+      lapsCompleted: team.laps_completed || 0
     };
   }
 
