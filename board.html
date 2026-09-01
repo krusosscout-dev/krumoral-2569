@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shared Board - Phygital Snakes and Ladders</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Kanit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'sans-serif'],
+            heading: ['Kanit', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- SweetAlert2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Firebase App & Database Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  
+  <!-- Project Firebase Config & Helper -->
+  <script src="firebase-config.js"></script>
+
+  <style>
+    body {
+      font-family: 'Prompt', sans-serif;
+      overflow-x: hidden;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 4px;
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .board-container {
+      position: relative;
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    }
+    .board-tile {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      transition: all 0.3s ease;
+    }
+    .team-pawn {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 30;
+      pointer-events: auto;
+    }
+    .team-pawn:hover {
+      transform: translate(-50%, -50%) scale(1.35);
+      z-index: 40;
+    }
+    @keyframes bounce-pawn {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -65%) scale(1.15); }
+    }
+    .pawn-moving {
+      animation: bounce-pawn 0.6s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+  <!-- ================= TOP HEADER BAR ================= -->
+  <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-xl px-4 sm:px-6 py-2.5">
+    <div class="max-w-[1700px] mx-auto flex items-center justify-between">
+      
+      <!-- Brand & Room PIN -->
+      <div class="flex items-center space-x-4">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-2xl font-bold shadow-lg shadow-indigo-500/30">
+          🎲
+        </div>
+        <div>
+          <div class="flex items-center space-x-2.5">
+            <h1 id="boardRoomTitle" class="text-lg sm:text-xl font-black font-heading bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-100 to-purple-300">
+              Active Learning: Phygital Snakes & Ladders
+            </h1>
+            <span id="boardStatusBadge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              รอเริ่มเกม
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">จอภาพกระดานรวมแสดงผลสดในห้องเรียน (Shared Digital Board)</p>
+        </div>
+      </div>
+
+      <!-- Center: Big PIN Display for Class Projection -->
+      <div class="flex items-center space-x-3 bg-slate-800/90 border border-slate-700 px-5 py-2 rounded-2xl shadow-inner">
+        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">ROOM PIN:</span>
+        <span id="boardRoomPin" class="text-2xl sm:text-3xl font-black text-amber-400 font-mono tracking-widest">------</span>
+      </div>
+
+      <!-- Right Controls -->
+      <div class="flex items-center space-x-2">
+        <button onclick="toggleSound()" id="btnSoundToggle" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all text-xs flex items-center space-x-1.5">
+          <i data-lucide="volume-2" class="w-4 h-4 text-emerald-400"></i>
+          <span class="hidden md:inline font-semibold">เปิดเสียง</span>
+        </button>
+        <button onclick="toggleFullScreen()" class="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 transition-all text-xs font-semibold flex items-center space-x-1.5">
+          <i data-lucide="maximize" class="w-4 h-4"></i>
+          <span class="hidden md:inline">เต็มจอ (Full Screen)</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ================= NO ROOM MODAL / ENTER PIN ================= -->
+  <div id="noRoomOverlay" class="fixed inset-0 z-50 bg-slate-950/95 flex items-center justify-center p-4">
+    <div class="max-w-md w-full glass-card p-8 rounded-3xl border border-slate-800 shadow-2xl text-center space-y-5">
+      <div class="w-20 h-20 mx-auto rounded-3xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-4xl shadow-inner">
+        📺
+      </div>
+      <div>
+        <h2 class="text-2xl font-black font-heading text-white">เปิดจอภาพกระดานเกม</h2>
+        <p class="text-xs text-slate-400 mt-1">กรุณากรอกรหัส Room PIN ของห้องเรียนที่ต้องการแสดงผล</p>
+      </div>
+      <div class="space-y-3">
+        <input type="text" id="inputRoomPin" maxlength="6" class="w-full bg-slate-900 border border-slate-700 rounded-2xl px-4 py-3.5 font-mono text-center font-black text-3xl text-amber-400 tracking-widest uppercase focus:outline-none focus:border-amber-500" placeholder="123456">
+        <button onclick="loadBoardFromInput()" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 font-bold text-sm text-white shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center space-x-2">
+          <i data-lucide="play-circle" class="w-5 h-5"></i>
+          <span>แสดงกระดานเกม (Load Board)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MAIN ARENA ================= -->
+  <main class="flex-1 max-w-[1700px] w-full mx-auto px-4 sm:px-6 py-4 grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+    
+    <!-- LEFT / CENTER: BOARD CANVAS (3 COLS) -->
+    <div class="lg:col-span-3 space-y-3">
+      
+      <!-- Board Area Container -->
+      <div class="glass-card p-3 rounded-3xl border border-slate-800 shadow-2xl relative">
+        
+        <!-- Board Background & Active Tile Canvas -->
+        <div id="boardCanvas" class="board-container w-full aspect-[16/10] rounded-2xl overflow-hidden border border-white/10 relative">
+          
+          <!-- Board Background Image Overlay -->
+          <img id="boardBgImage" src="" alt="Snakes and Ladders Board" class="w-full h-full object-cover">
+          
+          <!-- Subtle Dark Gradient for Tile Visibility -->
+          <div class="absolute inset-0 bg-slate-950/40 backdrop-blur-[1px]"></div>
+
+          <!-- Dynamic Tiles Overlay -->
+          <div id="tilesContainer" class="absolute inset-0 pointer-events-none">
+            <!-- Injected by Coordinate Mapping -->
+          </div>
+
+          <!-- Team Pawns Layer -->
+          <div id="pawnsContainer" class="absolute inset-0 pointer-events-none">
+            <!-- 6 Team Pawns Injected by JS -->
+          </div>
+
+        </div>
+
+        <!-- Tile Legend / Board Info Bar -->
+        <div class="flex items-center justify-between px-3 pt-3 text-xs text-slate-400">
+          <div class="flex items-center space-x-4">
+            <span class="flex items-center space-x-1">
+              <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+              <span>จุดเริ่มต้น (Start): ช่อง 1</span>
+            </span>
+            <span class="flex items-center space-x-1">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
+              <span>เส้นชัย (Finish): ช่อง <strong id="legendFinishTile" class="text-amber-400">40</strong> (+500 โบนัส)</span>
+            </span>
+          </div>
+          <span class="text-slate-500 text-[11px]">Coordinate Mapping: Serpentine Matrix Grid</span>
+        </div>
+
+      </div>
+
+      <!-- Live Activity Marquee Ticker -->
+      <div class="glass-card p-3 rounded-2xl border border-slate-800 flex items-center space-x-3 text-xs">
+        <span class="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold uppercase whitespace-nowrap flex items-center space-x-1">
+          <i data-lucide="radio" class="w-3.5 h-3.5 text-indigo-400"></i>
+          <span>Live Ticker</span>
+        </span>
+        <div id="liveTickerText" class="truncate text-slate-300 font-medium">
+          🎲 ยินดีต้อนรับสู่เกม Active Learning: Phygital Snakes and Ladders!
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: REAL-TIME LEADERBOARD & STATIONS MATRIX (1 COL) -->
+    <div class="space-y-4">
+      
+      <!-- Leaderboard Card -->
+      <div class="glass-card p-5 rounded-3xl border border-slate-800 space-y-4 shadow-xl">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg">
+              🏆
+            </div>
+            <h3 class="font-bold text-base font-heading text-white">ตารางคะแนนสด (Leaderboard)</h3>
+          </div>
+          <span class="text-[11px] text-slate-400">Real-time</span>
+        </div>
+
+        <!-- 6 Teams Rankings -->
+        <div id="leaderboardList" class="space-y-2.5">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+
+      <!-- Active Stations Occupancy Mini Card -->
+      <div class="glass-card p-5 rounded-3xl border border-slate-800 space-y-3 shadow-xl">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="layers" class="w-4 h-4 text-indigo-400"></i>
+            <h4 class="font-bold text-xs uppercase tracking-wider text-slate-300">สถานะฐานกิจกรรม (Stations)</h4>
+          </div>
+          <span id="boardVacantCount" class="text-xs text-emerald-400 font-bold">ว่าง 0 ฐาน</span>
+        </div>
+
+        <div id="boardStationsMiniGrid" class="grid grid-cols-2 gap-2 max-h-[260px] overflow-y-auto custom-scrollbar pr-1">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ================= VICTORY / GRAND FINALE MODAL ================= -->
+  <div id="victoryModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="max-w-2xl w-full glass-card p-8 rounded-3xl border border-amber-500/40 shadow-2xl text-center space-y-6 relative overflow-hidden">
+      
+      <!-- Ambient Glow -->
+      <div class="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-amber-500/20 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -right-24 w-72 h-72 rounded-full bg-purple-500/20 blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 space-y-3">
+        <div class="w-24 h-24 mx-auto rounded-3xl bg-gradient-to-br from-amber-400 to-yellow-600 text-5xl flex items-center justify-center shadow-xl shadow-amber-500/40 animate-bounce">
+          👑
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-black font-heading text-white">
+          🎉 สิ้นสุดการแข่งขัน! 🎉
+        </h2>
+        <p id="victorySubtitle" class="text-sm text-amber-300 font-semibold">
+          ทีมผู้ชนะเลิศอันดับ 1 ประจำรอบนี้
+        </p>
+      </div>
+
+      <!-- Podium Cards (1st, 2nd, 3rd) -->
+      <div id="victoryPodium" class="grid grid-cols-3 gap-3 items-end pt-4">
+        <!-- Injected by JS -->
+      </div>
+
+      <!-- Close / Back Button -->
+      <div class="pt-4 border-t border-slate-800 flex justify-center">
+        <button onclick="closeVictoryModal()" class="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 hover:text-white transition-all">
+          ปิดหน้าต่างสรุปผล (ดูภาพกระดานต่อ)
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= JAVASCRIPT APP LOGIC ================= -->
+  <script>
+    let currentRoomPin = null;
+    let roomData = null;
+    let soundEnabled = true;
+    let previousPositions = {};
+
+    // Web Audio Synthesizer for Audio Feedback
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playChime(freq = 600, duration = 0.2, type = 'sine') {
+      if (!soundEnabled) return;
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    function playGrandFanfare() {
+      if (!soundEnabled) return;
+      const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+      notes.forEach((note, idx) => {
+        setTimeout(() => playChime(note, 0.3, 'triangle'), idx * 130);
+      });
+    }
+
+    // Toggle Sound
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const btn = document.getElementById('btnSoundToggle');
+      if (soundEnabled) {
+        btn.innerHTML = `<i data-lucide="volume-2" class="w-4 h-4 text-emerald-400"></i><span class="hidden md:inline font-semibold">เปิดเสียง</span>`;
+      } else {
+        btn.innerHTML = `<i data-lucide="volume-x" class="w-4 h-4 text-rose-400"></i><span class="hidden md:inline font-semibold">ปิดเสียง</span>`;
+      }
+      lucide.createIcons();
+    }
+
+    // Full Screen Toggle
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => console.log(err));
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+
+    // On Load
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      initFirebaseApp();
+
+      const params = new URLSearchParams(window.location.search);
+      const urlPin = params.get('pin');
+      const savedPin = localStorage.getItem('PHYGITAL_CURRENT_ROOM_PIN');
+      const pinToUse = urlPin || savedPin;
+
+      if (pinToUse) {
+        loadRoom(pinToUse);
+      } else {
+        document.getElementById('noRoomOverlay').classList.remove('hidden');
+      }
+    });
+
+    function initFirebaseApp() {
+      const stored = PhygitalDB.getStoredConfig();
+      if (stored) {
+        PhygitalDB.initFirebase(stored);
+      }
+    }
+
+    function loadBoardFromInput() {
+      const pin = document.getElementById('inputRoomPin').value.trim();
+      if (!pin) {
+        Swal.fire('กรุณากรอก PIN', '', 'warning');
+        return;
+      }
+      loadRoom(pin);
+    }
+
+    function loadRoom(pin) {
+      currentRoomPin = pin;
+      document.getElementById('noRoomOverlay').classList.add('hidden');
+      document.getElementById('boardRoomPin').textContent = pin;
+
+      // Update URL query
+      const newUrl = new URL(window.location);
+      newUrl.searchParams.set('pin', pin);
+      window.history.replaceState({}, '', newUrl);
+
+      // Listen to Room in Realtime
+      PhygitalDB.listenToRoom(pin, (data) => {
+        if (!data) {
+          Swal.fire('ไม่พบห้องเกม', `ไม่พบห้อง PIN: ${pin}`, 'error');
+          document.getElementById('noRoomOverlay').classList.remove('hidden');
+          return;
+        }
+        roomData = data;
+        renderSharedBoard(data);
+      });
+    }
+
+    // ================= COORDINATE MAPPING ALGORITHM =================
+    // Converts tile number (1 to total_tiles) to (X%, Y%) position on board image
+    // Uses Serpentine / Zigzag matrix layout
+    function getTileCoordinate(tileNumber, totalTiles) {
+      if (tileNumber <= 0) {
+        // Start Zone (Bottom Left outside tile 1)
+        return { x: 5, y: 95 };
+      }
+
+      // Calculate Grid Dimensions (e.g. 40 tiles -> 5 rows x 8 cols)
+      let cols = 8;
+      if (totalTiles <= 20) cols = 5;
+      else if (totalTiles <= 30) cols = 6;
+      else if (totalTiles <= 50) cols = 10;
+      else if (totalTiles <= 100) cols = 10;
+
+      const rows = Math.ceil(totalTiles / cols);
+      const index = Math.min(tileNumber, totalTiles) - 1; // 0-based
+      
+      const rowIndex = Math.floor(index / cols); // 0 = bottom row, 1 = second row, etc.
+      const colInRow = index % cols;
+
+      // Zigzag logic: Even rows go Left->Right, Odd rows go Right->Left
+      let colPos = (rowIndex % 2 === 0) ? colInRow : (cols - 1 - colInRow);
+
+      // Margin paddings (in percentage)
+      const xPadding = 8;
+      const yPadding = 10;
+      const usableWidth = 100 - (xPadding * 2);
+      const usableHeight = 100 - (yPadding * 2);
+
+      const cellWidth = usableWidth / cols;
+      const cellHeight = usableHeight / rows;
+
+      // Bottom row (rowIndex = 0) is at the bottom (high Y%), Top row (rowIndex = rows-1) is at the top (low Y%)
+      const x = xPadding + (colPos * cellWidth) + (cellWidth / 2);
+      const y = (100 - yPadding) - (rowIndex * cellHeight) - (cellHeight / 2);
+
+      return { x, y, rows, cols };
+    }
+
+    // Render Full Shared Board & Realtime Components
+    function renderSharedBoard(data) {
+      const config = data.config || {};
+      const teams = data.teams || {};
+      const stations = data.stations || {};
+      const logs = data.logs || {};
+
+      const totalTiles = parseInt(config.total_tiles) || 40;
+
+      // 1. Header Info
+      document.getElementById('boardRoomTitle').textContent = config.title || 'Active Learning: Phygital Snakes & Ladders';
+      document.getElementById('legendFinishTile').textContent = totalTiles;
+
+      const statusBadge = document.getElementById('boardStatusBadge');
+      if (config.game_status === 'playing') {
+        statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+        statusBadge.innerHTML = `<span class="w-2 h-2 inline-block rounded-full bg-emerald-400 animate-ping mr-1"></span> กำลังแข่งขัน`;
+      } else if (config.game_status === 'finished') {
+        statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30";
+        statusBadge.textContent = "🏁 จบการแข่งขัน";
+      } else {
+        statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30";
+        statusBadge.textContent = "🟡 รอเริ่มเกม";
+      }
+
+      // 2. Set Board Background Image
+      const bgImg = document.getElementById('boardBgImage');
+      if (config.board_image_url && bgImg.src !== config.board_image_url) {
+        bgImg.src = config.board_image_url;
+      }
+
+      // 3. Render Board Tiles Grid Overlay
+      renderTilesOverlay(totalTiles);
+
+      // 4. Render 6 Team Pawns with Coordinate Mapping
+      renderTeamPawns(teams, totalTiles);
+
+      // 5. Render Leaderboard
+      renderLeaderboard(teams, config);
+
+      // 6. Render Stations Mini Status
+      renderStationsMini(stations, teams);
+
+      // 7. Update Live Ticker from latest log
+      updateLiveTicker(logs);
+
+      // 8. Check Victory Trigger
+      if (config.game_status === 'finished') {
+        showVictoryFinale(teams, config);
+      } else {
+        document.getElementById('victoryModal').classList.add('hidden');
+      }
+
+      lucide.createIcons();
+    }
+
+    // Render Tiles Overlay (Zigzag numbering)
+    function renderTilesOverlay(totalTiles) {
+      const container = document.getElementById('tilesContainer');
+      container.innerHTML = '';
+
+      for (let i = 1; i <= totalTiles; i++) {
+        const coord = getTileCoordinate(i, totalTiles);
+        const isFinish = i === totalTiles;
+        const isStart = i === 1;
+
+        const tileEl = document.createElement('div');
+        tileEl.className = `board-tile flex flex-col items-center justify-center rounded-xl font-mono font-bold transition-all ${
+          isFinish 
+            ? 'w-12 h-12 bg-gradient-to-br from-amber-400 to-yellow-600 text-slate-950 text-base shadow-lg shadow-amber-400/50 border-2 border-yellow-200 animate-pulse'
+            : isStart 
+              ? 'w-10 h-10 bg-indigo-600/80 text-white text-xs border border-indigo-400/50 shadow-md' 
+              : 'w-8 h-8 bg-slate-900/60 text-slate-300 text-[11px] border border-white/20'
+        }`;
+        tileEl.style.left = `${coord.x}%`;
+        tileEl.style.top = `${coord.y}%`;
+        
+        tileEl.innerHTML = isFinish ? `🏁 ${i}` : `${i}`;
+        container.appendChild(tileEl);
+      }
+    }
+
+    // Render Team Pawns on Board
+    function renderTeamPawns(teams, totalTiles) {
+      const container = document.getElementById('pawnsContainer');
+      
+      // Group teams by their current tile to offset multiple pawns on the same square
+      const tileClusters = {};
+      Object.keys(teams).forEach(teamKey => {
+        const team = teams[teamKey];
+        const tile = team.current_tile || 0;
+        if (!tileClusters[tile]) tileClusters[tile] = [];
+        tileClusters[tile].push({ key: teamKey, ...team });
+      });
+
+      // Track moves for sound effects
+      Object.keys(teams).forEach(teamKey => {
+        const curTile = teams[teamKey].current_tile || 0;
+        if (previousPositions[teamKey] !== undefined && previousPositions[teamKey] !== curTile) {
+          playChime(500 + curTile * 10, 0.25, 'triangle');
+        }
+        previousPositions[teamKey] = curTile;
+      });
+
+      container.innerHTML = Object.keys(teams).map(teamKey => {
+        const team = teams[teamKey];
+        const currentTile = team.current_tile || 0;
+        const coord = getTileCoordinate(currentTile, totalTiles);
+
+        // Stagger offset if multiple teams on same tile
+        const cluster = tileClusters[currentTile] || [];
+        const indexInCluster = cluster.findIndex(t => t.key === teamKey);
+        
+        let offsetX = 0;
+        let offsetY = 0;
+        if (cluster.length > 1) {
+          const angle = (indexInCluster / cluster.length) * (2 * Math.PI);
+          offsetX = Math.cos(angle) * 16;
+          offsetY = Math.sin(angle) * 16;
+        }
+
+        return `
+          <div id="pawn-${teamKey}" class="team-pawn flex flex-col items-center group cursor-pointer" style="left: calc(${coord.x}% + ${offsetX}px); top: calc(${coord.y}% + ${offsetY}px);">
+            
+            <!-- Floating Name Badge -->
+            <div class="px-2 py-0.5 rounded-md text-[10px] font-bold text-white shadow-md uppercase tracking-wider mb-1 whitespace-nowrap border border-white/20 transform group-hover:scale-110 transition-transform" style="background-color: ${team.color || '#6366f1'}">
+              ${team.name}
+            </div>
+
+            <!-- Pawn Avatar Bubble -->
+            <div class="w-11 h-11 rounded-2xl flex items-center justify-center text-2xl shadow-2xl border-2 border-white transform transition-transform group-hover:scale-125" style="background-color: ${team.color || '#6366f1'}; box-shadow: 0 0 15px ${team.color}88;">
+              ${team.avatar || '🦁'}
+            </div>
+
+            <!-- Tile Number Indicator -->
+            <span class="text-[9px] font-black text-white px-1.5 py-0.2 rounded-full bg-slate-950/80 border border-slate-700 mt-0.5">
+              ช่อง ${currentTile}
+            </span>
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Render Real-time Leaderboard
+    function renderLeaderboard(teams, config) {
+      const container = document.getElementById('leaderboardList');
+      const totalTiles = config.total_tiles || 40;
+
+      // Sort teams by total score descending
+      const sortedTeams = Object.keys(teams).map(key => ({
+        ...teams[key],
+        key
+      })).sort((a, b) => b.score - a.score);
+
+      container.innerHTML = sortedTeams.map((team, idx) => {
+        let rankBadge = `${idx + 1}`;
+        if (idx === 0) rankBadge = '🥇';
+        else if (idx === 1) rankBadge = '🥈';
+        else if (idx === 2) rankBadge = '🥉';
+
+        const completedCount = Object.keys(team.completed_stations || {}).length;
+
+        return `
+          <div class="p-3 rounded-2xl border transition-all flex items-center justify-between ${idx === 0 && team.score > 0 ? 'bg-amber-500/10 border-amber-500/40 shadow-md shadow-amber-500/10' : 'bg-slate-900/80 border-slate-800'}">
+            
+            <div class="flex items-center space-x-3">
+              <span class="text-base font-black w-6 text-center">${rankBadge}</span>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-inner border border-white/10" style="background-color: ${team.color}22">
+                ${team.avatar || '🦁'}
+              </div>
+              <div>
+                <h4 class="font-bold text-xs text-white font-heading truncate max-w-[120px]">${team.name}</h4>
+                <div class="flex items-center space-x-1.5 text-[10px] text-slate-400">
+                  <span>ช่อง <strong>${team.current_tile || 0}</strong>/${totalTiles}</span>
+                  <span>&bull;</span>
+                  <span class="text-emerald-400 font-semibold">${completedCount} ฐาน</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-right">
+              <span class="text-lg font-black text-amber-400 font-heading">${team.score || 0}</span>
+              <span class="block text-[9px] text-slate-400 uppercase font-semibold">แต้ม</span>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Render Stations Mini Matrix
+    function renderStationsMini(stations, teams) {
+      const container = document.getElementById('boardStationsMiniGrid');
+      const list = Object.values(stations || {});
+      const vacantCount = list.filter(s => s.is_vacant).length;
+
+      document.getElementById('boardVacantCount').textContent = `ว่าง ${vacantCount}/${list.length} ฐาน`;
+
+      container.innerHTML = list.map(st => {
+        const isVacant = st.is_vacant;
+        const currentTeam = st.current_team_id ? (teams[st.current_team_id]?.name || 'กลุ่มอื่น') : null;
+
+        return `
+          <div class="p-2 rounded-xl border text-[11px] ${isVacant ? 'bg-slate-900/60 border-slate-800' : 'bg-rose-950/20 border-rose-500/30'}">
+            <div class="flex items-center justify-between">
+              <span class="text-base">${st.icon || '🎯'}</span>
+              <span class="text-[9px] px-1.5 py-0.2 rounded-full font-bold ${isVacant ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-300 animate-pulse'}">
+                ${isVacant ? 'ว่าง' : 'มีกลุ่มเล่น'}
+              </span>
+            </div>
+            <h5 class="font-bold text-white truncate mt-1">${st.name}</h5>
+            ${!isVacant ? `<span class="block text-[9px] text-rose-300 truncate">${currentTeam}</span>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Update Live Marquee Ticker
+    function updateLiveTicker(logs) {
+      const entries = Object.values(logs || {}).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      if (entries.length > 0) {
+        const latest = entries[0];
+        document.getElementById('liveTickerText').innerHTML = `
+          <span class="text-indigo-300 font-bold">${latest.message}</span>
+        `;
+      }
+    }
+
+    // Show Victory Finale Modal
+    function showVictoryFinale(teams, config) {
+      const modal = document.getElementById('victoryModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      playGrandFanfare();
+      confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
+
+      // Sort teams
+      const sortedTeams = Object.keys(teams).map(key => ({
+        ...teams[key],
+        key
+      })).sort((a, b) => b.score - a.score);
+
+      const winner = sortedTeams[0] || {};
+      document.getElementById('victorySubtitle').textContent = `ขอแสดงความยินดีกับ "${winner.name}" ที่คว้าชัยชนะคะแนนรวมสูงสุด!`;
+
+      // Podium: 2nd (Left), 1st (Center), 3rd (Right)
+      const first = sortedTeams[0];
+      const second = sortedTeams[1];
+      const third = sortedTeams[2];
+
+      document.getElementById('victoryPodium').innerHTML = `
+        <!-- 2nd Place -->
+        ${second ? `
+          <div class="glass-card p-4 rounded-2xl border border-slate-700 text-center space-y-2 h-[220px] flex flex-col justify-end">
+            <span class="text-3xl">${second.avatar || '🦁'}</span>
+            <div class="font-black text-2xl text-slate-300 font-heading">🥈 2nd</div>
+            <h4 class="font-bold text-xs text-white truncate font-heading">${second.name}</h4>
+            <div class="text-base font-black text-amber-400 font-heading">${second.score || 0} แต้ม</div>
+          </div>
+        ` : '<div></div>'}
+
+        <!-- 1st Place (Winner) -->
+        ${first ? `
+          <div class="glass-card p-5 rounded-2xl border-2 border-amber-400 bg-amber-500/10 text-center space-y-2 h-[260px] flex flex-col justify-end shadow-2xl shadow-amber-500/20">
+            <span class="text-4xl animate-bounce">${first.avatar || '🦁'}</span>
+            <div class="font-black text-3xl text-amber-400 font-heading">🥇 1st</div>
+            <h4 class="font-bold text-sm text-white truncate font-heading">${first.name}</h4>
+            <div class="text-xl font-black text-amber-400 font-heading">${first.score || 0} แต้ม</div>
+          </div>
+        ` : '<div></div>'}
+
+        <!-- 3rd Place -->
+        ${third ? `
+          <div class="glass-card p-4 rounded-2xl border border-slate-700 text-center space-y-2 h-[190px] flex flex-col justify-end">
+            <span class="text-3xl">${third.avatar || '🦁'}</span>
+            <div class="font-black text-xl text-amber-600 font-heading">🥉 3rd</div>
+            <h4 class="font-bold text-xs text-white truncate font-heading">${third.name}</h4>
+            <div class="text-base font-black text-amber-400 font-heading">${third.score || 0} แต้ม</div>
+          </div>
+        ` : '<div></div>'}
+      `;
+    }
+
+    function closeVictoryModal() {
+      document.getElementById('victoryModal').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "rooms": {
+      "$room_pin": {
+        ".read": true,
+        ".write": true,
+        ".indexOn": ["config/created_at", "config/game_status"]
+      }
+    }
+  }
+}

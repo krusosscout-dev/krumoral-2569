@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "name": "phygital-snakes-and-ladders",
+  "routes": [
+    {
+      "src": "/admin",
+      "dest": "/admin.html"
+    },
+    {
+      "src": "/student",
+      "dest": "/student.html"
+    },
+    {
+      "src": "/board",
+      "dest": "/board.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+}

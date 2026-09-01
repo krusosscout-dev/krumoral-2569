@@ -1,0 +1,13 @@
+{
+  "name": "phygital-snakes-and-ladders",
+  "version": "1.0.0",
+  "description": "Active Learning: Phygital Snakes and Ladders Web Application",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "deploy": "vercel --prod"
+  },
+  "keywords": ["education", "active-learning", "firebase", "game"],
+  "author": "",
+  "license": "MIT"
+}
