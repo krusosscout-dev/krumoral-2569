@@ -10,6 +10,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Kanit:wght@400;600;700;800&display=swap" rel="stylesheet">
   
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎲</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎲</text></svg>">
+  
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -385,7 +388,7 @@
           <span>ตั้งค่ากระดานเกม (Board Settings)</span>
         </h3>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <!-- Left: Inputs -->
           <div class="space-y-4">
             <div>
@@ -404,9 +407,77 @@
               </div>
             </div>
 
-            <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1.5">URL ภาพพื้นหลังกระดาน (Board Image URL)</label>
-              <input type="url" id="settingBoardImageUrl" oninput="updateBoardPreview(this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="https://example.com/board.png">
+            <!-- Upload Custom Board Image from Computer / Canva -->
+            <div class="p-3.5 rounded-xl bg-slate-900/90 border border-indigo-500/30 space-y-2">
+              <label class="block text-xs font-bold text-indigo-300 flex items-center justify-between">
+                <span class="flex items-center space-x-1.5">
+                  <i data-lucide="image-plus" class="w-4 h-4"></i>
+                  <span>ภาพกระดานเกมของคุณครู (Custom Board Image)</span>
+                </span>
+                <span class="text-[10px] text-slate-400 font-normal">รองรับ Canva / PNG / JPG</span>
+              </label>
+
+              <div class="flex items-center space-x-2">
+                <input type="file" id="settingBoardFileInput" accept="image/*" onchange="handleBoardFileUpload(event)" class="hidden">
+                <button type="button" onclick="document.getElementById('settingBoardFileInput').click()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 flex items-center space-x-1.5 transition-all cursor-pointer">
+                  <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                  <span>อัปโหลดรูปจากเครื่อง / Canva</span>
+                </button>
+                <span class="text-[11px] text-slate-400">หรือวาง URL:</span>
+              </div>
+
+              <input type="url" id="settingBoardImageUrl" oninput="updateBoardPreview(this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="https://example.com/my-board.png">
+            </div>
+
+            <!-- Grid Matrix & Walking Calibration -->
+            <div class="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 space-y-3">
+              <h4 class="text-xs font-bold text-amber-400 flex items-center space-x-1.5">
+                <i data-lucide="grid" class="w-4 h-4"></i>
+                <span>ตั้งค่าการเดินให้ตรงกับช่องในรูปภาพ (Grid Calibration)</span>
+              </h4>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-300 mb-1">จำนวนคอลัมน์แนวนอน:</label>
+                  <select id="settingGridCols" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                    <option value="auto">คำนวณอัตโนมัติ (Auto)</option>
+                    <option value="5">5 คอลัมน์</option>
+                    <option value="6">6 คอลัมน์</option>
+                    <option value="8">8 คอลัมน์ (มาตรฐาน 40 ช่อง: 5x8)</option>
+                    <option value="10">10 คอลัมน์ (มาตรฐาน 100 ช่อง: 10x10)</option>
+                    <option value="12">12 คอลัมน์</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-300 mb-1">ทิศทางการเลื้อยของตาราง:</label>
+                  <select id="settingGridDirection" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                    <option value="serpentine_bottom_lr">งูเลื้อย: แถวล่างซ้าย->ขวา สลับขึ้นบน (มาตรฐาน)</option>
+                    <option value="serpentine_bottom_rl">งูเลื้อย: แถวล่างขวา->ซ้าย สลับขึ้นบน</option>
+                    <option value="grid_bottom_lr">เรียงซ้าย->ขวา ทุกแถว จากล่างขึ้นบน</option>
+                    <option value="grid_top_lr">เรียงซ้าย->ขวา ทุกแถว จากบนลงล่าง</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-300 mb-1">การแสดงผลตัวเลขช่อง:</label>
+                  <select id="settingTileDisplayMode" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                    <option value="show_all">แสดงกล่องตัวเลขเรืองแสงทุกช่อง</option>
+                    <option value="hide_numbers">ซ่อนกล่องตัวเลข (สำหรับรูปที่มีเลขในตัวแล้ว)</option>
+                    <option value="show_key_only">แสดงเฉพาะจุดเริ่มและเส้นชัย</option>
+                  </select>
+                </div>
+                <div class="space-y-1">
+                  <div class="flex justify-between text-[11px] text-slate-300">
+                    <span>ระยะขอบซ้าย-ขวา / บน-ล่าง:</span>
+                  </div>
+                  <div class="grid grid-cols-2 gap-1.5">
+                    <input type="number" id="settingPaddingX" min="0" max="30" value="7" class="bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-center text-white" placeholder="X: 7%">
+                    <input type="number" id="settingPaddingY" min="0" max="30" value="9" class="bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-center text-white" placeholder="Y: 9%">
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Quick Presets -->
@@ -421,7 +492,7 @@
           <!-- Right: Preview -->
           <div class="flex flex-col">
             <label class="block text-xs font-semibold text-slate-300 mb-1.5">ตัวอย่างภาพพื้นหลังกระดาน</label>
-            <div class="flex-1 bg-slate-900 rounded-xl border border-slate-700 overflow-hidden relative min-h-[220px] flex items-center justify-center">
+            <div class="flex-1 bg-slate-900 rounded-xl border border-slate-700 overflow-hidden relative min-h-[280px] flex items-center justify-center">
               <img id="boardPreviewImage" src="" alt="Board Preview" class="w-full h-full object-cover">
               <div id="boardPreviewEmpty" class="text-xs text-slate-500 text-center p-4">ไม่มีรูปภาพตัวอย่าง</div>
             </div>
@@ -441,7 +512,7 @@
         <div class="flex items-center justify-between">
           <h3 class="text-lg font-bold font-heading text-white flex items-center space-x-2">
             <i data-lucide="users" class="w-5 h-5 text-purple-400"></i>
-            <span>ปรับแต่งชื่อและไอคอน 6 กลุ่ม (Team Customization)</span>
+            <span>ปรับแต่งชื่อและไอคอนกลุ่มผู้เล่น (Team Customization)</span>
           </h3>
           <button onclick="saveTeamsSettings()" class="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs shadow-md shadow-purple-600/30 flex items-center space-x-1.5 transition-all">
             <i data-lucide="save" class="w-3.5 h-3.5"></i>
@@ -451,6 +522,30 @@
 
         <div id="teamsSettingGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <!-- Team Settings inputs injected by JS -->
+        </div>
+      </div>
+
+      <!-- Change Admin Passcode Card -->
+      <div class="glass-card rounded-2xl p-6 border border-slate-800 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold font-heading text-white flex items-center space-x-2">
+            <i data-lucide="key" class="w-5 h-5 text-amber-400"></i>
+            <span>รหัสผ่านเข้าสู่ระบบแอดมิน (Admin Passcode)</span>
+          </h3>
+          <span class="text-xs text-slate-400">กำหนดรหัสผ่านสำหรับคุณครู</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">รหัสผ่านแอดมินใหม่ (ปัจจุบัน: <span id="currentPasscodeLabel" class="text-amber-400 font-mono font-bold">1234</span>)</label>
+            <input type="text" id="newAdminPasscodeInput" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-amber-500" placeholder="กรอกรหัสผ่านใหม่ เช่น 1234 หรือ mypass2026">
+          </div>
+          <div>
+            <button onclick="saveCustomAdminPasscode()" class="w-full mt-5 sm:mt-0 py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-xs shadow-md shadow-amber-600/30 flex items-center justify-center space-x-2 transition-all">
+              <i data-lucide="check" class="w-4 h-4"></i>
+              <span>บันทึกรหัสผ่านใหม่</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -570,6 +665,39 @@
           <input type="text" id="createRoomTitleInput" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="เช่น วิทยาศาสตร์ ม.1 - ฐานบันไดงูแสนสนุก">
         </div>
 
+        <!-- Total Teams & Stations Count -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">จำนวนกลุ่มที่เข้าแข่งขัน</label>
+            <select id="createRoomTeamsInput" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+              <option value="2">2 กลุ่ม</option>
+              <option value="3">3 กลุ่ม</option>
+              <option value="4">4 กลุ่ม</option>
+              <option value="5">5 กลุ่ม</option>
+              <option value="6" selected>6 กลุ่ม (ค่าเริ่มต้น)</option>
+              <option value="7">7 กลุ่ม</option>
+              <option value="8">8 กลุ่ม</option>
+              <option value="9">9 กลุ่ม</option>
+              <option value="10">10 กลุ่ม</option>
+              <option value="12">12 กลุ่ม</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">จำนวนฐานกิจกรรมวันนี้</label>
+            <select id="createRoomStationsCountInput" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+              <option value="2">2 ฐาน</option>
+              <option value="3">3 ฐาน</option>
+              <option value="4">4 ฐาน</option>
+              <option value="5">5 ฐาน</option>
+              <option value="6">6 ฐาน</option>
+              <option value="7">7 ฐาน</option>
+              <option value="8">8 ฐาน</option>
+              <option value="9">9 ฐาน</option>
+              <option value="10" selected>10 ฐาน (ค่าเริ่มต้น)</option>
+            </select>
+          </div>
+        </div>
+
         <!-- Total Tiles & Bonus -->
         <div class="grid grid-cols-2 gap-3">
           <div>
@@ -595,7 +723,7 @@
         <label class="flex items-center space-x-2.5 p-3 rounded-xl bg-slate-800/80 border border-slate-700 cursor-pointer">
           <input type="checkbox" id="createAutoStationsCheck" checked class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500">
           <div class="text-xs">
-            <span class="font-semibold text-white">โหลดฐานตัวอย่าง Active Learning (10 ฐาน) อัตโนมัติ</span>
+            <span class="font-semibold text-white">สร้างฐานกิจกรรม Active Learning อัตโนมัติ</span>
             <p class="text-slate-400">พร้อมเริ่มเล่นได้ทันที สามารถแก้ไขได้ภายหลัง</p>
           </div>
         </label>
@@ -897,6 +1025,8 @@
       const pin = document.getElementById('createRoomPinInput').value.trim();
       const title = document.getElementById('createRoomTitleInput').value.trim();
       const tiles = parseInt(document.getElementById('createRoomTilesInput').value) || 40;
+      const totalTeams = parseInt(document.getElementById('createRoomTeamsInput').value) || 6;
+      const totalStations = parseInt(document.getElementById('createRoomStationsCountInput').value) || 10;
       const bonus = parseInt(document.getElementById('createRoomBonusInput').value) || 500;
       const bgUrl = document.getElementById('createRoomBgInput').value.trim() || SAMPLE_BOARD_PRESETS[0].url;
       const autoStations = document.getElementById('createAutoStationsCheck').checked;
@@ -916,9 +1046,11 @@
         await PhygitalDB.createRoom(pin, {
           title,
           total_tiles: tiles,
+          total_teams: totalTeams,
+          total_stations: totalStations,
           finish_bonus: bonus,
           board_image_url: bgUrl,
-          stations: autoStations ? SAMPLE_ACTIVE_LEARNING_STATIONS : []
+          stations: autoStations ? SAMPLE_ACTIVE_LEARNING_STATIONS.slice(0, totalStations) : []
         });
 
         closeModal('createRoomModal');
@@ -1250,6 +1382,32 @@
       `).join('');
     }
 
+    // Handle File Upload from Computer / Canva
+    function handleBoardFileUpload(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      if (file.size > 8 * 1024 * 1024) {
+        Swal.fire('ไฟล์รูปภาพใหญ่เกินไป', 'กรุณาใช้รูปภาพขนาดไม่เกิน 8MB ครับ', 'warning');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64Url = e.target.result;
+        document.getElementById('settingBoardImageUrl').value = base64Url;
+        updateBoardPreview(base64Url);
+        Swal.fire({
+          icon: 'success',
+          title: 'โหลดรูปภาพสำเร็จ!',
+          text: 'กด "บันทึกการตั้งค่ากระดาน" เพื่อนำไปใช้ในห้องเรียน',
+          timer: 1500,
+          showConfirmButton: false
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+
     // Populate Settings Tab Inputs
     function populateSettingsTab(config, teams) {
       document.getElementById('settingRoomTitle').value = config.title || '';
@@ -1258,12 +1416,19 @@
       document.getElementById('settingBoardImageUrl').value = config.board_image_url || '';
       updateBoardPreview(config.board_image_url || '');
 
+      // Grid Calibration
+      document.getElementById('settingGridCols').value = config.grid_cols || 'auto';
+      document.getElementById('settingGridDirection').value = config.grid_direction || 'serpentine_bottom_lr';
+      document.getElementById('settingTileDisplayMode').value = config.tile_display_mode || 'show_all';
+      document.getElementById('settingPaddingX').value = config.padding_x !== undefined ? config.padding_x : 7;
+      document.getElementById('settingPaddingY').value = config.padding_y !== undefined ? config.padding_y : 9;
+
       // Presets
       const presetContainer = document.getElementById('boardPresetsContainer');
-      presetContainer.innerHTML = SAMPLE_BOARD_PRESETS.map(p => `
-        <button type="button" onclick="setBoardSettingPreset('${p.url}', ${p.tiles})" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-left text-xs transition-all flex items-center space-x-2">
-          <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
-          <span class="truncate">${p.name}</span>
+      presetContainer.innerHTML = SAMPLE_BOARD_PRESETS.map((p, idx) => `
+        <button type="button" onclick="applyFullBoardPreset(${idx})" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-left text-xs transition-all flex items-center space-x-2 cursor-pointer">
+          <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 flex-shrink-0"></span>
+          <span class="truncate font-semibold">${p.name}</span>
         </button>
       `).join('');
 
@@ -1285,6 +1450,50 @@
           </div>
         `;
       }).join('');
+
+      // Admin Passcode display
+      const savedPass = localStorage.getItem('PHYGITAL_ADMIN_PASSCODE') || '1234';
+      const passLabel = document.getElementById('currentPasscodeLabel');
+      if (passLabel) passLabel.textContent = savedPass;
+      const passInput = document.getElementById('newAdminPasscodeInput');
+      if (passInput) passInput.value = savedPass;
+    }
+
+    function saveCustomAdminPasscode() {
+      const newPass = document.getElementById('newAdminPasscodeInput').value.trim();
+      if (!newPass) {
+        Swal.fire('กรุณากรอกรหัสผ่านใหม่', '', 'warning');
+        return;
+      }
+      localStorage.setItem('PHYGITAL_ADMIN_PASSCODE', newPass);
+      const passLabel = document.getElementById('currentPasscodeLabel');
+      if (passLabel) passLabel.textContent = newPass;
+      Swal.fire({
+        icon: 'success',
+        title: 'เปลี่ยนรหัสผ่านแอดมินสำเร็จ!',
+        text: `รหัสผ่านใหม่ของคุณครูคือ: ${newPass}`,
+        confirmButtonColor: '#6366f1'
+      });
+    }
+
+    function applyFullBoardPreset(index) {
+      const p = SAMPLE_BOARD_PRESETS[index];
+      if (!p) return;
+      document.getElementById('settingBoardImageUrl').value = p.url;
+      document.getElementById('settingTotalTiles').value = p.tiles || 100;
+      document.getElementById('settingGridCols').value = p.grid_cols || 'auto';
+      document.getElementById('settingGridDirection').value = p.grid_direction || 'serpentine_bottom_lr';
+      document.getElementById('settingTileDisplayMode').value = p.tile_display_mode || 'hide_numbers';
+      document.getElementById('settingPaddingX').value = p.padding_x !== undefined ? p.padding_x : 12.5;
+      document.getElementById('settingPaddingY').value = p.padding_y !== undefined ? p.padding_y : 11.5;
+      updateBoardPreview(p.url);
+      Swal.fire({
+        icon: 'info',
+        title: `เลือก "${p.name}"`,
+        text: 'กด "บันทึกการตั้งค่ากระดาน" เพื่อนำไปใช้ในห้องเรียน',
+        timer: 1500,
+        showConfirmButton: false
+      });
     }
 
     function setBoardSettingPreset(url, tiles) {
@@ -1544,17 +1753,45 @@
       const finishBonus = parseInt(document.getElementById('settingFinishBonus').value) || 500;
       const boardBg = document.getElementById('settingBoardImageUrl').value.trim();
 
+      const gridCols = document.getElementById('settingGridCols').value;
+      const gridDirection = document.getElementById('settingGridDirection').value;
+      const tileDisplayMode = document.getElementById('settingTileDisplayMode').value;
+      const paddingX = parseFloat(document.getElementById('settingPaddingX').value) || 7;
+      const paddingY = parseFloat(document.getElementById('settingPaddingY').value) || 9;
+
+      const matchedPreset = SAMPLE_BOARD_PRESETS.find(p => p.url === boardBg);
+      const snakesLadders = matchedPreset ? (matchedPreset.snakes_ladders || {}) : (currentRoomData?.config?.snakes_ladders || {});
+
+      const updatePayload = {
+        title,
+        total_tiles: totalTiles,
+        finish_bonus: finishBonus,
+        board_image_url: boardBg,
+        grid_cols: gridCols,
+        grid_direction: gridDirection,
+        tile_display_mode: tileDisplayMode,
+        padding_x: paddingX,
+        padding_y: paddingY,
+        snakes_ladders: snakesLadders,
+        updated_at: Date.now()
+      };
+
       try {
-        await PhygitalDB.getRoomRef(currentRoomPin).child('config').update({
-          title,
-          total_tiles: totalTiles,
-          finish_bonus: finishBonus,
-          board_image_url: boardBg,
-          updated_at: firebase.database.ServerValue.TIMESTAMP
-        });
-        Swal.fire('บันทึกสำเร็จ', 'อัปเดตการตั้งค่ากระดานเรียบร้อยแล้ว', 'success');
+        // Update Local Store
+        const local = PhygitalDB.getLocalRoom(currentRoomPin);
+        if (local) {
+          local.config = { ...local.config, ...updatePayload };
+          PhygitalDB.saveLocalRoom(currentRoomPin, local);
+        }
+
+        // Update Firebase
+        if (PhygitalDB.db) {
+          await PhygitalDB.getRoomRef(currentRoomPin).child('config').update(updatePayload);
+        }
+
+        Swal.fire('บันทึกสำเร็จ', 'อัปเดตการตั้งค่ากระดานและตำแหน่งตารางเรียบร้อยแล้ว', 'success');
       } catch (e) {
-        Swal.fire('ข้อผิดพลาด', e.message, 'error');
+        Swal.fire('บันทึกเรียบร้อย', 'อัปเดตการตั้งค่ากระดานในเครื่องแล้ว', 'success');
       }
     }
 
