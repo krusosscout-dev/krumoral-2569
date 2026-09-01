@@ -1,22 +1,18 @@
 {
-  "version": 2,
-  "name": "phygital-snakes-and-ladders",
-  "routes": [
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
     {
-      "src": "/admin",
-      "dest": "/admin.html"
+      "source": "/admin",
+      "destination": "/admin.html"
     },
     {
-      "src": "/student",
-      "dest": "/student.html"
+      "source": "/student",
+      "destination": "/student.html"
     },
     {
-      "src": "/board",
-      "dest": "/board.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
+      "source": "/board",
+      "destination": "/board.html"
     }
   ]
 }
