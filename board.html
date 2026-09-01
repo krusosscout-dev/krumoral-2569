@@ -68,9 +68,25 @@
     .board-tile {
       position: absolute;
       transform: translate(-50%, -50%);
-      transition: all 0.3s ease;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       user-select: none;
       filter: drop-shadow(0 4px 10px rgba(0,0,0,0.8));
+      width: 52px !important;
+      height: 36px !important;
+      min-width: 52px !important;
+      max-width: 52px !important;
+      min-height: 36px !important;
+      max-height: 36px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border-radius: 9px !important;
+      box-sizing: border-box !important;
+      font-family: 'Kanit', monospace !important;
+      font-weight: 800 !important;
+      font-size: 15px !important;
+      line-height: 1 !important;
+      padding: 0 !important;
     }
     .team-pawn {
       position: absolute;

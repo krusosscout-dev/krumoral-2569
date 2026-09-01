@@ -99,9 +99,37 @@
     .board-tile {
       position: absolute;
       transform: translate(-50%, -50%);
-      transition: all 0.3s ease;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       user-select: none;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.7));
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.7));
+      width: 44px !important;
+      height: 30px !important;
+      min-width: 44px !important;
+      max-width: 44px !important;
+      min-height: 30px !important;
+      max-height: 30px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border-radius: 8px !important;
+      box-sizing: border-box !important;
+      font-family: 'Kanit', monospace !important;
+      font-weight: 800 !important;
+      font-size: 13px !important;
+      line-height: 1 !important;
+      padding: 0 !important;
+    }
+    @media (min-width: 1024px) {
+      .board-tile {
+        width: 48px !important;
+        height: 32px !important;
+        min-width: 48px !important;
+        max-width: 48px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        font-size: 14px !important;
+        border-radius: 9px !important;
+      }
     }
     .team-pawn {
       position: absolute;
@@ -433,31 +461,38 @@
       </div>
 
       <!-- RIGHT COLUMN (28-32%): DEDICATED CONTROL COCKPIT & LIVE FRIENDS RADAR -->
-      <div class="lg:col-span-4 xl:col-span-4 flex flex-col justify-between space-y-2.5 h-full">
+      <div class="lg:col-span-4 xl:col-span-4 flex flex-col justify-start space-y-2.5 h-full">
         
-        <!-- Card 1: My Team Profile Card -->
-        <div class="glass-panel p-3 rounded-2xl flex items-center justify-between relative group border border-indigo-500/30 shadow-lg">
-          <div class="flex items-center space-x-3">
+        <!-- Card 1: My Team Profile Card (High Readability, Crisp Typography, Large Rank) -->
+        <div class="glass-panel p-3 sm:p-3.5 rounded-2xl flex items-center justify-between relative border border-indigo-500/40 shadow-xl bg-slate-900/90">
+          <div class="flex items-center space-x-3 sm:space-x-3.5">
             <button onclick="openMascotPickerModal()" title="คลิกเพื่อเปลี่ยนตัวละครตัวเดิน" class="relative group/avatar cursor-pointer">
-              <div id="myTeamAvatarBox" class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-inner border-2 border-white/30 transition-transform group-hover/avatar:scale-110">
+              <div id="myTeamAvatarBox" class="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-3xl shadow-inner border-2 border-white/40 bg-indigo-950/70 transition-transform group-hover/avatar:scale-110">
                 🦁
               </div>
-              <span class="absolute -bottom-1 -right-1 bg-indigo-600 text-white rounded-full p-1 text-[9px] shadow-md">
-                <i data-lucide="sparkles" class="w-2.5 h-2.5"></i>
+              <span class="absolute -bottom-1 -right-1 bg-indigo-600 text-white rounded-full p-1 text-[10px] shadow-md">
+                <i data-lucide="sparkles" class="w-3 h-3"></i>
               </span>
             </button>
-            <div>
-              <div class="flex items-center space-x-1.5">
-                <span class="text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 font-bold">กลุ่มของคุณ</span>
-                <span id="myTeamRankBadge" class="text-[9px] px-2 py-0.2 rounded-full bg-amber-500/20 text-amber-300 font-black border border-amber-500/40">อันดับ 1 🥇</span>
+            <div class="space-y-1">
+              <div class="flex items-center space-x-2">
+                <span class="text-[10px] px-2 py-0.5 rounded bg-indigo-500/25 text-indigo-300 font-bold tracking-wide">กลุ่มของคุณ</span>
+                <span id="myTeamRankBadge" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/25 text-amber-300 font-black border border-amber-400 shadow-sm shadow-amber-500/30">
+                  🥇 อันดับ 1 (ผู้นำ)
+                </span>
               </div>
-              <h3 id="myTeamNameLabel" class="text-sm font-black font-heading text-white truncate max-w-[130px]">กลุ่ม 1</h3>
-              <span class="text-[11px] text-slate-300 font-semibold">ช่อง: <strong id="myTeamTileLabel" class="text-amber-400 font-mono text-xs">0</strong>/<span id="myTeamTotalTilesLabel">40</span></span>
+              <h3 id="myTeamNameLabel" class="text-base sm:text-lg font-bold font-heading text-white tracking-wide truncate max-w-[150px] sm:max-w-[170px]">กลุ่มที่ 1 (สิงโตเพลิง)</h3>
+              <div class="flex items-center space-x-1.5 text-xs text-slate-300">
+                <span class="text-slate-400">ช่อง:</span>
+                <span class="px-2 py-0.5 rounded bg-slate-800 text-amber-300 font-mono font-bold text-xs border border-slate-700">
+                  <strong id="myTeamTileLabel" class="text-amber-400">0</strong> / <span id="myTeamTotalTilesLabel">40</span>
+                </span>
+              </div>
             </div>
           </div>
-          <div class="text-right">
-            <span id="myTeamScoreLabel" class="text-2xl font-black text-amber-400 font-heading">0</span>
-            <span class="block text-[9px] text-slate-400 uppercase font-semibold">คะแนนสะสม</span>
+          <div class="text-right pl-3 border-l border-slate-800">
+            <span id="myTeamScoreLabel" class="text-3xl sm:text-4xl font-black text-amber-400 font-heading tracking-tight block">0</span>
+            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">คะแนนสะสม</span>
           </div>
         </div>
 
@@ -492,24 +527,27 @@
           </button>
         </div>
 
-        <!-- Card 3: Live Top 3 Podium & Friends Radar (แท่น 3 อันดับคะแนน & ส่องหมากเพื่อน) -->
-        <div class="glass-panel p-3 rounded-2xl flex-1 flex flex-col justify-between space-y-2 border border-slate-800 shadow-lg min-h-[220px]">
-          <div class="flex items-center justify-between border-b border-white/10 pb-1.5">
-            <span class="font-bold text-xs text-amber-400 flex items-center space-x-1.5">
-              <i data-lucide="crown" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span>แท่น 3 อันดับคะแนนสะสม (Top 3):</span>
+        <!-- Card 3: Live Top 3 Olympic Podium & Friends Radar -->
+        <div class="glass-panel p-3 sm:p-3.5 rounded-2xl flex-1 flex flex-col justify-start space-y-2.5 border border-slate-800 shadow-xl bg-slate-900/90 overflow-hidden">
+          <div class="flex items-center justify-between border-b border-white/10 pb-2">
+            <span class="font-bold text-xs sm:text-sm text-amber-400 flex items-center space-x-1.5 font-heading">
+              <i data-lucide="crown" class="w-4 h-4 text-amber-400"></i>
+              <span>แท่น 3 อันดับคะแนนสะสม (Top 3)</span>
             </span>
-            <span class="text-[9px] text-indigo-400 font-bold">อัปเดตสด 🔴</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30 animate-pulse">Live 🔴</span>
           </div>
 
-          <!-- Top 3 Visual Podium Container -->
-          <div id="podiumTop3Container" class="flex items-end justify-center gap-1.5 pt-1 pb-1">
+          <!-- Top 3 Visual Podium Container (True 3D Tiered Height Pedestals) -->
+          <div id="podiumTop3Container" class="flex items-end justify-center gap-2 pt-2 px-1">
             <!-- Injected by JS: 2nd (Silver), 1st (Gold Elevated), 3rd (Bronze) -->
           </div>
 
           <!-- Remaining Teams List (Rank 4+) -->
-          <div id="teamsQuickTrackerBar" class="grid grid-cols-1 gap-1 overflow-y-auto custom-scrollbar max-h-[110px] p-0.5 border-t border-white/5 pt-1">
-            <!-- Injected by JS: Remaining teams -->
+          <div class="space-y-1 pt-1.5 border-t border-white/10">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block px-1">อันดับกลุ่มอื่นๆ ในห้อง:</span>
+            <div id="teamsQuickTrackerBar" class="grid grid-cols-1 gap-1.5 overflow-y-auto custom-scrollbar max-h-[125px] p-0.5">
+              <!-- Injected by JS: Remaining teams -->
+            </div>
           </div>
         </div>
 
@@ -1419,7 +1457,7 @@
       renderTeamsQuickTracker(teams, config);
     }
 
-    // Render Quick-Tracker Live Top 3 Podium & Remaining Teams
+    // Render Quick-Tracker Live Top 3 Olympic Podium & Remaining Teams
     function renderTeamsQuickTracker(teams, config) {
       const podiumEl = document.getElementById('podiumTop3Container');
       const listEl = document.getElementById('teamsQuickTrackerBar');
@@ -1440,42 +1478,42 @@
 
       if (podiumEl) {
         podiumEl.innerHTML = `
-          <!-- Rank 2: Silver Pillar -->
-          <div onclick="inspectTeamPawn('${top2 ? top2.key : ''}')" class="flex-1 flex flex-col items-center cursor-pointer group ${top2?.key === currentTeamId ? 'scale-105' : ''}">
-            <div class="relative mb-0.5">
-              <span class="text-base">${top2 ? top2.avatar || '🐯' : '🥈'}</span>
-              <span class="absolute -top-1.5 -right-1 text-[9px]">🥈</span>
+          <!-- Rank 2: Silver Pedestal (Height: 88px) -->
+          <div onclick="inspectTeamPawn('${top2 ? top2.key : ''}')" class="flex-1 flex flex-col items-center cursor-pointer group transition-transform hover:scale-102 ${top2?.key === currentTeamId ? 'ring-2 ring-indigo-400 rounded-t-xl' : ''}">
+            <div class="relative mb-1 flex flex-col items-center">
+              <span class="text-2xl filter drop-shadow">${top2 ? top2.avatar || '🐯' : '🥈'}</span>
+              <span class="text-xs absolute -top-2 -right-2">🥈</span>
             </div>
-            <div class="w-full h-14 rounded-t-xl bg-gradient-to-t from-slate-800 to-slate-700/90 border-t-2 border-x-2 border-slate-400/60 p-1 flex flex-col items-center justify-between text-center shadow-lg group-hover:border-slate-300 transition-all">
-              <span class="text-[9px] font-black text-slate-200 truncate max-w-[65px]">${top2 ? top2.name : 'อันดับ 2'}</span>
-              <span class="text-[10px] font-black font-mono text-slate-200">${top2 ? (top2.score || 0).toLocaleString() : '0'}</span>
-              <span class="text-[8px] px-1 rounded bg-slate-900/80 text-slate-400 font-mono">ช่อง ${top2 ? Math.min(top2.current_tile || 0, totalTiles) : 0}</span>
-            </div>
-          </div>
-
-          <!-- Rank 1: Gold Pillar (Elevated Center) -->
-          <div onclick="inspectTeamPawn('${top1 ? top1.key : ''}')" class="flex-1 flex flex-col items-center cursor-pointer group z-10 ${top1?.key === currentTeamId ? 'scale-105' : ''}">
-            <div class="relative mb-0.5">
-              <span class="text-lg animate-bounce">${top1 ? top1.avatar || '🦁' : '🥇'}</span>
-              <span class="absolute -top-2 -right-1 text-xs">👑</span>
-            </div>
-            <div class="w-full h-18 rounded-t-xl bg-gradient-to-t from-amber-950 via-amber-900/70 to-yellow-600/60 border-t-2 border-x-2 border-amber-400 p-1 flex flex-col items-center justify-between text-center shadow-xl shadow-amber-500/20 group-hover:border-yellow-300 transition-all">
-              <span class="text-[10px] font-black text-amber-300 truncate max-w-[75px] drop-shadow">${top1 ? top1.name : 'อันดับ 1'}</span>
-              <span class="text-xs font-black font-mono text-yellow-300 drop-shadow">${top1 ? (top1.score || 0).toLocaleString() : '0'}</span>
-              <span class="text-[8px] px-1 rounded bg-amber-950 text-amber-300 font-mono font-bold">ช่อง ${top1 ? Math.min(top1.current_tile || 0, totalTiles) : 0}</span>
+            <div class="w-full h-22 rounded-t-xl bg-gradient-to-t from-slate-900 via-slate-800 to-slate-700 border-t-2 border-x-2 border-slate-300/70 p-1.5 flex flex-col items-center justify-between text-center shadow-lg group-hover:border-slate-200 transition-all">
+              <span class="text-[11px] font-bold text-slate-100 truncate w-full px-0.5">${top2 ? top2.name : 'อันดับ 2'}</span>
+              <span class="text-sm font-black font-mono text-slate-100 tracking-tight">${top2 ? (top2.score || 0).toLocaleString() : '0'}</span>
+              <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-950/80 text-slate-300 font-mono font-bold">ช่อง ${top2 ? Math.min(top2.current_tile || 0, totalTiles) : 0}</span>
             </div>
           </div>
 
-          <!-- Rank 3: Bronze Pillar -->
-          <div onclick="inspectTeamPawn('${top3 ? top3.key : ''}')" class="flex-1 flex flex-col items-center cursor-pointer group ${top3?.key === currentTeamId ? 'scale-105' : ''}">
-            <div class="relative mb-0.5">
-              <span class="text-base">${top3 ? top3.avatar || '🦅' : '🥉'}</span>
-              <span class="absolute -top-1.5 -right-1 text-[9px]">🥉</span>
+          <!-- Rank 1: Gold Pedestal (Height: 120px - Elevated Center) -->
+          <div onclick="inspectTeamPawn('${top1 ? top1.key : ''}')" class="flex-1 flex flex-col items-center cursor-pointer group z-10 transition-transform hover:scale-102 ${top1?.key === currentTeamId ? 'ring-2 ring-amber-400 rounded-t-xl' : ''}">
+            <div class="relative mb-1 flex flex-col items-center">
+              <span class="text-3xl filter drop-shadow animate-bounce">${top1 ? top1.avatar || '🦁' : '🥇'}</span>
+              <span class="text-sm absolute -top-3 -right-2">👑</span>
             </div>
-            <div class="w-full h-11 rounded-t-xl bg-gradient-to-t from-amber-950/60 to-amber-800/40 border-t-2 border-x-2 border-amber-700/60 p-1 flex flex-col items-center justify-between text-center shadow-lg group-hover:border-amber-500 transition-all">
-              <span class="text-[9px] font-black text-amber-200 truncate max-w-[65px]">${top3 ? top3.name : 'อันดับ 3'}</span>
-              <span class="text-[10px] font-black font-mono text-amber-300">${top3 ? (top3.score || 0).toLocaleString() : '0'}</span>
-              <span class="text-[8px] px-1 rounded bg-slate-900/80 text-slate-400 font-mono">ช่อง ${top3 ? Math.min(top3.current_tile || 0, totalTiles) : 0}</span>
+            <div class="w-full h-30 rounded-t-xl bg-gradient-to-t from-amber-950 via-amber-900 to-yellow-500 border-t-2 border-x-2 border-amber-300 p-1.5 flex flex-col items-center justify-between text-center shadow-xl shadow-amber-500/30 group-hover:border-yellow-200 transition-all">
+              <span class="text-xs font-black text-slate-950 bg-amber-300 px-1.5 py-0.5 rounded font-heading truncate w-full shadow-sm">${top1 ? top1.name : 'อันดับ 1'}</span>
+              <span class="text-base font-black font-mono text-yellow-300 drop-shadow-md tracking-tight">${top1 ? (top1.score || 0).toLocaleString() : '0'}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-amber-950/90 text-amber-200 font-mono font-black border border-amber-500/40">ช่อง ${top1 ? Math.min(top1.current_tile || 0, totalTiles) : 0}</span>
+            </div>
+          </div>
+
+          <!-- Rank 3: Bronze Pedestal (Height: 64px) -->
+          <div onclick="inspectTeamPawn('${top3 ? top3.key : ''}')" class="flex-1 flex flex-col items-center cursor-pointer group transition-transform hover:scale-102 ${top3?.key === currentTeamId ? 'ring-2 ring-indigo-400 rounded-t-xl' : ''}">
+            <div class="relative mb-1 flex flex-col items-center">
+              <span class="text-2xl filter drop-shadow">${top3 ? top3.avatar || '🦅' : '🥉'}</span>
+              <span class="text-xs absolute -top-2 -right-2">🥉</span>
+            </div>
+            <div class="w-full h-16 rounded-t-xl bg-gradient-to-t from-amber-950/90 via-amber-900/60 to-amber-700/60 border-t-2 border-x-2 border-amber-600/70 p-1.5 flex flex-col items-center justify-between text-center shadow-lg group-hover:border-amber-400 transition-all">
+              <span class="text-[11px] font-bold text-amber-200 truncate w-full px-0.5">${top3 ? top3.name : 'อันดับ 3'}</span>
+              <span class="text-sm font-black font-mono text-amber-300 tracking-tight">${top3 ? (top3.score || 0).toLocaleString() : '0'}</span>
+              <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-950/80 text-slate-300 font-mono font-bold">ช่อง ${top3 ? Math.min(top3.current_tile || 0, totalTiles) : 0}</span>
             </div>
           </div>
         `;
@@ -1485,22 +1523,22 @@
       if (listEl) {
         const remainingKeys = sortedKeys.slice(3);
         if (remainingKeys.length === 0) {
-          listEl.innerHTML = `<span class="text-[9px] text-slate-500 italic text-center p-1">คลิกที่แท่นโพเดียมเพื่อส่องหมากบนกระดาน</span>`;
+          listEl.innerHTML = `<span class="text-xs text-slate-400 italic text-center p-2 block bg-slate-950/50 rounded-lg">กำลังแข่งขันทั้งหมด 3 กลุ่ม</span>`;
         } else {
           listEl.innerHTML = remainingKeys.map((key, idx) => {
             const t = teams[key];
             const tile = Math.min(t.current_tile || 0, totalTiles);
             const isMyTeam = key === currentTeamId;
             return `
-              <button type="button" onclick="inspectTeamPawn('${key}')" class="w-full px-2 py-1 rounded-lg bg-slate-900/80 hover:bg-slate-800 border ${isMyTeam ? 'border-amber-400 ring-1 ring-amber-400/40 bg-indigo-950/30' : 'border-slate-800 hover:border-slate-700'} flex items-center justify-between text-[11px] text-slate-300 hover:text-white transition-all cursor-pointer shadow-sm group">
-                <div class="flex items-center space-x-1.5 truncate">
+              <button type="button" onclick="inspectTeamPawn('${key}')" class="w-full px-2.5 py-1.5 rounded-xl bg-slate-950/80 hover:bg-slate-800 border ${isMyTeam ? 'border-amber-400 ring-1 ring-amber-400/50 bg-indigo-950/40' : 'border-slate-800 hover:border-slate-700'} flex items-center justify-between text-xs text-slate-200 hover:text-white transition-all cursor-pointer shadow-sm group">
+                <div class="flex items-center space-x-2 truncate">
                   <span class="text-xs font-mono font-bold text-slate-500">#${idx + 4}</span>
-                  <span>${t.avatar || '🦁'}</span>
-                  <span class="truncate font-semibold text-[10px] ${isMyTeam ? 'text-amber-300 font-bold' : ''}">${t.name}</span>
+                  <span class="text-base">${t.avatar || '🦁'}</span>
+                  <span class="truncate font-bold text-xs ${isMyTeam ? 'text-amber-300 font-extrabold' : 'text-slate-200'}">${t.name}</span>
                 </div>
-                <div class="flex items-center space-x-1.5 flex-shrink-0">
-                  <span class="text-[9px] font-mono text-slate-400">${(t.score || 0).toLocaleString()} แต้ม</span>
-                  <span class="px-1.5 py-0.2 rounded bg-indigo-600/80 text-white font-mono text-[9px] font-bold">ช่อง ${tile}</span>
+                <div class="flex items-center space-x-2 flex-shrink-0">
+                  <span class="text-xs font-mono font-bold text-slate-300">${(t.score || 0).toLocaleString()} แต้ม</span>
+                  <span class="px-2 py-0.5 rounded-md bg-indigo-600/90 text-white font-mono text-xs font-bold shadow-sm">ช่อง ${tile}</span>
                 </div>
               </button>
             `;
@@ -1586,17 +1624,17 @@
       const rankBadgeEl = document.getElementById('myTeamRankBadge');
       if (rankBadgeEl) {
         if (myRank === 1) {
-          rankBadgeEl.className = "text-[9px] px-2 py-0.2 rounded-full bg-amber-500/25 text-amber-300 font-black border border-amber-400 shadow-sm shadow-amber-500/30 animate-pulse";
-          rankBadgeEl.textContent = "🥇 อันดับ 1 (ผู้นำ)";
+          rankBadgeEl.className = "text-xs px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500/30 to-yellow-500/20 text-yellow-300 font-black border border-amber-400 shadow-md shadow-amber-500/20 animate-pulse";
+          rankBadgeEl.textContent = "🥇 ครองอันดับ 1";
         } else if (myRank === 2) {
-          rankBadgeEl.className = "text-[9px] px-2 py-0.2 rounded-full bg-slate-700 text-slate-200 font-black border border-slate-400";
-          rankBadgeEl.textContent = "🥈 อันดับ 2";
+          rankBadgeEl.className = "text-xs px-2.5 py-0.5 rounded-full bg-slate-700/80 text-slate-200 font-black border border-slate-400 shadow-sm";
+          rankBadgeEl.textContent = "🥈 อยู่อันดับ 2";
         } else if (myRank === 3) {
-          rankBadgeEl.className = "text-[9px] px-2 py-0.2 rounded-full bg-amber-950 text-amber-300 font-black border border-amber-700";
-          rankBadgeEl.textContent = "🥉 อันดับ 3";
+          rankBadgeEl.className = "text-xs px-2.5 py-0.5 rounded-full bg-amber-950/80 text-amber-300 font-black border border-amber-600 shadow-sm";
+          rankBadgeEl.textContent = "🥉 อยู่อันดับ 3";
         } else {
-          rankBadgeEl.className = "text-[9px] px-2 py-0.2 rounded-full bg-slate-800 text-slate-400 font-bold border border-slate-700";
-          rankBadgeEl.textContent = `#${myRank} อันดับที่ ${myRank}`;
+          rankBadgeEl.className = "text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-bold border border-slate-700";
+          rankBadgeEl.textContent = `อันดับที่ ${myRank}`;
         }
       }
 
