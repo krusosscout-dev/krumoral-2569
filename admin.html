@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel - Active Learning: Phygital Snakes and Ladders</title>
+  <title>แผงควบคุมครูผู้สอน (Admin) - Phygital Snakes & Ladders</title>
   
   <!-- Google Fonts: Prompt & Kanit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,7 +11,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Kanit:wght@400;600;700;800&display=swap" rel="stylesheet">
   
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎲</text></svg>">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎲</text></svg>">
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -22,21 +21,6 @@
           fontFamily: {
             sans: ['Prompt', 'sans-serif'],
             heading: ['Kanit', 'sans-serif'],
-          },
-          colors: {
-            primary: {
-              50: '#f0fdf4',
-              100: '#dcfce7',
-              500: '#22c55e',
-              600: '#16a34a',
-              700: '#15803d',
-            },
-            game: {
-              accent: '#6366f1',
-              dark: '#0f172a',
-              card: '#1e293b',
-              border: '#334155'
-            }
           }
         }
       }
@@ -52,7 +36,7 @@
   <!-- QRCode.js CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-  <!-- Firebase App & Database Compat SDKs -->
+  <!-- Firebase Compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
   
@@ -68,811 +52,510 @@
       height: 6px;
     }
     .custom-scrollbar::-webkit-scrollbar-track {
-      background: #1e293b;
+      background: #0f172a;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #475569;
+      background: #334155;
       border-radius: 4px;
     }
     .glass-card {
-      background: rgba(30, 41, 59, 0.85);
+      background: rgba(15, 23, 42, 0.85);
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
-    .glow-effect {
-      box-shadow: 0 0 25px rgba(99, 102, 241, 0.25);
-    }
-    @keyframes pulse-slow {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.6; }
-    }
-    .animate-pulse-slow {
-      animation: pulse-slow 2.5s infinite ease-in-out;
+    .sidebar-active-tab {
+      background: linear-gradient(90deg, rgba(99, 102, 241, 0.25) 0%, rgba(168, 85, 247, 0.15) 100%);
+      border-left: 4px solid #818cf8;
+      color: #ffffff !important;
+      font-weight: 700;
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col custom-scrollbar selection:bg-indigo-500 selection:text-white">
+<body class="bg-slate-950 text-slate-100 h-screen flex overflow-hidden custom-scrollbar selection:bg-indigo-500 selection:text-white">
 
-  <!-- ================= TOP NAVIGATION BAR ================= -->
-  <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 shadow-lg">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      
-      <!-- Brand & Title -->
+  <!-- ================= LEFT SIDEBAR (แถบเมนูด้านข้าง) ================= -->
+  <aside class="w-64 sm:w-72 bg-slate-900 border-r border-slate-800 flex flex-col justify-between flex-shrink-0 z-30 shadow-2xl">
+    
+    <!-- Sidebar Header & Active Room Badge -->
+    <div class="p-4 border-b border-slate-800 space-y-3">
       <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md shadow-indigo-500/30 text-xl font-bold">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xl shadow-lg shadow-indigo-500/30">
           🎲
         </div>
         <div>
-          <div class="flex items-center space-x-2">
-            <h1 class="text-lg font-bold font-heading bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-indigo-300">
-              Phygital Snakes & Ladders
-            </h1>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-medium">
-              Admin Panel
-            </span>
-          </div>
-          <p class="text-xs text-slate-400">ระบบจัดการเกมบันไดงูฐานกิจกรรม Active Learning</p>
+          <h1 class="text-sm font-black font-heading text-white tracking-wide">Phygital Snakes</h1>
+          <span class="text-[10px] px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30">Admin Control</span>
         </div>
       </div>
 
-      <!-- Center: Current Room Display (if active) -->
-      <div id="topRoomInfo" class="hidden md:flex items-center space-x-3 bg-slate-800/80 px-4 py-1.5 rounded-xl border border-slate-700">
-        <span class="text-xs text-slate-400 font-medium">ห้องปัจจุบัน:</span>
-        <span id="navRoomPin" class="text-base font-bold text-amber-400 tracking-wider font-mono">------</span>
-        <div id="navStatusBadge" class="flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-700 text-slate-300">
-          <span class="w-2 h-2 rounded-full bg-slate-400"></span>
-          <span>ยังไม่เลือกห้อง</span>
+      <!-- Active Room Quick Card -->
+      <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+        <div>
+          <span class="text-[9px] text-slate-400 font-bold uppercase block">ห้องปัจจุบัน (Room PIN)</span>
+          <span id="sideRoomPin" class="text-base font-black font-mono text-amber-400">999999</span>
+        </div>
+        <div class="flex items-center space-x-1">
+          <button onclick="openSelectRoomModal()" title="เปลี่ยนห้องเกม" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs transition-all cursor-pointer">
+            <i data-lucide="door-open" class="w-4 h-4 text-amber-400"></i>
+          </button>
+          <button onclick="openQrModal()" title="แสดง QR Code" class="p-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs transition-all shadow-sm cursor-pointer">
+            <i data-lucide="qr-code" class="w-4 h-4"></i>
+          </button>
         </div>
       </div>
+    </div>
 
-      <!-- Right Action Controls -->
-      <div class="flex items-center space-x-2 sm:space-x-2.5">
-        <!-- Go to Student Screen (หน้านักเรียน) -->
-        <a id="navGoToStudentBtn" href="index.html" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/50 text-xs font-bold text-emerald-300 hover:text-white transition-all shadow-sm">
-          <i data-lucide="gamepad-2" class="w-3.5 h-3.5 text-emerald-400"></i>
+    <!-- Navigation Tabs List -->
+    <nav class="flex-1 py-3 px-2 space-y-1.5 overflow-y-auto custom-scrollbar">
+      <button onclick="switchTab('dashboard')" id="navTab-dashboard" class="w-full sidebar-active-tab px-3 py-2.5 rounded-xl text-left text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all flex items-center space-x-3 cursor-pointer">
+        <i data-lucide="layout-dashboard" class="w-4 h-4 text-indigo-400"></i>
+        <span>ภาพรวมห้องเรียน & ควบคุม</span>
+      </button>
+
+      <button onclick="switchTab('teams')" id="navTab-teams" class="w-full px-3 py-2.5 rounded-xl text-left text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all flex items-center space-x-3 cursor-pointer">
+        <i data-lucide="users" class="w-4 h-4 text-emerald-400"></i>
+        <span>จัดการกลุ่ม & ปรับคะแนน</span>
+      </button>
+
+      <button onclick="switchTab('stations')" id="navTab-stations" class="w-full px-3 py-2.5 rounded-xl text-left text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all flex items-center space-x-3 cursor-pointer">
+        <i data-lucide="target" class="w-4 h-4 text-amber-400"></i>
+        <span>จัดการฐานกิจกรรม & ปลดล็อก</span>
+      </button>
+
+      <button onclick="switchTab('settings')" id="navTab-settings" class="w-full px-3 py-2.5 rounded-xl text-left text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all flex items-center space-x-3 cursor-pointer">
+        <i data-lucide="sliders" class="w-4 h-4 text-cyan-400"></i>
+        <span>ตั้งค่าห้องเรียน & กระดาน</span>
+      </button>
+
+      <button onclick="switchTab('logs')" id="navTab-logs" class="w-full px-3 py-2.5 rounded-xl text-left text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all flex items-center space-x-3 cursor-pointer">
+        <i data-lucide="scroll-text" class="w-4 h-4 text-purple-400"></i>
+        <span>ประวัติกิจกรรมสด (Logs)</span>
+      </button>
+    </nav>
+
+    <!-- Sidebar Bottom: Cross Navigation & Firebase Status -->
+    <div class="p-3 border-t border-slate-800 space-y-2 bg-slate-950/60">
+      <div class="grid grid-cols-2 gap-1.5">
+        <a id="sideGoToStudentBtn" href="index.html" class="p-2 rounded-xl bg-emerald-950/70 hover:bg-emerald-900 border border-emerald-500/40 text-[11px] font-bold text-emerald-300 flex items-center justify-center space-x-1.5 transition-all text-center">
+          <i data-lucide="gamepad-2" class="w-3.5 h-3.5"></i>
           <span>หน้านักเรียน</span>
         </a>
-
-        <!-- Open Live Projector Screen (จอโปรเจกเตอร์) -->
-        <a id="navGoToBoardBtn" href="board.html" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-500/50 text-xs font-bold text-indigo-300 hover:text-white transition-all shadow-sm">
-          <i data-lucide="presentation" class="w-3.5 h-3.5 text-indigo-400"></i>
-          <span class="hidden sm:inline">จอโปรเจกเตอร์</span>
+        <a id="sideGoToBoardBtn" href="board.html" class="p-2 rounded-xl bg-indigo-950/70 hover:bg-indigo-900 border border-indigo-500/40 text-[11px] font-bold text-indigo-300 flex items-center justify-center space-x-1.5 transition-all text-center">
+          <i data-lucide="presentation" class="w-3.5 h-3.5"></i>
+          <span>จอโปรเจกเตอร์</span>
         </a>
-
-        <!-- Firebase Status Indicator -->
-        <button id="btnOpenFirebaseModal" onclick="openFirebaseConfigModal()" class="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all text-xs font-medium text-slate-300 hover:text-white">
-          <span id="firebaseStatusDot" class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
-          <span id="firebaseStatusText" class="hidden md:inline">Firebase</span>
-          <i data-lucide="settings" class="w-3.5 h-3.5 text-slate-400"></i>
-        </button>
-
-        <!-- Room Selector / Switcher -->
-        <button onclick="openSelectRoomModal()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all text-xs font-medium text-slate-300 hover:text-white">
-          <i data-lucide="door-open" class="w-3.5 h-3.5 text-amber-400"></i>
-          <span>เลือกห้อง</span>
-        </button>
-
-        <!-- Create Room Button -->
-        <button onclick="openCreateRoomModal()" class="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
-          <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">สร้างห้องใหม่</span>
-        </button>
       </div>
 
+      <button onclick="openCreateRoomModal()" class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 flex items-center justify-center space-x-1.5 transition-all cursor-pointer">
+        <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+        <span>สร้างห้องเกมใหม่</span>
+      </button>
+
+      <button onclick="openFirebaseConfigModal()" class="w-full py-1.5 px-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[10px] text-slate-400 hover:text-slate-200 flex items-center justify-between cursor-pointer">
+        <span class="flex items-center space-x-1.5">
+          <span id="firebaseStatusDot" class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+          <span id="firebaseStatusText">Firebase</span>
+        </span>
+        <i data-lucide="settings-2" class="w-3 h-3 text-slate-500"></i>
+      </button>
     </div>
-  </header>
 
-  <!-- ================= NO ACTIVE ROOM STATE ================= -->
-  <main id="noRoomContainer" class="flex-1 flex items-center justify-center p-6">
-    <div class="max-w-md w-full text-center p-8 rounded-2xl glass-card border border-slate-800 shadow-2xl">
-      <div class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center text-4xl mb-4 shadow-inner">
-        🏰
-      </div>
-      <h2 class="text-2xl font-bold font-heading text-white mb-2">ยินดีต้อนรับสู่ระบบควบคุม</h2>
-      <p class="text-sm text-slate-400 mb-6 leading-relaxed">
-        กรุณาเชื่อมต่อ Firebase และสร้างห้องเรียนเกมบันไดงูใหม่ หรือกรอก Room PIN เพื่อเริ่มจัดการการเรียนรู้
-      </p>
-      
-      <div class="space-y-3">
-        <button onclick="openCreateRoomModal()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 font-semibold text-sm shadow-lg shadow-indigo-500/30 flex items-center justify-center space-x-2 transition-all">
-          <i data-lucide="sparkles" class="w-4 h-4"></i>
-          <span>สร้างห้องเกมใหม่ (Create Room)</span>
-        </button>
-        <button onclick="openSelectRoomModal()" class="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-medium text-sm text-slate-300 hover:text-white flex items-center justify-center space-x-2 transition-all">
-          <i data-lucide="key" class="w-4 h-4 text-amber-400"></i>
-          <span>เข้ารหัส Room PIN ที่มีอยู่แล้ว</span>
-        </button>
-        <button onclick="openFirebaseConfigModal()" class="w-full py-2 px-4 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-xs text-slate-400 hover:text-slate-200 flex items-center justify-center space-x-1.5">
-          <i data-lucide="database" class="w-3.5 h-3.5 text-indigo-400"></i>
-          <span>ตั้งค่าการเชื่อมต่อ Firebase Database</span>
-        </button>
-      </div>
-    </div>
-  </main>
+  </aside>
 
-  <!-- ================= ACTIVE ROOM DASHBOARD ================= -->
-  <main id="activeRoomContainer" class="hidden flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+  <!-- ================= MAIN CONTENT WORKSPACE ================= -->
+  <main class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-950">
     
-    <!-- 1. ROOM BANNER & GAME CONTROLLER -->
-    <section class="glass-card rounded-2xl p-6 border border-slate-800 relative overflow-hidden">
-      <!-- Background Ambient Glow -->
-      <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-indigo-600/10 blur-3xl pointer-events-none"></div>
-      <div class="absolute -left-20 -bottom-20 w-64 h-64 rounded-full bg-purple-600/10 blur-3xl pointer-events-none"></div>
+    <!-- Top Context Header Bar -->
+    <header class="h-16 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between flex-shrink-0">
+      <div class="flex items-center space-x-3">
+        <h2 id="topBarTabTitle" class="text-base sm:text-lg font-black font-heading text-white">📊 ภาพรวมห้องเรียน & ควบคุมเกม</h2>
+        <span id="topRoomStatusBadge" class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30 flex items-center space-x-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span>กำลังแข่งขัน</span>
+        </span>
+      </div>
 
-      <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+      <!-- Quick Action Buttons -->
+      <div class="flex items-center space-x-2">
+        <button onclick="handleUnlockAllStations()" class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-xs font-bold text-amber-300 flex items-center space-x-1.5 transition-all shadow-sm cursor-pointer" title="ปลดล็อกทุกฐานกิจกรรมให้ว่างทันที">
+          <i data-lucide="unlock" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span class="hidden sm:inline">ปลดล็อกทุกฐาน</span>
+        </button>
+
+        <button onclick="openSelectRoomModal()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-300 flex items-center space-x-1.5 transition-all cursor-pointer">
+          <i data-lucide="door-open" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span class="hidden sm:inline">เลือกห้อง</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Scrollable Tab Views Container -->
+    <div class="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 space-y-6">
+
+      <!-- ================= TAB 1: DASHBOARD & CONTROLLER ================= -->
+      <div id="tabContent-dashboard" class="space-y-6">
         
-        <!-- Left: Room Info & PIN -->
-        <div class="space-y-2">
-          <div class="flex items-center space-x-3">
-            <span class="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 font-mono text-xl font-extrabold tracking-widest flex items-center space-x-2">
-              <span>PIN:</span>
-              <span id="bannerRoomPin">------</span>
-            </span>
-            <button onclick="copyRoomLink()" title="คัดลอกลิงก์ให้นักเรียน" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all">
-              <i data-lucide="copy" class="w-4 h-4"></i>
-            </button>
-            <button onclick="showQRCodeModal()" title="แสดง QR Code" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all">
-              <i data-lucide="qr-code" class="w-4 h-4 text-emerald-400"></i>
-            </button>
+        <!-- Master Game Controller Card -->
+        <div class="glass-card rounded-2xl p-5 border border-indigo-500/30 shadow-xl space-y-4">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+            <div>
+              <span class="text-xs text-slate-400 font-bold uppercase">เวลานับถอยหลังห้องเรียน (Master Game Timer)</span>
+              <div class="flex items-baseline space-x-3 mt-1">
+                <span id="masterGameTimerDisplay" class="text-4xl sm:text-5xl font-black font-mono text-amber-400 tracking-wider">40:00</span>
+                <span id="masterTimerTotalLabel" class="text-xs text-slate-400 font-bold">จากทั้งหมด 40 นาที</span>
+              </div>
+            </div>
+
+            <!-- Controller Buttons -->
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="setRoomGameStatus('playing')" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 flex items-center space-x-1.5 transition-all cursor-pointer">
+                <i data-lucide="play" class="w-4 h-4"></i>
+                <span>เริ่มเกม (Start)</span>
+              </button>
+              <button onclick="setRoomGameStatus('waiting')" class="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-lg shadow-amber-600/30 flex items-center space-x-1.5 transition-all cursor-pointer">
+                <i data-lucide="pause" class="w-4 h-4"></i>
+                <span>พักเกม (Pause)</span>
+              </button>
+              <button onclick="handleRestartRoomGame()" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 flex items-center space-x-1.5 transition-all cursor-pointer">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                <span>เริ่มรอบใหม่ (40 นาที)</span>
+              </button>
+              <button onclick="setRoomGameStatus('finished')" class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-lg shadow-rose-600/30 flex items-center space-x-1.5 transition-all cursor-pointer">
+                <i data-lucide="flag" class="w-4 h-4"></i>
+                <span>จบเกม (Finish)</span>
+              </button>
+            </div>
           </div>
-          <h2 id="bannerRoomTitle" class="text-2xl font-bold font-heading text-white">ห้องเรียนบันไดงู</h2>
-          <div class="flex flex-wrap items-center gap-3 text-xs text-slate-400">
-            <span class="flex items-center space-x-1">
-              <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-indigo-400"></i>
-              <span id="bannerTotalTiles">40 ช่องเดิน</span>
-            </span>
-            <span class="flex items-center space-x-1">
-              <i data-lucide="flag" class="w-3.5 h-3.5 text-yellow-400"></i>
-              <span id="bannerFinishBonus">โบนัสเส้นชัย +500 คะแนน</span>
-            </span>
-            <span class="flex items-center space-x-1">
-              <i data-lucide="layers" class="w-3.5 h-3.5 text-pink-400"></i>
-              <span id="bannerStationCount">10 ฐานกิจกรรม</span>
-            </span>
+
+          <!-- Quick Stats Grid -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800">
+              <span class="text-[10px] text-slate-400 font-bold uppercase block">กลุ่มที่แข่งขัน</span>
+              <span id="statTeamsCount" class="text-xl font-black font-mono text-emerald-400">6 กลุ่ม</span>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800">
+              <span class="text-[10px] text-slate-400 font-bold uppercase block">ฐานกิจกรรมทั้งหมด</span>
+              <span id="statStationsCount" class="text-xl font-black font-mono text-indigo-400">10 ฐาน</span>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800">
+              <span class="text-[10px] text-slate-400 font-bold uppercase block">ฐานที่ว่างตอนนี้</span>
+              <span id="statVacantCount" class="text-xl font-black font-mono text-amber-400">10 ฐาน</span>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800">
+              <span class="text-[10px] text-slate-400 font-bold uppercase block">จำนวนช่องบนกระดาน</span>
+              <span id="statTilesCount" class="text-xl font-black font-mono text-cyan-400">40 ช่อง</span>
+            </div>
           </div>
         </div>
 
-        <!-- Center / Right: Quick Access Links & Master Game Controls -->
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <!-- Top 3 Podium & Live Teams Snapshot -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
-          <!-- Open Board View -->
-          <a id="btnOpenBoard" href="board.html" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-xs text-indigo-300 hover:text-white flex items-center justify-center space-x-2 transition-all">
-            <i data-lucide="presentation" class="w-4 h-4 text-indigo-400"></i>
-            <span>เปิดหน้าจอกระดานรวม (Board)</span>
-          </a>
+          <!-- Top 3 Podium Card (5 cols) -->
+          <div class="lg:col-span-5 glass-card rounded-2xl p-4 border border-amber-500/30 shadow-lg flex flex-col justify-between">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+              <span class="font-bold text-sm text-amber-400 flex items-center space-x-2 font-heading">
+                <i data-lucide="crown" class="w-4 h-4 text-amber-400"></i>
+                <span>แท่น 3 อันดับคะแนนสะสม (Top 3)</span>
+              </span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-bold animate-pulse">Live 🔴</span>
+            </div>
 
-          <!-- Open Student View -->
-          <a id="btnOpenStudent" href="index.html" class="px-4 py-2.5 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/50 font-bold text-xs text-emerald-300 hover:text-white flex items-center justify-center space-x-2 transition-all">
-            <i data-lucide="gamepad-2" class="w-4 h-4 text-emerald-400"></i>
-            <span>เปิดหน้าจอนักเรียน (Student)</span>
-          </a>
+            <!-- Top 3 Pedestal Container -->
+            <div id="dashPodiumTop3" class="flex items-end justify-center gap-2 pt-3 pb-1"></div>
+          </div>
 
-          <!-- Master Game Status Actions -->
-          <div class="flex items-center space-x-2 bg-slate-900/90 p-1.5 rounded-xl border border-slate-800">
-            <!-- Start Game -->
-            <button id="btnStartGame" onclick="setRoomGameStatus('playing')" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 font-medium text-xs text-white shadow-md shadow-emerald-600/30 flex items-center space-x-1.5 transition-all">
-              <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
-              <span>เริ่มเกม</span>
-            </button>
-            <!-- Pause Game -->
-            <button id="btnPauseGame" onclick="setRoomGameStatus('waiting')" class="px-3.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 font-medium text-xs text-white shadow-md shadow-amber-600/30 flex items-center space-x-1.5 transition-all">
-              <i data-lucide="pause" class="w-3.5 h-3.5"></i>
-              <span>พักเกม</span>
-            </button>
-            <!-- Reset Game -->
-            <button id="btnResetGame" onclick="confirmResetGame()" class="px-3 py-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/30 font-medium text-xs text-rose-300 hover:text-rose-100 flex items-center space-x-1 transition-all">
-              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-              <span>รีเซ็ต</span>
-            </button>
+          <!-- Active Stations Matrix Snapshot (7 cols) -->
+          <div class="lg:col-span-7 glass-card rounded-2xl p-4 border border-slate-800 shadow-lg space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+              <span class="font-bold text-sm text-white flex items-center space-x-2 font-heading">
+                <i data-lucide="target" class="w-4 h-4 text-indigo-400"></i>
+                <span>สถานะฐานกิจกรรมแบบ Realtime (Active Stations)</span>
+              </span>
+              <button onclick="handleUnlockAllStations()" class="text-xs text-amber-400 hover:underline font-bold cursor-pointer">
+                ปลดล็อกทั้งหมด
+              </button>
+            </div>
+
+            <div id="dashStationsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[220px] overflow-y-auto custom-scrollbar p-1"></div>
           </div>
 
         </div>
 
       </div>
-    </section>
 
-    <!-- 2. NAVIGATION TABS -->
-    <div class="flex items-center space-x-2 border-b border-slate-800 pb-2 overflow-x-auto custom-scrollbar">
-      <button onclick="switchTab('monitor')" id="tabBtn-monitor" class="tab-btn flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-indigo-600 text-white shadow-md shadow-indigo-600/30">
-        <i data-lucide="activity" class="w-4 h-4"></i>
-        <span>ติดตามการแข่งขันสด (Live Monitor)</span>
-      </button>
-      <button onclick="switchTab('stations')" id="tabBtn-stations" class="tab-btn flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/80 transition-all">
-        <i data-lucide="layers" class="w-4 h-4"></i>
-        <span>จัดการฐานกิจกรรม (Stations)</span>
-        <span id="tabStationBadge" class="px-1.5 py-0.2 rounded-full text-xs bg-slate-700 text-slate-300">0</span>
-      </button>
-      <button onclick="switchTab('settings')" id="tabBtn-settings" class="tab-btn flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/80 transition-all">
-        <i data-lucide="sliders" class="w-4 h-4"></i>
-        <span>ตั้งค่ากระดานและทีม (Settings)</span>
-      </button>
-      <button onclick="switchTab('logs')" id="tabBtn-logs" class="tab-btn flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/80 transition-all">
-        <i data-lucide="scroll-text" class="w-4 h-4"></i>
-        <span>บันทึกความเคลื่อนไหว (Live Logs)</span>
-      </button>
-    </div>
+      <!-- ================= TAB 2: TEAMS MANAGEMENT ================= -->
+      <div id="tabContent-teams" class="hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-bold font-heading text-white">จัดการกลุ่มผู้เรียน & ปรับคะแนน (Teams Control)</h3>
+            <p class="text-xs text-slate-400">ดูตำแหน่งหมากบนกระดาน คะแนนสะสม และแก้ไขคะแนนรายกลุ่ม</p>
+          </div>
+        </div>
 
-    <!-- 3. TAB CONTENT SECTIONS -->
-
-    <!-- TAB 1: LIVE MONITOR -->
-    <section id="tabContent-monitor" class="tab-pane space-y-6">
-      
-      <!-- Top Live Summary Bar -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div class="glass-card p-4 rounded-xl border border-slate-800">
-          <div class="text-xs text-slate-400 mb-1 flex items-center justify-between">
-            <span>สถานะห้อง</span>
-            <i data-lucide="radio" class="w-3.5 h-3.5 text-indigo-400"></i>
-          </div>
-          <div id="statGameStatus" class="text-lg font-bold text-emerald-400 font-heading">กำลังแข่งขัน</div>
-        </div>
-        <div class="glass-card p-4 rounded-xl border border-slate-800">
-          <div class="text-xs text-slate-400 mb-1 flex items-center justify-between">
-            <span>ฐานว่าง / ทั้งหมด</span>
-            <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i>
-          </div>
-          <div id="statVacantStations" class="text-lg font-bold text-white font-heading">0 / 10 ฐาน</div>
-        </div>
-        <div class="glass-card p-4 rounded-xl border border-slate-800">
-          <div class="text-xs text-slate-400 mb-1 flex items-center justify-between">
-            <span>คะแนนสูงสุดปัจจุบัน</span>
-            <i data-lucide="trophy" class="w-3.5 h-3.5 text-amber-400"></i>
-          </div>
-          <div id="statTopScore" class="text-lg font-bold text-amber-400 font-heading">0 แต้ม</div>
-        </div>
-        <div class="glass-card p-4 rounded-xl border border-slate-800">
-          <div class="text-xs text-slate-400 mb-1 flex items-center justify-between">
-            <span>ทีมที่เข้าเส้นชัย</span>
-            <i data-lucide="crown" class="w-3.5 h-3.5 text-yellow-300"></i>
-          </div>
-          <div id="statFinishedTeams" class="text-lg font-bold text-yellow-300 font-heading">0 / 6 ทีม</div>
+        <div id="teamsManagementGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Injected by JS -->
         </div>
       </div>
 
-      <!-- 6 Teams Live Grid -->
-      <div>
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-bold font-heading text-white flex items-center space-x-2">
-            <span>👥 ติดตามสถานะ 6 กลุ่ม</span>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-normal">Real-time Sync</span>
-          </h3>
-          <span class="text-xs text-slate-400">คุณครูสามารถกดปรับคะแนนหรือตำแหน่งช่องของแต่ละทีมได้ทันที</span>
-        </div>
-
-        <div id="teamsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <!-- Team Cards injected by JS -->
-        </div>
-      </div>
-
-      <!-- Live Station Occupancy Status Matrix -->
-      <div class="glass-card rounded-2xl p-5 border border-slate-800">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-          <h3 class="text-base font-bold font-heading text-white flex items-center space-x-2">
-            <i data-lucide="map-pin" class="w-4 h-4 text-indigo-400"></i>
-            <span>สถานะการครอบครองฐานกิจกรรม (Live Station Occupancy)</span>
-          </h3>
-          <div class="flex items-center space-x-2">
-            <span class="text-xs text-slate-400 hidden lg:inline">ระบบปลดล็อกให้อัตโนมัติเมื่อส่งคะแนน</span>
-            <button onclick="handleUnlockAllStations()" class="px-3 py-1.5 rounded-lg bg-rose-950/80 hover:bg-rose-900 border border-rose-500/50 text-rose-300 hover:text-white text-xs font-bold flex items-center space-x-1.5 transition-all shadow-sm active:scale-95 cursor-pointer">
-              <i data-lucide="unlock" class="w-3.5 h-3.5"></i>
-              <span>ปลดล็อกทุกฐานให้ว่าง</span>
-            </button>
+      <!-- ================= TAB 3: STATIONS MANAGEMENT ================= -->
+      <div id="tabContent-stations" class="hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-bold font-heading text-white">จัดการฐานกิจกรรม & ปลดล็อก (Stations Matrix)</h3>
+            <p class="text-xs text-slate-400">เพิ่ม ลบ แก้ไขเวลา คะแนนเต็ม และปลดล็อกฐานที่ติดค้าง</p>
           </div>
-        </div>
-        <div id="stationsStatusList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          <!-- Station Badges injected by JS -->
-        </div>
-      </div>
-
-    </section>
-
-    <!-- TAB 2: STATION MANAGEMENT -->
-    <section id="tabContent-stations" class="tab-pane hidden space-y-6">
-      
-      <!-- Top Action Bar for Stations -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-card p-4 rounded-xl border border-slate-800">
-        <div>
-          <h3 class="text-lg font-bold font-heading text-white">🎪 จัดการฐานกิจกรรมการเรียนรู้</h3>
-          <p class="text-xs text-slate-400">กำหนดชื่อฐาน คำอธิบายกติกา เวลาจับเวลา และคะแนนเต็มของแต่ละฐาน</p>
-        </div>
-        <div class="flex items-center space-x-2">
-          <button onclick="loadSampleStationsPreset()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-300 hover:text-white flex items-center space-x-1.5 transition-all">
-            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
-            <span>โหลด 10 ฐานตัวอย่าง</span>
-          </button>
-          <button onclick="openAddStationModal()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-md shadow-indigo-600/30 flex items-center space-x-1.5 transition-all">
+          <button onclick="openAddStationModal()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-bold text-xs text-white shadow-md shadow-indigo-600/30 flex items-center space-x-1.5 transition-all cursor-pointer">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span>เพิ่มฐานกิจกรรมใหม่</span>
           </button>
         </div>
+
+        <div id="stationsManagementList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Injected by JS -->
+        </div>
       </div>
 
-      <!-- Stations Cards List -->
-      <div id="stationsManageGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- Station Edit Cards injected by JS -->
-      </div>
+      <!-- ================= TAB 4: ROOM SETTINGS ================= -->
+      <div id="tabContent-settings" class="hidden space-y-4">
+        <div class="max-w-2xl glass-card p-6 rounded-2xl border border-slate-800 space-y-5">
+          <div class="border-b border-slate-800 pb-3">
+            <h3 class="text-base font-bold font-heading text-white">ตั้งค่าห้องเรียน & กระดานเกม (Room Config)</h3>
+            <p class="text-xs text-slate-400">ปรับแต่งชื่อห้อง จำนวนช่อง เวลา และภาพพื้นหลัง</p>
+          </div>
 
-    </section>
-
-    <!-- TAB 3: SETTINGS -->
-    <section id="tabContent-settings" class="tab-pane hidden space-y-6">
-      
-      <!-- Board Settings Card -->
-      <div class="glass-card rounded-2xl p-6 border border-slate-800 space-y-5">
-        <h3 class="text-lg font-bold font-heading text-white flex items-center space-x-2">
-          <i data-lucide="image" class="w-5 h-5 text-indigo-400"></i>
-          <span>ตั้งค่ากระดานเกม (Board Settings)</span>
-        </h3>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Left: Inputs -->
           <div class="space-y-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1.5">ชื่อห้อง / วิชา</label>
-              <input type="text" id="settingRoomTitle" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+              <label class="block text-xs font-bold text-slate-300 mb-1">ชื่อห้องเรียน / กิจกรรม</label>
+              <input id="settingsTitleInput" type="text" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500">
             </div>
-            
-            <div class="grid grid-cols-3 gap-3">
+
+            <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1.5">จำนวนช่องบนกระดาน</label>
-                <input type="number" id="settingTotalTiles" min="10" max="100" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1.5">เวลาแข่งขันรวม (นาที)</label>
-                <input type="number" id="settingGameDuration" min="5" max="180" value="40" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-amber-400 font-bold focus:outline-none focus:border-amber-500">
+                <label class="block text-xs font-bold text-slate-300 mb-1">จำนวนช่องเดินบนกระดาน</label>
+                <input id="settingsTilesInput" type="number" min="20" max="100" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500">
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1.5">โบนัสเข้าเส้นชัย/รอบ</label>
-                <input type="number" id="settingFinishBonus" min="0" step="50" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                <label class="block text-xs font-bold text-slate-300 mb-1">เวลานับถอยหลัง (นาที)</label>
+                <input id="settingsDurationInput" type="number" min="5" max="180" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500">
               </div>
             </div>
 
-            <!-- Upload Custom Board Image from Computer / Canva -->
-            <div class="p-3.5 rounded-xl bg-slate-900/90 border border-indigo-500/30 space-y-2">
-              <label class="block text-xs font-bold text-indigo-300 flex items-center justify-between">
-                <span class="flex items-center space-x-1.5">
-                  <i data-lucide="image-plus" class="w-4 h-4"></i>
-                  <span>ภาพกระดานเกมของคุณครู (Custom Board Image)</span>
-                </span>
-                <span class="text-[10px] text-slate-400 font-normal">รองรับ Canva / PNG / JPG</span>
-              </label>
-
-              <div class="flex items-center space-x-2">
-                <input type="file" id="settingBoardFileInput" accept="image/*" onchange="handleBoardFileUpload(event)" class="hidden">
-                <button type="button" onclick="document.getElementById('settingBoardFileInput').click()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 flex items-center space-x-1.5 transition-all cursor-pointer">
-                  <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-                  <span>อัปโหลดรูปจากเครื่อง / Canva</span>
-                </button>
-                <span class="text-[11px] text-slate-400">หรือวาง URL:</span>
-              </div>
-
-              <input type="url" id="settingBoardImageUrl" oninput="updateBoardPreview(this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="https://example.com/my-board.png">
-            </div>
-
-            <!-- Grid Matrix & Walking Calibration -->
-            <div class="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 space-y-3">
-              <h4 class="text-xs font-bold text-amber-400 flex items-center space-x-1.5">
-                <i data-lucide="grid" class="w-4 h-4"></i>
-                <span>ตั้งค่าการเดินให้ตรงกับช่องในรูปภาพ (Grid Calibration)</span>
-              </h4>
-
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="block text-[11px] font-semibold text-slate-300 mb-1">จำนวนคอลัมน์แนวนอน:</label>
-                  <select id="settingGridCols" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
-                    <option value="auto">คำนวณอัตโนมัติ (Auto)</option>
-                    <option value="5">5 คอลัมน์</option>
-                    <option value="6">6 คอลัมน์</option>
-                    <option value="8">8 คอลัมน์ (มาตรฐาน 40 ช่อง: 5x8)</option>
-                    <option value="10">10 คอลัมน์ (มาตรฐาน 100 ช่อง: 10x10)</option>
-                    <option value="12">12 คอลัมน์</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-[11px] font-semibold text-slate-300 mb-1">ทิศทางการเลื้อยของตาราง:</label>
-                  <select id="settingGridDirection" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
-                    <option value="serpentine_bottom_lr">งูเลื้อย: แถวล่างซ้าย->ขวา สลับขึ้นบน (มาตรฐาน)</option>
-                    <option value="serpentine_bottom_rl">งูเลื้อย: แถวล่างขวา->ซ้าย สลับขึ้นบน</option>
-                    <option value="grid_bottom_lr">เรียงซ้าย->ขวา ทุกแถว จากล่างขึ้นบน</option>
-                    <option value="grid_top_lr">เรียงซ้าย->ขวา ทุกแถว จากบนลงล่าง</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="block text-[11px] font-semibold text-slate-300 mb-1">การแสดงผลตัวเลขช่อง:</label>
-                  <select id="settingTileDisplayMode" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
-                    <option value="show_all">แสดงกล่องตัวเลขเรืองแสงทุกช่อง</option>
-                    <option value="hide_numbers">ซ่อนกล่องตัวเลข (สำหรับรูปที่มีเลขในตัวแล้ว)</option>
-                    <option value="show_key_only">แสดงเฉพาะจุดเริ่มและเส้นชัย</option>
-                  </select>
-                </div>
-                <div class="space-y-1">
-                  <div class="flex justify-between text-[11px] text-slate-300">
-                    <span>ระยะขอบซ้าย-ขวา / บน-ล่าง:</span>
-                  </div>
-                  <div class="grid grid-cols-2 gap-1.5">
-                    <input type="number" id="settingPaddingX" min="0" max="30" value="7" class="bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-center text-white" placeholder="X: 7%">
-                    <input type="number" id="settingPaddingY" min="0" max="30" value="9" class="bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-center text-white" placeholder="Y: 9%">
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Dynamic Snakes & Ladders Auto-Randomizer Card -->
-            <div class="p-3.5 rounded-xl bg-slate-900/90 border border-amber-500/30 space-y-2.5">
-              <div class="flex items-center justify-between">
-                <h4 class="text-xs font-bold text-amber-400 flex items-center space-x-1.5">
-                  <i data-lucide="shuffle" class="w-4 h-4 text-amber-400"></i>
-                  <span>จุดสำคัญ บันไดลัด 🧗‍♂️ และงูกับดัก 🐍</span>
-                </h4>
-                <button type="button" onclick="randomizeCurrentRoomSnakes()" class="px-3 py-1 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-[11px] flex items-center space-x-1 shadow-md shadow-amber-500/20 active:scale-95 transition-all cursor-pointer">
-                  <i data-lucide="dices" class="w-3.5 h-3.5"></i>
-                  <span>สุ่มจุดใหม่ (Re-Roll)</span>
-                </button>
-              </div>
-              <p class="text-[10px] text-slate-400">คำนวณตำแหน่งและระยะปีน/ถอยอย่างสมดุลตามจำนวนช่องกระดาน (40 / 50 / 100 ช่อง)</p>
-              <div id="snakesLaddersBadgesList" class="flex flex-wrap gap-1.5 max-h-[95px] overflow-y-auto custom-scrollbar p-1.5 bg-slate-950/60 rounded-lg border border-slate-800">
-                <!-- Injected by JS -->
-              </div>
-            </div>
-
-            <!-- Quick Presets -->
             <div>
-              <label class="block text-xs font-semibold text-slate-400 mb-2">หรือเลือกภาพพื้นหลังตัวอย่าง:</label>
-              <div class="grid grid-cols-2 gap-2" id="boardPresetsContainer">
-                <!-- Preset buttons injected by JS -->
-              </div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">คะแนนโบนัสเมื่อถึงเส้นชัย (+แต้ม)</label>
+              <input id="settingsBonusInput" type="number" min="0" step="50" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500">
             </div>
-          </div>
 
-          <!-- Right: Preview -->
-          <div class="flex flex-col">
-            <label class="block text-xs font-semibold text-slate-300 mb-1.5">ตัวอย่างภาพพื้นหลังกระดาน</label>
-            <div class="flex-1 bg-slate-900 rounded-xl border border-slate-700 overflow-hidden relative min-h-[280px] flex items-center justify-center">
-              <img id="boardPreviewImage" src="" alt="Board Preview" class="w-full h-full object-cover">
-              <div id="boardPreviewEmpty" class="text-xs text-slate-500 text-center p-4">ไม่มีรูปภาพตัวอย่าง</div>
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">URL รูปภาพพื้นหลังกระดาน</label>
+              <input id="settingsBgInput" type="text" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500">
             </div>
-          </div>
-        </div>
 
-        <div class="flex justify-end pt-3 border-t border-slate-800">
-          <button onclick="saveBoardSettings()" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-lg shadow-indigo-600/30 flex items-center space-x-2 transition-all">
-            <i data-lucide="save" class="w-4 h-4"></i>
-            <span>บันทึกการตั้งค่ากระดาน</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Teams Customization Card -->
-      <div class="glass-card rounded-2xl p-6 border border-slate-800 space-y-5">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-bold font-heading text-white flex items-center space-x-2">
-            <i data-lucide="users" class="w-5 h-5 text-purple-400"></i>
-            <span>ปรับแต่งชื่อและไอคอนกลุ่มผู้เล่น (Team Customization)</span>
-          </h3>
-          <button onclick="saveTeamsSettings()" class="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs shadow-md shadow-purple-600/30 flex items-center space-x-1.5 transition-all">
-            <i data-lucide="save" class="w-3.5 h-3.5"></i>
-            <span>บันทึกข้อมูลทีม</span>
-          </button>
-        </div>
-
-        <div id="teamsSettingGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <!-- Team Settings inputs injected by JS -->
-        </div>
-      </div>
-
-      <!-- Change Admin Passcode Card -->
-      <div class="glass-card rounded-2xl p-6 border border-slate-800 space-y-4">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-bold font-heading text-white flex items-center space-x-2">
-            <i data-lucide="key" class="w-5 h-5 text-amber-400"></i>
-            <span>รหัสผ่านเข้าสู่ระบบแอดมิน (Admin Passcode)</span>
-          </h3>
-          <span class="text-xs text-slate-400">กำหนดรหัสผ่านสำหรับคุณครู</span>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-          <div class="sm:col-span-2">
-            <label class="block text-xs font-semibold text-slate-300 mb-1.5">รหัสผ่านแอดมินใหม่ (ปัจจุบัน: <span id="currentPasscodeLabel" class="text-amber-400 font-mono font-bold">1234</span>)</label>
-            <input type="text" id="newAdminPasscodeInput" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-amber-500" placeholder="กรอกรหัสผ่านใหม่ เช่น 1234 หรือ mypass2026">
-          </div>
-          <div>
-            <button onclick="saveCustomAdminPasscode()" class="w-full mt-5 sm:mt-0 py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-bold text-xs shadow-md shadow-amber-600/30 flex items-center justify-center space-x-2 transition-all">
-              <i data-lucide="check" class="w-4 h-4"></i>
-              <span>บันทึกรหัสผ่านใหม่</span>
+            <button onclick="saveRoomSettings()" class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 flex items-center justify-center space-x-2 transition-all cursor-pointer">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>บันทึกการตั้งค่าห้อง</span>
             </button>
           </div>
         </div>
       </div>
 
-    </section>
-
-    <!-- TAB 4: LIVE LOGS & REPORT -->
-    <section id="tabContent-logs" class="tab-pane hidden space-y-6">
-      
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-card p-4 rounded-xl border border-slate-800">
-        <div>
-          <h3 class="text-lg font-bold font-heading text-white">📜 ประวัติกิจกรรมสด (Live Activity Logs)</h3>
-          <p class="text-xs text-slate-400">บันทึกทุกการทอยลูกเต๋า การเข้าฐาน และการบันทึกคะแนน</p>
+      <!-- ================= TAB 5: ACTIVITY LOGS ================= -->
+      <div id="tabContent-logs" class="hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-bold font-heading text-white">ประวัติกิจกรรมสด (Live Activity Logs)</h3>
+            <p class="text-xs text-slate-400">บันทึกเหตุการณ์ทอยเต๋า เข้าฐาน และส่งคะแนนในห้องเรียน</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="exportLogsToCSV()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 flex items-center space-x-1.5 transition-all cursor-pointer">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>Export CSV</span>
+            </button>
+            <button onclick="clearRoomLogs()" class="px-3 py-1.5 rounded-xl bg-rose-950/70 hover:bg-rose-900 border border-rose-500/40 text-xs font-bold text-rose-300 flex items-center space-x-1.5 transition-all cursor-pointer">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              <span>ล้างประวัติ</span>
+            </button>
+          </div>
         </div>
-        <div class="flex items-center space-x-2">
-          <button onclick="exportLogsToCSV()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-300 hover:text-white flex items-center space-x-1.5 transition-all">
-            <i data-lucide="download" class="w-3.5 h-3.5 text-emerald-400"></i>
-            <span>Export CSV</span>
-          </button>
-          <button onclick="clearRoomLogs()" class="px-3.5 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/30 text-xs font-semibold text-rose-300 hover:text-rose-100 flex items-center space-x-1.5 transition-all">
-            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            <span>ล้างบันทึก</span>
-          </button>
-        </div>
-      </div>
 
-      <!-- Logs Stream Container -->
-      <div class="glass-card rounded-2xl p-4 border border-slate-800">
-        <div id="logsFeed" class="space-y-2 max-h-[500px] overflow-y-auto custom-scrollbar pr-2">
-          <div class="text-center text-xs text-slate-500 py-8">กำลังโหลดข้อมูลความเคลื่อนไหว...</div>
+        <div class="glass-card rounded-2xl p-4 border border-slate-800">
+          <div id="logsContainerList" class="space-y-2 max-h-[60vh] overflow-y-auto custom-scrollbar pr-1"></div>
         </div>
       </div>
 
-    </section>
-
+    </div>
   </main>
 
   <!-- ================= MODALS ================= -->
 
-  <!-- 1. FIREBASE CONFIG MODAL -->
-  <div id="firebaseModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center space-x-2">
-          <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
-            <i data-lucide="database" class="w-4 h-4"></i>
-          </div>
-          <h3 class="text-lg font-bold font-heading text-white">ตั้งค่า Firebase Realtime Database</h3>
-        </div>
-        <button onclick="closeModal('firebaseModal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+  <!-- 1. SELECT ROOM PIN MODAL -->
+  <div id="selectRoomModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="max-w-sm w-full glass-card p-6 rounded-3xl border border-indigo-500/40 shadow-2xl text-center space-y-4">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-2xl">
+        🚪
       </div>
-
-      <p class="text-xs text-slate-400 leading-relaxed">
-        คัดลอก Firebase Config จาก Firebase Console (Web App) วางในช่องด้านล่าง เพื่อเชื่อมต่อ Realtime Database
-      </p>
-
-      <div class="space-y-3">
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Firebase Configuration (JSON format)</label>
-          <textarea id="firebaseConfigTextarea" rows="8" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 font-mono text-xs text-indigo-200 focus:outline-none focus:border-indigo-500 custom-scrollbar" placeholder='{
-  "apiKey": "AIzaSy...",
-  "authDomain": "your-app.firebaseapp.com",
-  "databaseURL": "https://your-app-default-rtdb.firebaseio.com",
-  "projectId": "your-app",
-  "storageBucket": "your-app.appspot.com",
-  "messagingSenderId": "...",
-  "appId": "..."
-}'></textarea>
-        </div>
+      <div>
+        <h3 class="text-base font-bold font-heading text-white">เลือกห้องเรียนเกมบันไดงู</h3>
+        <p class="text-xs text-slate-400 mt-0.5">กรอกรหัส Room PIN เพื่อโหลดข้อมูล</p>
       </div>
-
-      <div class="flex items-center justify-between pt-3 border-t border-slate-800">
-        <button onclick="loadSampleFirebaseConfig()" class="text-xs text-amber-400 hover:underline flex items-center space-x-1">
-          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-          <span>ใช้ Demo Config ตัวอย่าง</span>
+      <input id="enterRoomPinInput" type="text" placeholder="เช่น 999999" maxlength="10" class="w-full px-4 py-3 rounded-2xl bg-slate-950 border-2 border-indigo-500/50 text-white font-mono text-center text-xl tracking-wider focus:outline-none focus:border-indigo-400" onkeydown="if(event.key==='Enter') submitSelectRoom()">
+      <div class="flex items-center space-x-2 pt-1">
+        <button onclick="submitSelectRoom()" class="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-md shadow-indigo-600/30 cursor-pointer">
+          เปิดห้องนี้
         </button>
-        <div class="flex items-center space-x-2">
-          <button onclick="closeModal('firebaseModal')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300">ยกเลิก</button>
-          <button onclick="saveFirebaseConfigFromModal()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-xs text-white shadow-md shadow-indigo-600/30">บันทึก & เชื่อมต่อ</button>
-        </div>
+        <button onclick="closeModal('selectRoomModal')" class="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 cursor-pointer">
+          ยกเลิก
+        </button>
       </div>
     </div>
   </div>
 
   <!-- 2. CREATE ROOM MODAL -->
-  <div id="createRoomModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+  <div id="createRoomModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="max-w-lg w-full glass-card p-6 rounded-3xl border border-indigo-500/40 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <div class="flex items-center space-x-2">
-          <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
-            🎲
-          </div>
-          <h3 class="text-lg font-bold font-heading text-white">สร้างห้องเรียนเกมบันไดงูใหม่</h3>
+          <span class="text-2xl">✨</span>
+          <h3 class="text-base font-bold font-heading text-white">สร้างห้องเรียนเกมบันไดงูใหม่</h3>
         </div>
         <button onclick="closeModal('createRoomModal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <div class="space-y-4">
-        <!-- Room PIN -->
+      <div class="space-y-3">
         <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">รหัสห้อง (Room PIN 6 หลัก)</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1">รหัส Room PIN (6 หลัก)</label>
           <div class="flex items-center space-x-2">
-            <input type="text" id="createRoomPinInput" maxlength="6" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 font-mono text-center font-bold text-lg text-amber-400 tracking-widest uppercase focus:outline-none focus:border-amber-500" placeholder="123456">
-            <button onclick="generateRandomPin()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-300 hover:text-white flex items-center space-x-1">
-              <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span>สุ่ม PIN</span>
-            </button>
+            <input id="createRoomPinInput" type="text" maxlength="8" class="flex-1 px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono font-bold text-sm focus:outline-none focus:border-indigo-500">
+            <button type="button" onclick="generateRandomPin()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-amber-400 font-bold cursor-pointer">สุ่มรหัส</button>
           </div>
         </div>
 
-        <!-- Room Title -->
         <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">ชื่อห้องเรียน / หัวข้อบทเรียน</label>
-          <input type="text" id="createRoomTitleInput" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="เช่น วิทยาศาสตร์ ม.1 - ฐานบันไดงูแสนสนุก">
+          <label class="block text-xs font-bold text-slate-300 mb-1">ชื่อห้องเรียน / หัวข้อบทเรียน</label>
+          <input id="createRoomTitleInput" type="text" value="ห้องเรียนเกมบันไดงู Active Learning" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500">
         </div>
 
-        <!-- Total Teams & Stations Count -->
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">จำนวนกลุ่มที่เข้าแข่งขัน</label>
-            <select id="createRoomTeamsInput" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
-              <option value="2">2 กลุ่ม</option>
-              <option value="3">3 กลุ่ม</option>
-              <option value="4">4 กลุ่ม</option>
-              <option value="5">5 กลุ่ม</option>
-              <option value="6" selected>6 กลุ่ม (ค่าเริ่มต้น)</option>
-              <option value="7">7 กลุ่ม</option>
-              <option value="8">8 กลุ่ม</option>
-              <option value="9">9 กลุ่ม</option>
-              <option value="10">10 กลุ่ม</option>
-              <option value="12">12 กลุ่ม</option>
-            </select>
+            <label class="block text-xs font-bold text-slate-300 mb-1">จำนวนช่องเดิน</label>
+            <input id="createRoomTilesInput" type="number" value="40" min="20" max="100" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">จำนวนฐานกิจกรรมวันนี้</label>
-            <select id="createRoomStationsCountInput" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
-              <option value="2">2 ฐาน</option>
-              <option value="3">3 ฐาน</option>
-              <option value="4">4 ฐาน</option>
-              <option value="5">5 ฐาน</option>
-              <option value="6">6 ฐาน</option>
-              <option value="7">7 ฐาน</option>
-              <option value="8">8 ฐาน</option>
-              <option value="9">9 ฐาน</option>
-              <option value="10" selected>10 ฐาน (ค่าเริ่มต้น)</option>
-            </select>
+            <label class="block text-xs font-bold text-slate-300 mb-1">เวลาแข่งขัน (นาที)</label>
+            <input id="createRoomDurationInput" type="number" value="40" min="5" max="180" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500">
           </div>
         </div>
 
-        <!-- Total Tiles & Duration & Bonus -->
-        <div class="grid grid-cols-3 gap-3">
+        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">จำนวนช่องเดิน</label>
-            <input type="number" id="createRoomTilesInput" value="40" min="10" max="100" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+            <label class="block text-xs font-bold text-slate-300 mb-1">จำนวนกลุ่มผู้เล่น</label>
+            <input id="createRoomTeamsInput" type="number" value="6" min="2" max="10" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">เวลาแข่งขัน (นาที)</label>
-            <input type="number" id="createRoomDurationInput" value="40" min="5" max="180" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-amber-400 font-bold focus:outline-none focus:border-amber-500">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">โบนัสเส้นชัย/รอบ</label>
-            <input type="number" id="createRoomBonusInput" value="500" min="0" step="50" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+            <label class="block text-xs font-bold text-slate-300 mb-1">จำนวนฐานกิจกรรม</label>
+            <input id="createRoomStationsCountInput" type="number" value="10" min="1" max="20" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500">
           </div>
         </div>
 
-        <!-- Board Background Selection -->
         <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1.5">เลือกภาพพื้นหลังกระดาน</label>
-          <div class="grid grid-cols-2 gap-2 mb-2" id="createBoardPresets">
-            <!-- Injected by JS -->
-          </div>
-          <input type="url" id="createRoomBgInput" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="หรือวางลิงก์รูปภาพ URL...">
+          <label class="block text-xs font-bold text-slate-300 mb-1">คะแนนโบนัสถึงเส้นชัย (+แต้ม)</label>
+          <input id="createRoomBonusInput" type="number" value="500" step="50" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500">
         </div>
 
-        <!-- Auto Randomize Snakes & Ladders Checkbox -->
-        <label class="flex items-center space-x-2.5 p-3 rounded-xl bg-slate-800/80 border border-slate-700 cursor-pointer">
-          <input type="checkbox" id="createRandomSnakesCheck" checked class="w-4 h-4 rounded text-amber-500 focus:ring-amber-500">
-          <div class="text-xs">
-            <span class="font-semibold text-white flex items-center space-x-1.5">
-              <span>🎲 สุ่มตำแหน่งบันไดลัดและงูอัตโนมัติ</span>
-              <span class="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 text-[10px] font-mono font-bold">สมดุลตามช่อง 40/50/100</span>
-            </span>
-            <p class="text-slate-400">ระบบจะคำนวณและกระจายจุดบันได/งูให้อย่างยุติธรรมตามขนาดกระดาน</p>
-          </div>
-        </label>
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">URL ภาพพื้นหลังกระดาน</label>
+          <input id="createRoomBgInput" type="text" value="pirate_board_100.jpg" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500">
+        </div>
 
-        <!-- Auto Load Stations Checkbox -->
-        <label class="flex items-center space-x-2.5 p-3 rounded-xl bg-slate-800/80 border border-slate-700 cursor-pointer">
-          <input type="checkbox" id="createAutoStationsCheck" checked class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500">
-          <div class="text-xs">
-            <span class="font-semibold text-white">สร้างฐานกิจกรรม Active Learning อัตโนมัติ</span>
-            <p class="text-slate-400">พร้อมเริ่มเล่นได้ทันที สามารถแก้ไขได้ภายหลัง</p>
-          </div>
-        </label>
+        <div class="space-y-1.5 pt-1">
+          <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
+            <input id="createRandomSnakesCheck" type="checkbox" checked class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+            <span>สุ่มตำแหน่งงูและบันไดอัตโนมัติ 🐍🧗‍♂️</span>
+          </label>
+          <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
+            <input id="createAutoStationsCheck" type="checkbox" checked class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+            <span>ใส่ชุดภารกิจ Active Learning อัตโนมัติ 🎯</span>
+          </label>
+        </div>
       </div>
 
-      <div class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-800">
-        <button onclick="closeModal('createRoomModal')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300">ยกเลิก</button>
-        <button onclick="submitCreateRoom()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 font-semibold text-xs text-white shadow-md shadow-indigo-600/30">สร้างห้องเลย</button>
+      <div class="flex items-center space-x-2 pt-2 border-t border-slate-800">
+        <button onclick="submitCreateRoom()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 cursor-pointer">
+          สร้างห้องและเริ่มทันที
+        </button>
+        <button onclick="closeModal('createRoomModal')" class="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 cursor-pointer">
+          ยกเลิก
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- 3. SELECT / ENTER ROOM MODAL -->
-  <div id="selectRoomModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+  <!-- 3. FIREBASE CONFIG MODAL -->
+  <div id="firebaseModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="max-w-md w-full glass-card p-6 rounded-3xl border border-slate-800 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <div class="flex items-center space-x-2">
-          <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
-            <i data-lucide="key" class="w-4 h-4"></i>
-          </div>
-          <h3 class="text-lg font-bold font-heading text-white">เปิดห้องที่มีอยู่</h3>
+          <i data-lucide="database" class="w-5 h-5 text-indigo-400"></i>
+          <h3 class="text-base font-bold font-heading text-white">ตั้งค่า Firebase Database</h3>
         </div>
-        <button onclick="closeModal('selectRoomModal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
+        <button onclick="closeModal('firebaseModal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
       <div>
-        <label class="block text-xs font-semibold text-slate-300 mb-1.5">กรอก Room PIN (6 หลัก)</label>
-        <input type="text" id="enterRoomPinInput" maxlength="6" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 font-mono text-center font-bold text-2xl text-amber-400 tracking-widest uppercase focus:outline-none focus:border-amber-500" placeholder="123456">
+        <label class="block text-xs font-bold text-slate-300 mb-1">Firebase Config (JSON format)</label>
+        <textarea id="firebaseConfigTextarea" rows="6" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-emerald-400 font-mono text-[11px] focus:outline-none focus:border-indigo-500" placeholder="วางโค้ด firebaseConfig JSON ที่นี่..."></textarea>
       </div>
 
-      <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-800">
-        <button onclick="closeModal('selectRoomModal')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300">ยกเลิก</button>
-        <button onclick="submitSelectRoom()" class="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 font-semibold text-xs text-white shadow-md shadow-amber-600/30">เข้าสู่ห้อง</button>
+      <div class="flex items-center justify-between text-xs">
+        <button type="button" onclick="loadSampleFirebaseConfig()" class="text-indigo-400 hover:underline cursor-pointer">
+          โหลดคอนฟิกตัวอย่าง
+        </button>
+      </div>
+
+      <div class="flex items-center space-x-2 pt-2 border-t border-slate-800">
+        <button onclick="saveFirebaseConfigFromModal()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-md shadow-indigo-600/30 cursor-pointer">
+          บันทึกและเชื่อมต่อ
+        </button>
+        <button onclick="closeModal('firebaseModal')" class="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 cursor-pointer">
+          ปิด
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- 4. ADD / EDIT STATION MODAL -->
-  <div id="stationModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center space-x-2">
-          <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg">
-            🎪
-          </div>
-          <h3 id="stationModalTitle" class="text-lg font-bold font-heading text-white">เพิ่มฐานกิจกรรมใหม่</h3>
-        </div>
-        <button onclick="closeModal('stationModal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
+  <!-- 4. QR CODE MODAL -->
+  <div id="qrModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="max-w-sm w-full glass-card p-6 rounded-3xl border border-indigo-500/40 shadow-2xl text-center space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <h3 class="text-base font-bold font-heading text-white">QR Code ให้นักเรียนสแกน</h3>
+        <button onclick="closeModal('qrModal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <input type="hidden" id="modalStationId">
-
-      <div class="space-y-3">
-        <div class="grid grid-cols-4 gap-2">
-          <div class="col-span-1">
-            <label class="block text-xs font-semibold text-slate-300 mb-1">ไอคอน</label>
-            <input type="text" id="modalStationIcon" value="🎯" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-center text-xl text-white focus:outline-none focus:border-indigo-500">
-          </div>
-          <div class="col-span-3">
-            <label class="block text-xs font-semibold text-slate-300 mb-1">ชื่อฐานกิจกรรม</label>
-            <input type="text" id="modalStationName" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="เช่น ฐานที่ 1: คิดเลขเร็ว">
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">คำอธิบายกติกา / ภารกิจ</label>
-          <textarea id="modalStationDesc" rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="อธิบายสิ่งที่นักเรียนต้องปฏิบัติในฐานนี้..."></textarea>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">เวลาจับเวลา (นาที)</label>
-            <input type="number" id="modalStationTimer" value="3" min="1" max="60" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">คะแนนเต็ม</label>
-            <input type="number" id="modalStationMaxScore" value="100" min="1" step="10" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
-          </div>
-        </div>
+      <div class="flex justify-center p-4 bg-white rounded-2xl mx-auto w-fit shadow-inner">
+        <div id="qrCanvasContainer"></div>
       </div>
 
-      <div class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-800">
-        <button onclick="closeModal('stationModal')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300">ยกเลิก</button>
-        <button onclick="submitSaveStation()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-xs text-white shadow-md shadow-indigo-600/30">บันทึกฐานกิจกรรม</button>
+      <div>
+        <p class="text-xs text-slate-400">สแกนเพื่อเข้าหน้านักเรียนทันที</p>
+        <p id="qrPinLabel" class="text-lg font-black font-mono text-amber-400">PIN: 999999</p>
       </div>
+
+      <button onclick="copyRoomLink()" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-md shadow-indigo-600/30 flex items-center justify-center space-x-1.5 transition-all cursor-pointer">
+        <i data-lucide="copy" class="w-4 h-4"></i>
+        <span>คัดลอกลิงก์ Direct URL</span>
+      </button>
     </div>
   </div>
 
   <!-- 5. ADJUST SCORE / TILE MODAL -->
-  <div id="teamAdjustModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+  <div id="teamAdjustModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="max-w-sm w-full glass-card p-6 rounded-3xl border border-slate-800 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <div class="flex items-center space-x-2">
           <span id="adjustTeamAvatar" class="text-2xl">🦁</span>
@@ -887,56 +570,81 @@
 
       <div class="space-y-3">
         <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">คะแนนรวม (Score)</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1">คะแนนสะสม (Score)</label>
           <div class="flex items-center space-x-2">
-            <button onclick="changeAdjustScore(-50)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-bold">-50</button>
-            <button onclick="changeAdjustScore(-10)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-bold">-10</button>
-            <input type="number" id="adjustScoreInput" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-center font-bold text-white focus:outline-none focus:border-indigo-500">
-            <button onclick="changeAdjustScore(10)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-bold">+10</button>
-            <button onclick="changeAdjustScore(50)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-bold">+50</button>
+            <button onclick="changeAdjustScore(-50)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-bold cursor-pointer">-50</button>
+            <button onclick="changeAdjustScore(-10)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-bold cursor-pointer">-10</button>
+            <input type="number" id="adjustScoreInput" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-center font-black font-mono text-white focus:outline-none focus:border-indigo-500">
+            <button onclick="changeAdjustScore(10)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-bold cursor-pointer">+10</button>
+            <button onclick="changeAdjustScore(50)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-bold cursor-pointer">+50</button>
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">ตำแหน่งช่องเดิน (Tile Position)</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1">ตำแหน่งช่องเดิน (Tile Position)</label>
           <div class="flex items-center space-x-2">
-            <button onclick="changeAdjustTile(-1)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-bold">-1</button>
-            <input type="number" id="adjustTileInput" min="0" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-center font-bold text-white focus:outline-none focus:border-indigo-500">
-            <button onclick="changeAdjustTile(1)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-bold">+1</button>
+            <button onclick="changeAdjustTile(-1)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-bold cursor-pointer">-1</button>
+            <input type="number" id="adjustTileInput" min="0" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-center font-black font-mono text-white focus:outline-none focus:border-indigo-500">
+            <button onclick="changeAdjustTile(1)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-bold cursor-pointer">+1</button>
           </div>
         </div>
       </div>
 
-      <div class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-800">
-        <button onclick="closeModal('teamAdjustModal')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300">ยกเลิก</button>
-        <button onclick="submitAdjustTeam()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-xs text-white shadow-md shadow-indigo-600/30">บันทึกการปรับปรุง</button>
+      <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-800">
+        <button onclick="closeModal('teamAdjustModal')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 cursor-pointer">ยกเลิก</button>
+        <button onclick="submitAdjustTeam()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-bold text-xs text-white shadow-md shadow-indigo-600/30 cursor-pointer">บันทึก</button>
       </div>
     </div>
   </div>
 
-  <!-- 6. QR CODE & SHARE MODAL -->
-  <div id="qrModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
+  <!-- 6. EDIT / ADD STATION MODAL -->
+  <div id="stationModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="max-w-md w-full glass-card p-6 rounded-3xl border border-slate-800 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-base font-bold font-heading text-white">QR Code ให้นักเรียนสแกน</h3>
-        <button onclick="closeModal('qrModal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
+        <div class="flex items-center space-x-2">
+          <span id="modalStationHeaderIcon" class="text-2xl">🎯</span>
+          <h3 id="modalStationTitle" class="text-base font-bold font-heading text-white">แก้ไขฐานกิจกรรม</h3>
+        </div>
+        <button onclick="closeModal('stationModal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <div class="flex justify-center p-4 bg-white rounded-2xl mx-auto w-fit shadow-inner">
-        <div id="qrCanvasContainer"></div>
+      <input type="hidden" id="modalStationId">
+
+      <div class="space-y-3">
+        <div class="grid grid-cols-4 gap-3">
+          <div class="col-span-1">
+            <label class="block text-xs font-bold text-slate-300 mb-1">ไอคอน</label>
+            <input type="text" id="modalStationIcon" value="🎯" maxlength="4" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2 text-center text-xl text-white focus:outline-none focus:border-indigo-500">
+          </div>
+          <div class="col-span-3">
+            <label class="block text-xs font-bold text-slate-300 mb-1">ชื่อฐานกิจกรรม</label>
+            <input type="text" id="modalStationName" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="ชื่อฐาน...">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">คำอธิบายภารกิจ</label>
+          <textarea id="modalStationDesc" rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="อธิบายสิ่งที่นักเรียนต้องปฏิบัติ..."></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">เวลาจับเวลา (นาที)</label>
+            <input type="number" id="modalStationTimer" value="3" min="1" max="60" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">คะแนนเต็ม</label>
+            <input type="number" id="modalStationMaxScore" value="100" min="10" step="10" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
       </div>
 
-      <div class="space-y-1">
-        <p class="text-xs text-slate-400">สแกนเพื่อเข้าหน้านักเรียนทันที</p>
-        <p id="qrPinLabel" class="text-lg font-bold font-mono text-amber-400">PIN: ------</p>
+      <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-800">
+        <button onclick="closeModal('stationModal')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 cursor-pointer">ยกเลิก</button>
+        <button onclick="submitSaveStation()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-bold text-xs text-white shadow-md shadow-indigo-600/30 cursor-pointer">บันทึกฐาน</button>
       </div>
-
-      <button onclick="copyRoomLink()" class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-xs text-white shadow-md shadow-indigo-600/30 flex items-center justify-center space-x-1.5 transition-all">
-        <i data-lucide="copy" class="w-4 h-4"></i>
-        <span>คัดลอก Direct URL</span>
-      </button>
     </div>
   </div>
 
@@ -945,27 +653,68 @@
     // Global State
     let currentRoomPin = null;
     let currentRoomData = null;
-    let roomListener = null;
+    let masterTimerInterval = null;
+    let activeTabId = 'dashboard';
 
     // On Page Load
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       lucide.createIcons();
       initFirebaseApp();
-      checkUrlParams();
+      await checkUrlParams();
     });
 
-    // ตรวจสอบ Parameter จาก URL (เช่น ?pin=123456) หรือดึงจากแคชห้องล่าสุด
-    function checkUrlParams() {
+    // Switch Sidebar Navigation Tabs
+    function switchTab(tabId) {
+      activeTabId = tabId;
+      const tabs = ['dashboard', 'teams', 'stations', 'settings', 'logs'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`navTab-${t}`);
+        const content = document.getElementById(`tabContent-${t}`);
+        if (btn) {
+          if (t === tabId) {
+            btn.className = "w-full sidebar-active-tab px-3 py-2.5 rounded-xl text-left text-xs font-bold text-white transition-all flex items-center space-x-3 cursor-pointer";
+          } else {
+            btn.className = "w-full px-3 py-2.5 rounded-xl text-left text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all flex items-center space-x-3 cursor-pointer";
+          }
+        }
+        if (content) {
+          if (t === tabId) {
+            content.classList.remove('hidden');
+          } else {
+            content.classList.add('hidden');
+          }
+        }
+      });
+
+      const titleEl = document.getElementById('topBarTabTitle');
+      if (titleEl) {
+        if (tabId === 'dashboard') titleEl.textContent = '📊 ภาพรวมห้องเรียน & ควบคุมเกม';
+        if (tabId === 'teams') titleEl.textContent = '👥 จัดการกลุ่ม & ปรับคะแนนผู้เล่น';
+        if (tabId === 'stations') titleEl.textContent = '🎯 จัดการฐานกิจกรรม & ปลดล็อก';
+        if (tabId === 'settings') titleEl.textContent = '⚙️ ตั้งค่าห้องเรียน & กระดานเกม';
+        if (tabId === 'logs') titleEl.textContent = '📜 ประวัติกิจกรรมสด (Live Logs)';
+      }
+
+      lucide.createIcons();
+    }
+
+    // Auto-load Active Room on Boot
+    async function checkUrlParams() {
       const params = new URLSearchParams(window.location.search);
       const urlPin = params.get('pin');
-      const savedPin = localStorage.getItem(DEFAULT_SAVED_ROOM_KEY)
+      const savedPin = localStorage.getItem('PHYGITAL_SAVED_ROOM_PIN')
         || localStorage.getItem('PHYGITAL_CURRENT_ROOM_PIN')
         || localStorage.getItem('STUDENT_ROOM_PIN');
       
       const pinToLoad = urlPin || savedPin || '999999';
-      if (pinToLoad) {
-        loadRoom(pinToLoad);
+
+      try {
+        await PhygitalDB.createDemoRoomIfNotExist(pinToLoad);
+      } catch (e) {
+        console.warn(e);
       }
+
+      loadRoom(pinToLoad);
     }
 
     // Initialize Firebase Connection
@@ -975,12 +724,11 @@
         updateFirebaseStatusUI(false, "ไม่ได้ตั้งค่า");
         return;
       }
-
       const res = PhygitalDB.initFirebase(stored);
       if (res.success) {
         updateFirebaseStatusUI(true, "เชื่อมต่อแล้ว");
         PhygitalDB.watchConnectionState((connected) => {
-          updateFirebaseStatusUI(connected, connected ? "ออนไลน์ (Realtime)" : "หลุดการเชื่อมต่อ");
+          updateFirebaseStatusUI(connected, connected ? "ออนไลน์ (Realtime)" : "ออฟไลน์");
         });
       } else {
         updateFirebaseStatusUI(false, "เกิดข้อผิดพลาด");
@@ -990,93 +738,510 @@
     function updateFirebaseStatusUI(connected, text) {
       const dot = document.getElementById('firebaseStatusDot');
       const label = document.getElementById('firebaseStatusText');
-      
-      label.textContent = `Firebase: ${text}`;
-      if (connected) {
-        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50";
-      } else {
-        dot.className = "w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse";
+      if (label) label.textContent = `Firebase: ${text}`;
+      if (dot) {
+        if (connected) {
+          dot.className = "w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50";
+        } else {
+          dot.className = "w-2 h-2 rounded-full bg-rose-500 animate-pulse";
+        }
       }
     }
 
-    // Modal Control Helpers
+    // Modal Helpers
     function openModal(id) {
       const el = document.getElementById(id);
-      el.classList.remove('hidden');
-      el.classList.add('flex');
-      lucide.createIcons();
+      if (el) {
+        el.classList.remove('hidden');
+        el.classList.add('flex');
+        lucide.createIcons();
+      }
     }
     function closeModal(id) {
       const el = document.getElementById(id);
-      el.classList.add('hidden');
-      el.classList.remove('flex');
+      if (el) {
+        el.classList.add('hidden');
+        el.classList.remove('flex');
+      }
     }
 
-    // Firebase Config Modal Actions
-    function openFirebaseConfigModal() {
-      const stored = PhygitalDB.getStoredConfig();
-      const textarea = document.getElementById('firebaseConfigTextarea');
-      textarea.value = stored ? JSON.stringify(stored, null, 2) : '';
-      openModal('firebaseModal');
+    // Load Room and Subscribe Real-time Listener
+    async function loadRoom(pin) {
+      if (!pin) return;
+      currentRoomPin = pin;
+      localStorage.setItem('PHYGITAL_SAVED_ROOM_PIN', pin);
+      localStorage.setItem('PHYGITAL_CURRENT_ROOM_PIN', pin);
+
+      document.getElementById('sideRoomPin').textContent = pin;
+      if (document.getElementById('qrPinLabel')) document.getElementById('qrPinLabel').textContent = `PIN: ${pin}`;
+      if (document.getElementById('sideGoToStudentBtn')) document.getElementById('sideGoToStudentBtn').href = `index.html?pin=${pin}`;
+      if (document.getElementById('sideGoToBoardBtn')) document.getElementById('sideGoToBoardBtn').href = `board.html?pin=${pin}`;
+
+      // Update URL query without reload
+      const newUrl = new URL(window.location);
+      newUrl.searchParams.set('pin', pin);
+      window.history.replaceState({}, '', newUrl);
+
+      // Listen to real-time room data
+      PhygitalDB.detachAllListeners();
+      PhygitalDB.listenToRoom(pin, (data) => {
+        if (!data) {
+          const local = PhygitalDB.getLocalRoom(pin);
+          if (local) {
+            currentRoomData = local;
+            renderRoomDashboard(local);
+          }
+          return;
+        }
+        currentRoomData = data;
+        renderRoomDashboard(data);
+      });
     }
 
-    function loadSampleFirebaseConfig() {
-      document.getElementById('firebaseConfigTextarea').value = JSON.stringify(SAMPLE_FIREBASE_CONFIG, null, 2);
+    // Render Room Dashboard & All Tabs UI
+    function renderRoomDashboard(room) {
+      const config = room.config || {};
+      const teams = room.teams || {};
+      const stations = room.stations || {};
+      const logs = room.logs || {};
+
+      // 1. Status Badge
+      const statusBadge = document.getElementById('topRoomStatusBadge');
+      if (statusBadge) {
+        if (config.game_status === 'playing') {
+          statusBadge.className = "text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30 flex items-center space-x-1.5";
+          statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span><span>กำลังแข่งขัน</span>`;
+        } else if (config.game_status === 'waiting') {
+          statusBadge.className = "text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 flex items-center space-x-1.5";
+          statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span><span>พักเกมชั่วคราว</span>`;
+        } else {
+          statusBadge.className = "text-xs px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30 flex items-center space-x-1.5";
+          statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-400"></span><span>จบการแข่งขันแล้ว</span>`;
+        }
+      }
+
+      // 2. Master Timer
+      updateMasterRoomTimerUI(config);
+
+      // 3. Stats
+      document.getElementById('statTeamsCount').textContent = `${Object.keys(teams).length} กลุ่ม`;
+      document.getElementById('statStationsCount').textContent = `${Object.keys(stations).length} ฐาน`;
+      const vacantCount = Object.values(stations).filter(s => s.is_vacant).length;
+      document.getElementById('statVacantCount').textContent = `${vacantCount} ฐาน`;
+      document.getElementById('statTilesCount').textContent = `${config.total_tiles || 40} ช่อง`;
+
+      // 4. Render Top 3 Podium in Dashboard
+      renderDashboardPodium(teams, config);
+
+      // 5. Render Dash Stations Matrix
+      renderDashboardStations(stations, teams);
+
+      // 6. Render Teams Management Tab
+      renderTeamsManagement(teams, config, stations);
+
+      // 7. Render Stations Management Tab
+      renderStationsManagement(stations, teams);
+
+      // 8. Render Room Settings Inputs
+      renderSettingsInputs(config);
+
+      // 9. Render Activity Logs
+      renderActivityLogs(logs);
+
+      lucide.createIcons();
     }
 
-    function saveFirebaseConfigFromModal() {
-      const raw = document.getElementById('firebaseConfigTextarea').value.trim();
-      if (!raw) {
-        Swal.fire('ข้อผิดพลาด', 'กรุณากรอก JSON Firebase Config', 'warning');
+    // Master Room Timer Controller
+    function updateMasterRoomTimerUI(config) {
+      if (masterTimerInterval) clearInterval(masterTimerInterval);
+      const displayEl = document.getElementById('masterGameTimerDisplay');
+      if (!displayEl) return;
+
+      const durationMins = parseInt(config.game_duration_minutes) || 40;
+      document.getElementById('masterTimerTotalLabel').textContent = `จากทั้งหมด ${durationMins} นาที`;
+
+      const totalSeconds = durationMins * 60;
+      const startedAt = config.game_started_at || config.created_at || Date.now();
+
+      function tick() {
+        const elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
+        const remainingSeconds = Math.max(0, totalSeconds - elapsedSeconds);
+        const mins = Math.floor(remainingSeconds / 60);
+        const secs = remainingSeconds % 60;
+        displayEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+        if (remainingSeconds <= 0 && config.game_status === 'playing') {
+          clearInterval(masterTimerInterval);
+          setRoomGameStatus('finished');
+        }
+      }
+
+      tick();
+      if (config.game_status === 'playing') {
+        masterTimerInterval = setInterval(tick, 1000);
+      }
+    }
+
+    // Render Dashboard Top 3 Podium
+    function renderDashboardPodium(teams, config) {
+      const container = document.getElementById('dashPodiumTop3');
+      if (!container) return;
+
+      const sorted = Object.keys(teams).map(k => ({ ...teams[k], key: k })).sort((a, b) => (b.score || 0) - (a.score || 0));
+      const top1 = sorted[0];
+      const top2 = sorted[1];
+      const top3 = sorted[2];
+      const totalTiles = config.total_tiles || 40;
+
+      container.innerHTML = `
+        <!-- Rank 2: Silver -->
+        <div class="flex-1 flex flex-col items-center">
+          <div class="relative mb-1">
+            <span class="text-2xl">${top2 ? top2.avatar || '🐯' : '🥈'}</span>
+            <span class="text-xs absolute -top-2 -right-2">🥈</span>
+          </div>
+          <div class="w-full h-20 rounded-t-xl bg-gradient-to-t from-slate-900 via-slate-800 to-slate-700 border-t-2 border-x-2 border-slate-400/60 p-1 flex flex-col items-center justify-between text-center shadow-lg">
+            <span class="text-[10px] font-bold text-slate-200 truncate w-full px-0.5">${top2 ? top2.name : 'อันดับ 2'}</span>
+            <span class="text-xs font-black font-mono text-slate-100">${top2 ? (top2.score || 0).toLocaleString() : '0'}</span>
+            <span class="text-[8px] px-1 rounded bg-slate-950/80 text-slate-300 font-mono">ช่อง ${top2 ? Math.min(top2.current_tile || 0, totalTiles) : 0}</span>
+          </div>
+        </div>
+
+        <!-- Rank 1: Gold (Center Elevated) -->
+        <div class="flex-1 flex flex-col items-center z-10 scale-105">
+          <div class="relative mb-1">
+            <span class="text-3xl animate-bounce">${top1 ? top1.avatar || '🦁' : '🥇'}</span>
+            <span class="text-sm absolute -top-3 -right-2">👑</span>
+          </div>
+          <div class="w-full h-28 rounded-t-xl bg-gradient-to-t from-amber-950 via-amber-900 to-yellow-500 border-t-2 border-x-2 border-amber-300 p-1.5 flex flex-col items-center justify-between text-center shadow-xl shadow-amber-500/30">
+            <span class="text-[11px] font-black text-slate-950 bg-amber-300 px-1.5 py-0.2 rounded font-heading truncate w-full shadow-sm">${top1 ? top1.name : 'อันดับ 1'}</span>
+            <span class="text-sm font-black font-mono text-yellow-300 drop-shadow">${top1 ? (top1.score || 0).toLocaleString() : '0'}</span>
+            <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-950 text-amber-200 font-mono font-black border border-amber-500/40">ช่อง ${top1 ? Math.min(top1.current_tile || 0, totalTiles) : 0}</span>
+          </div>
+        </div>
+
+        <!-- Rank 3: Bronze -->
+        <div class="flex-1 flex flex-col items-center">
+          <div class="relative mb-1">
+            <span class="text-2xl">${top3 ? top3.avatar || '🦅' : '🥉'}</span>
+            <span class="text-xs absolute -top-2 -right-2">🥉</span>
+          </div>
+          <div class="w-full h-16 rounded-t-xl bg-gradient-to-t from-amber-950/90 via-amber-900/60 to-amber-700/60 border-t-2 border-x-2 border-amber-600/70 p-1 flex flex-col items-center justify-between text-center shadow-lg">
+            <span class="text-[10px] font-bold text-amber-200 truncate w-full px-0.5">${top3 ? top3.name : 'อันดับ 3'}</span>
+            <span class="text-xs font-black font-mono text-amber-300">${top3 ? (top3.score || 0).toLocaleString() : '0'}</span>
+            <span class="text-[8px] px-1 rounded bg-slate-950/80 text-slate-300 font-mono">ช่อง ${top3 ? Math.min(top3.current_tile || 0, totalTiles) : 0}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    // Render Dashboard Stations Snapshot
+    function renderDashboardStations(stations, teams) {
+      const container = document.getElementById('dashStationsGrid');
+      if (!container) return;
+
+      container.innerHTML = Object.values(stations || {}).map(st => {
+        const isVacant = st.is_vacant;
+        const currentTeam = st.current_team_id ? (teams[st.current_team_id]?.name || 'มีกลุ่มเล่น') : null;
+        return `
+          <div class="p-2.5 rounded-xl border text-xs ${isVacant ? 'bg-slate-950/60 border-slate-800' : 'bg-rose-950/20 border-rose-500/40'} flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-lg">${st.icon || '🎯'}</span>
+              <span class="text-[9px] px-2 py-0.5 rounded-full font-bold ${isVacant ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-300 animate-pulse'}">
+                ${isVacant ? 'ว่าง' : '🔒 ล็อก'}
+              </span>
+            </div>
+            <h5 class="font-bold text-white text-xs truncate mt-1.5">${st.name}</h5>
+            <div class="flex items-center justify-between mt-2 pt-1 border-t border-white/5 text-[10px] text-slate-400">
+              <span class="truncate max-w-[100px]">${isVacant ? 'พร้อมเข้าเล่น' : currentTeam}</span>
+              ${!isVacant ? `<button onclick="handleForceUnlockStation('${st.id}')" class="text-amber-400 hover:underline font-bold text-[9px] cursor-pointer">ปลดล็อก</button>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Render Teams Management Tab
+    function renderTeamsManagement(teams, config, stations) {
+      const container = document.getElementById('teamsManagementGrid');
+      if (!container) return;
+
+      const totalTiles = config.total_tiles || 40;
+      const sorted = Object.keys(teams).map(k => ({ ...teams[k], key: k })).sort((a, b) => (b.score || 0) - (a.score || 0));
+
+      container.innerHTML = sorted.map((t, idx) => {
+        const completedCount = Object.keys(t.completed_stations || {}).length;
+        const currentStation = t.current_station_id ? (stations[t.current_station_id]?.name || 'กำลังทำภารกิจ') : 'อยู่บนกระดาน';
+
+        return `
+          <div class="glass-card p-4 rounded-2xl border border-slate-800 space-y-3 relative overflow-hidden">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-inner border border-white/20" style="background-color: ${t.color}33">
+                  ${t.avatar || '🦁'}
+                </div>
+                <div>
+                  <div class="flex items-center space-x-1.5">
+                    <span class="text-xs font-mono font-bold text-slate-500">#${idx + 1}</span>
+                    <h4 class="font-bold text-sm text-white font-heading truncate max-w-[140px]">${t.name}</h4>
+                  </div>
+                  <span class="text-xs text-amber-400 font-mono font-bold">ช่อง ${Math.min(t.current_tile || 0, totalTiles)} / ${totalTiles}</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="text-2xl font-black font-mono text-amber-400 font-heading">${(t.score || 0).toLocaleString()}</span>
+                <span class="block text-[9px] text-slate-400 uppercase font-bold">คะแนนสะสม</span>
+              </div>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/80 text-xs space-y-1">
+              <div class="flex items-center justify-between text-slate-400">
+                <span>🎯 สถานะภารกิจ:</span>
+                <span class="font-bold ${t.current_station_id ? 'text-rose-400' : 'text-emerald-400'} truncate max-w-[150px]">${currentStation}</span>
+              </div>
+              <div class="flex items-center justify-between text-slate-400">
+                <span>🏆 ฐานที่ผ่านแล้ว:</span>
+                <span class="font-mono font-bold text-indigo-300">${completedCount} ฐาน</span>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-2 pt-1">
+              <button onclick="openAdjustTeamModal('${t.key}')" class="flex-1 py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-bold text-xs text-white shadow-md shadow-indigo-600/30 flex items-center justify-center space-x-1 transition-all cursor-pointer">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                <span>ปรับคะแนน / ช่อง</span>
+              </button>
+              ${t.current_station_id ? `
+                <button onclick="handleForceReleaseTeamStation('${t.key}', '${t.current_station_id}')" class="py-2 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-xs font-bold text-amber-300 cursor-pointer">
+                  ปลดล็อกฐาน
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Render Stations Management Tab
+    function renderStationsManagement(stations, teams) {
+      const container = document.getElementById('stationsManagementList');
+      if (!container) return;
+
+      container.innerHTML = Object.values(stations || {}).map(st => {
+        const isVacant = st.is_vacant;
+        const currentTeam = st.current_team_id ? (teams[st.current_team_id]?.name || 'มีกลุ่มเล่นอยู่') : null;
+
+        return `
+          <div class="glass-card p-4 rounded-2xl border ${isVacant ? 'border-slate-800' : 'border-rose-500/40 bg-rose-950/10'} space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2.5">
+                <span class="text-2xl">${st.icon || '🎯'}</span>
+                <div>
+                  <h4 class="font-bold text-sm text-white font-heading">${st.name}</h4>
+                  <span class="text-[10px] text-slate-400">จับเวลา ${st.timer_minutes || 3} นาที &bull; คะแนนเต็ม ${st.max_score || 100} แต้ม</span>
+                </div>
+              </div>
+              <span class="text-[10px] px-2.5 py-0.5 rounded-full font-bold ${isVacant ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30 animate-pulse'}">
+                ${isVacant ? 'ว่าง' : 'กำลังมีกลุ่มเล่น'}
+              </span>
+            </div>
+
+            <p class="text-xs text-slate-300 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 line-clamp-2">
+              ${st.description || 'ไม่มีคำอธิบายภารกิจ'}
+            </p>
+
+            ${!isVacant ? `
+              <div class="flex items-center justify-between p-2 rounded-lg bg-rose-950/30 border border-rose-500/30 text-xs">
+                <span class="text-rose-300 font-bold truncate">🔒 กลุ่ม: ${currentTeam}</span>
+                <button onclick="handleForceUnlockStation('${st.id}')" class="px-2 py-0.5 rounded bg-rose-600 hover:bg-rose-500 text-white font-bold text-[10px] cursor-pointer">
+                  ปลดล็อกทันที
+                </button>
+              </div>
+            ` : ''}
+
+            <div class="flex items-center space-x-2 pt-1">
+              <button onclick="openEditStationModal('${st.id}')" class="flex-1 py-1.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-xs text-slate-300 hover:text-white transition-all flex items-center justify-center space-x-1 cursor-pointer">
+                <i data-lucide="edit" class="w-3.5 h-3.5"></i>
+                <span>แก้ไขฐาน</span>
+              </button>
+              <button onclick="handleDeleteStation('${st.id}')" class="p-1.5 rounded-xl bg-rose-950/50 hover:bg-rose-900 border border-rose-500/30 text-rose-300 transition-all cursor-pointer" title="ลบฐานนี้">
+                <i data-lucide="trash" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Render Room Settings
+    function renderSettingsInputs(config) {
+      if (document.getElementById('settingsTitleInput')) document.getElementById('settingsTitleInput').value = config.title || '';
+      if (document.getElementById('settingsTilesInput')) document.getElementById('settingsTilesInput').value = config.total_tiles || 40;
+      if (document.getElementById('settingsDurationInput')) document.getElementById('settingsDurationInput').value = config.game_duration_minutes || 40;
+      if (document.getElementById('settingsBonusInput')) document.getElementById('settingsBonusInput').value = config.finish_bonus || 500;
+      if (document.getElementById('settingsBgInput')) document.getElementById('settingsBgInput').value = config.board_image_url || 'pirate_board_100.jpg';
+    }
+
+    // Render Activity Logs
+    function renderActivityLogs(logs) {
+      const container = document.getElementById('logsContainerList');
+      if (!container) return;
+
+      const entries = Object.values(logs || {}).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      if (entries.length === 0) {
+        container.innerHTML = `<span class="text-xs text-slate-500 italic p-4 text-center block">ยังไม่มีประวัติกิจกรรมในห้องนี้</span>`;
         return;
       }
+
+      container.innerHTML = entries.map(l => {
+        const time = l.timestamp ? new Date(l.timestamp).toLocaleTimeString('th-TH') : '';
+        return `
+          <div class="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 text-xs flex items-center justify-between space-x-3">
+            <div class="flex items-center space-x-2 truncate">
+              <span class="text-[10px] font-mono text-slate-500">${time}</span>
+              <span class="text-white font-medium truncate">${l.message}</span>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-indigo-500/20 text-indigo-300">${l.type || 'info'}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ================= ACTIONS & EVENT HANDLERS =================
+
+    // Set Game Status (playing / waiting / finished)
+    async function setRoomGameStatus(status) {
+      if (!currentRoomPin) return;
       try {
-        const parsed = JSON.parse(raw);
-        PhygitalDB.saveConfig(parsed);
-        initFirebaseApp();
-        closeModal('firebaseModal');
-        Swal.fire('สำเร็จ', 'บันทึกและเริ่มต้นเชื่อมต่อ Firebase แล้ว', 'success');
-        
-        if (currentRoomPin) {
-          loadRoom(currentRoomPin);
+        const updates = { game_status: status, updated_at: Date.now() };
+        if (status === 'playing' && currentRoomData?.config?.game_status !== 'playing') {
+          updates.game_started_at = Date.now();
         }
+        await PhygitalDB.setRoomGameStatus(currentRoomPin, status);
+        Swal.fire({
+          icon: 'success',
+          title: status === 'playing' ? 'เริ่มการแข่งขันแล้ว!' : status === 'waiting' ? 'พักเกมชั่วคราว' : 'จบการแข่งขันแล้ว',
+          timer: 1200,
+          showConfirmButton: false
+        });
       } catch (e) {
-        Swal.fire('รูปแบบ JSON ไม่ถูกต้อง', e.message, 'error');
+        Swal.fire('เกิดข้อผิดพลาด', e.message, 'error');
       }
+    }
+
+    // Restart Game (Reset Timer to 40 mins & unfinish teams)
+    async function handleRestartRoomGame() {
+      if (!currentRoomPin) return;
+      const res = await Swal.fire({
+        title: 'ยืนยันเริ่มเล่นรอบใหม่?',
+        text: 'ระบบจะรีเซ็ตเวลานับถอยหลังเป็น 40:00 นาที และเปิดให้ทุกกลุ่มทอยเต๋าเล่นต่อได้ทันที',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'เริ่มรอบใหม่ทันที',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#6366f1'
+      });
+
+      if (res.isConfirmed) {
+        try {
+          if (PhygitalDB.db) {
+            await PhygitalDB.getRoomRef(currentRoomPin).child('config').update({
+              game_status: 'playing',
+              game_started_at: Date.now(),
+              updated_at: Date.now()
+            });
+            const teams = currentRoomData?.teams || {};
+            for (let tId of Object.keys(teams)) {
+              await PhygitalDB.updateTeamData(currentRoomPin, tId, {
+                is_finished: false,
+                current_station_id: null,
+                station_start_time: null
+              });
+            }
+          }
+          const local = PhygitalDB.getLocalRoom(currentRoomPin);
+          if (local?.config) {
+            local.config.game_status = 'playing';
+            local.config.game_started_at = Date.now();
+            PhygitalDB.saveLocalRoom(currentRoomPin, local);
+          }
+          Swal.fire('เริ่มรอบใหม่แล้ว!', 'เวลากลับมาเริ่มต้นที่ 40:00 นาที', 'success');
+        } catch (e) {
+          Swal.fire('ข้อผิดพลาด', e.message, 'error');
+        }
+      }
+    }
+
+    // Emergency Unlock All Stations
+    async function handleUnlockAllStations() {
+      if (!currentRoomPin) return;
+      const res = await Swal.fire({
+        title: 'ยืนยันปลดล็อกทุกฐานกิจกรรม?',
+        text: 'ระบบจะเคลียร์สถานะทุกฐานให้เป็น "ว่าง 100%" ทันที',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#f59e0b',
+        confirmButtonText: 'ปลดล็อกทุกฐาน',
+        cancelButtonText: 'ยกเลิก'
+      });
+
+      if (res.isConfirmed) {
+        try {
+          await PhygitalDB.unlockAllStations(currentRoomPin);
+          Swal.fire('ปลดล็อกสำเร็จ!', 'ทุกฐานกิจกรรมกลับมาว่าง 100% แล้ว', 'success');
+        } catch (e) {
+          Swal.fire('เกิดข้อผิดพลาด', e.message, 'error');
+        }
+      }
+    }
+
+    // Force Unlock Single Station
+    async function handleForceUnlockStation(stationId) {
+      if (!currentRoomPin || !stationId) return;
+      try {
+        await PhygitalDB.forceUnlockStation(currentRoomPin, stationId);
+        Swal.fire({ icon: 'success', title: 'ปลดล็อกฐานนี้แล้ว!', timer: 1000, showConfirmButton: false });
+      } catch (e) {
+        Swal.fire('เกิดข้อผิดพลาด', e.message, 'error');
+      }
+    }
+
+    // Force Release Team Station
+    async function handleForceReleaseTeamStation(teamId, stationId) {
+      if (!currentRoomPin) return;
+      try {
+        await PhygitalDB.forceUnlockStation(currentRoomPin, stationId);
+        await PhygitalDB.updateTeamData(currentRoomPin, teamId, { current_station_id: null, station_start_time: null });
+        Swal.fire({ icon: 'success', title: 'ปลดล็อกกลุ่มและฐานเรียบร้อย', timer: 1000, showConfirmButton: false });
+      } catch (e) {
+        Swal.fire('เกิดข้อผิดพลาด', e.message, 'error');
+      }
+    }
+
+    // Select Room PIN Action
+    function openSelectRoomModal() {
+      document.getElementById('enterRoomPinInput').value = '';
+      openModal('selectRoomModal');
+      setTimeout(() => document.getElementById('enterRoomPinInput').focus(), 100);
+    }
+    function submitSelectRoom() {
+      const pin = document.getElementById('enterRoomPinInput').value.trim();
+      if (!pin) {
+        Swal.fire('กรุณากรอกรหัส PIN', '', 'warning');
+        return;
+      }
+      closeModal('selectRoomModal');
+      loadRoom(pin);
     }
 
     // Create Room Wizard Actions
     function openCreateRoomModal() {
       generateRandomPin();
-      document.getElementById('createRoomTitleInput').value = "ห้องเรียนเกมบันไดงูฐานกิจกรรม";
-      document.getElementById('createRoomTilesInput').value = 40;
-      document.getElementById('createRoomBonusInput').value = 500;
-      document.getElementById('createRoomBgInput').value = SAMPLE_BOARD_PRESETS[0].url;
-      
-      // Render Board Presets
-      const container = document.getElementById('createBoardPresets');
-      container.innerHTML = SAMPLE_BOARD_PRESETS.map((p, idx) => `
-        <button type="button" onclick="selectCreatePreset('${p.url}', ${p.tiles})" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-left text-xs transition-all flex items-center space-x-2">
-          <span class="w-3 h-3 rounded-full bg-indigo-500"></span>
-          <span class="truncate">${p.name}</span>
-        </button>
-      `).join('');
-
       openModal('createRoomModal');
     }
-
-    function selectCreatePreset(url, tiles) {
-      document.getElementById('createRoomBgInput').value = url;
-      if (tiles) {
-        document.getElementById('createRoomTilesInput').value = tiles;
-      }
-    }
-
     function generateRandomPin() {
       const pin = Math.floor(100000 + Math.random() * 900000).toString();
       document.getElementById('createRoomPinInput').value = pin;
     }
-
     async function submitCreateRoom() {
       const pin = document.getElementById('createRoomPinInput').value.trim();
       const title = document.getElementById('createRoomTitleInput').value.trim();
@@ -1085,22 +1250,17 @@
       const totalTeams = parseInt(document.getElementById('createRoomTeamsInput').value) || 6;
       const totalStations = parseInt(document.getElementById('createRoomStationsCountInput').value) || 10;
       const bonus = parseInt(document.getElementById('createRoomBonusInput').value) || 500;
-      const bgUrl = document.getElementById('createRoomBgInput').value.trim() || SAMPLE_BOARD_PRESETS[0].url;
-      const randomSnakes = document.getElementById('createRandomSnakesCheck') ? document.getElementById('createRandomSnakesCheck').checked : true;
+      const bgUrl = document.getElementById('createRoomBgInput').value.trim() || 'pirate_board_100.jpg';
+      const randomSnakes = document.getElementById('createRandomSnakesCheck').checked;
       const autoStations = document.getElementById('createAutoStationsCheck').checked;
 
       if (!pin || pin.length < 4) {
-        Swal.fire('ข้อผิดพลาด', 'กรุณาระบุ PIN อย่างน้อย 4-6 หลัก', 'warning');
+        Swal.fire('กรุณากรอก PIN อย่างน้อย 4-6 หลัก', '', 'warning');
         return;
       }
 
       try {
-        Swal.fire({
-          title: 'กำลังสร้างห้องเกม...',
-          allowOutsideClick: false,
-          didOpen: () => Swal.showLoading()
-        });
-
+        Swal.fire({ title: 'กำลังสร้างห้องเกม...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
         await PhygitalDB.createRoom(pin, {
           title,
           total_tiles: tiles,
@@ -1112,992 +1272,183 @@
           randomize_snakes_ladders: randomSnakes,
           stations: autoStations ? SAMPLE_ACTIVE_LEARNING_STATIONS.slice(0, totalStations) : []
         });
-
         closeModal('createRoomModal');
-        Swal.fire({
-          icon: 'success',
-          title: 'สร้างห้องสำเร็จ!',
-          text: `Room PIN: ${pin} พร้อมใช้งานแล้ว`,
-          timer: 2000,
-          showConfirmButton: false
-        });
-
+        Swal.fire({ icon: 'success', title: 'สร้างห้องสำเร็จ!', text: `Room PIN: ${pin} พร้อมใช้งานแล้ว`, timer: 1500, showConfirmButton: false });
         loadRoom(pin);
       } catch (e) {
         Swal.fire('ไม่สามารถสร้างห้องได้', e.message, 'error');
       }
     }
 
-    // Select Existing Room
-    function openSelectRoomModal() {
-      document.getElementById('enterRoomPinInput').value = '';
-      openModal('selectRoomModal');
-    }
-
-    function submitSelectRoom() {
-      const pin = document.getElementById('enterRoomPinInput').value.trim();
-      if (!pin) {
-        Swal.fire('ข้อผิดพลาด', 'กรุณากรอกรหัส PIN', 'warning');
-        return;
-      }
-      closeModal('selectRoomModal');
-      loadRoom(pin);
-    }
-
-    // Load Room and Subscribe Real-time Listener
-    async function loadRoom(pin) {
-      if (!pin) return;
-      currentRoomPin = pin;
-      localStorage.setItem(DEFAULT_SAVED_ROOM_KEY, pin);
-
-      if (document.getElementById('navGoToStudentBtn')) document.getElementById('navGoToStudentBtn').href = `index.html?pin=${pin}`;
-      if (document.getElementById('navGoToBoardBtn')) document.getElementById('navGoToBoardBtn').href = `board.html?pin=${pin}`;
-
-      // Update URL query without reload
-      const newUrl = new URL(window.location);
-      newUrl.searchParams.set('pin', pin);
-      window.history.replaceState({}, '', newUrl);
-
-      // Detach prior listeners
-      PhygitalDB.detachAllListeners();
-
-      // Listen to room data
-      PhygitalDB.listenToRoom(pin, (data) => {
-        if (!data) {
-          showNoRoomState();
-          Swal.fire('ไม่พบห้องนี้', `ไม่พบข้อมูลห้อง PIN: ${pin} บน Firebase`, 'info');
-          return;
-        }
-        currentRoomData = data;
-        renderRoomDashboard(data);
-      });
-    }
-
-    function showNoRoomState() {
-      document.getElementById('noRoomContainer').classList.remove('hidden');
-      document.getElementById('activeRoomContainer').classList.add('hidden');
-      document.getElementById('topRoomInfo').classList.add('hidden');
-    }
-
-    // Render Full Room Dashboard UI
-    function renderRoomDashboard(data) {
-      document.getElementById('noRoomContainer').classList.add('hidden');
-      document.getElementById('activeRoomContainer').classList.remove('hidden');
-      document.getElementById('topRoomInfo').classList.remove('hidden');
-
-      const config = data.config || {};
-      const teams = data.teams || {};
-      const stations = data.stations || {};
-      const logs = data.logs || {};
-
-      // 1. Top Navbar Info
-      document.getElementById('navRoomPin').textContent = config.room_pin || currentRoomPin;
-      updateStatusBadge(config.game_status);
-
-      // 2. Banner Details
-      document.getElementById('bannerRoomPin').textContent = config.room_pin || currentRoomPin;
-      document.getElementById('bannerRoomTitle').textContent = config.title || 'ห้องเรียนเกมบันไดงู';
-      document.getElementById('bannerTotalTiles').textContent = `${config.total_tiles || 40} ช่องเดิน`;
-      document.getElementById('bannerFinishBonus').textContent = `โบนัสเส้นชัย +${config.finish_bonus || 500} คะแนน`;
-      
-      const stationsList = Object.values(stations);
-      document.getElementById('bannerStationCount').textContent = `${stationsList.length} ฐานกิจกรรม`;
-      document.getElementById('tabStationBadge').textContent = stationsList.length;
-
-      // Update External Links
-      const baseBoardUrl = `board.html?pin=${currentRoomPin}`;
-      const baseStudentUrl = `index.html?pin=${currentRoomPin}`;
-      if (document.getElementById('btnOpenBoard')) document.getElementById('btnOpenBoard').href = baseBoardUrl;
-      if (document.getElementById('btnOpenStudent')) document.getElementById('btnOpenStudent').href = baseStudentUrl;
-      if (document.getElementById('navGoToStudentBtn')) document.getElementById('navGoToStudentBtn').href = baseStudentUrl;
-      if (document.getElementById('navGoToBoardBtn')) document.getElementById('navGoToBoardBtn').href = baseBoardUrl;
-
-      // 3. Stats Summary
-      const vacantCount = stationsList.filter(s => s.is_vacant).length;
-      document.getElementById('statVacantStations').textContent = `${vacantCount} / ${stationsList.length} ฐาน`;
-      
-      let maxScore = 0;
-      let finishedCount = 0;
-      Object.values(teams).forEach(t => {
-        if (t.score > maxScore) maxScore = t.score;
-        if (t.is_finished) finishedCount++;
-      });
-      document.getElementById('statTopScore').textContent = `${maxScore} แต้ม`;
-      document.getElementById('statFinishedTeams').textContent = `${finishedCount} / 6 ทีม`;
-
-      // 4. Render 6 Teams Live Grid
-      renderTeamsGrid(teams, config);
-
-      // 5. Render Stations Live Matrix
-      renderStationsMatrix(stations, teams);
-
-      // 6. Render Stations Management Grid
-      renderStationsManageGrid(stations);
-
-      // 7. Populate Settings Tab
-      populateSettingsTab(config, teams);
-
-      // 8. Render Live Logs
-      renderLogsFeed(logs);
-
-      lucide.createIcons();
-    }
-
-    function updateStatusBadge(status) {
-      const navBadge = document.getElementById('navStatusBadge');
-      const statGame = document.getElementById('statGameStatus');
-      
-      if (status === 'playing') {
-        navBadge.className = "flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
-        navBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span><span>กำลังแข่งขัน</span>`;
-        if (statGame) statGame.textContent = "🟢 กำลังแข่งขัน";
-      } else if (status === 'finished') {
-        navBadge.className = "flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30";
-        navBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-purple-400"></span><span>จบเกมแล้ว</span>`;
-        if (statGame) statGame.textContent = "🏁 สิ้นสุดเกม";
-      } else {
-        navBadge.className = "flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30";
-        navBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span><span>รอเริ่มเกม</span>`;
-        if (statGame) statGame.textContent = "🟡 พัก / รอเริ่ม";
-      }
-    }
-
-    // Render 6 Teams Live Cards
-    function renderTeamsGrid(teams, config) {
-      const container = document.getElementById('teamsGrid');
-      const totalTiles = config.total_tiles || 40;
-
-      // แปลงเป็น Array แล้วเรียงตามคะแนนสะสม (Leaderboard Ranking)
-      const sortedTeams = Object.keys(teams).map(key => ({
-        ...teams[key],
-        key
-      })).sort((a, b) => b.score - a.score);
-
-      container.innerHTML = sortedTeams.map((team, idx) => {
-        const completedCount = Object.keys(team.completed_stations || {}).length;
-        const progressPercent = Math.min(100, Math.round((team.current_tile / totalTiles) * 100));
-        
-        let rankBadge = '';
-        if (idx === 0 && team.score > 0) rankBadge = '🥇 อันดับ 1';
-        else if (idx === 1 && team.score > 0) rankBadge = '🥈 อันดับ 2';
-        else if (idx === 2 && team.score > 0) rankBadge = '🥉 อันดับ 3';
-
-        return `
-          <div class="glass-card rounded-2xl p-5 border border-slate-800 relative overflow-hidden transition-all hover:border-slate-700">
-            <!-- Team Color Accent Bar -->
-            <div class="absolute top-0 left-0 right-0 h-1.5" style="background-color: ${team.color || '#6366f1'}"></div>
-
-            <div class="flex items-start justify-between mb-3 mt-1">
-              <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-inner border border-white/10" style="background-color: ${team.color}22">
-                  ${team.avatar || '🦁'}
-                </div>
-                <div>
-                  <h4 class="font-bold text-base text-white font-heading">${team.name}</h4>
-                  <div class="flex items-center space-x-2 text-xs text-slate-400">
-                    <span>${rankBadge}</span>
-                    ${team.is_finished ? '<span class="text-yellow-300 font-bold">🏁 เข้าเส้นชัยแล้ว</span>' : ''}
-                  </div>
-                </div>
-              </div>
-
-              <!-- Score Badge -->
-              <div class="text-right">
-                <span class="text-2xl font-black text-amber-400 font-heading">${team.score || 0}</span>
-                <span class="block text-[10px] text-slate-400 uppercase font-semibold">คะแนนรวม</span>
-              </div>
-            </div>
-
-            <!-- Position Progress Bar -->
-            <div class="space-y-1.5 my-3 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-              <div class="flex justify-between text-xs font-semibold">
-                <span class="text-slate-400">ช่องปัจจุบัน: <strong class="text-indigo-300">${team.current_tile || 0}</strong> / ${totalTiles}</span>
-                <span class="text-slate-400">${progressPercent}%</span>
-              </div>
-              <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-                <div class="h-2 rounded-full transition-all duration-500" style="width: ${progressPercent}%; background-color: ${team.color || '#6366f1'}"></div>
-              </div>
-            </div>
-
-            <!-- Current Station Status -->
-            <div class="flex items-center justify-between text-xs py-2 border-t border-slate-800/80">
-              <span class="text-slate-400">สถานะฐาน:</span>
-              ${team.current_station_id ? `
-                <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 font-medium">
-                  กำลังเล่น ${team.current_station_id}
-                </span>
-              ` : `
-                <span class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  ว่าง / รอทอยเต๋า
-                </span>
-              `}
-            </div>
-
-            <!-- Completed Stations Count & Action Buttons -->
-            <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
-              <span class="text-xs text-slate-400">ผ่านแล้ว: <strong class="text-white">${completedCount}</strong> ฐาน</span>
-              <button onclick="openAdjustTeamModal('${team.key}', '${team.name}', '${team.avatar}', ${team.score || 0}, ${team.current_tile || 0})" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-300 hover:text-white transition-all flex items-center space-x-1">
-                <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-indigo-400"></i>
-                <span>ปรับข้อมูล</span>
-              </button>
-            </div>
-
-          </div>
-        `;
-      }).join('');
-    }
-
-    // Render Stations Status Matrix (Live Tab)
-    function renderStationsMatrix(stations, teams) {
-      const container = document.getElementById('stationsStatusList');
-      const list = Object.values(stations || {});
-
-      if (list.length === 0) {
-        container.innerHTML = `<div class="col-span-full text-center text-xs text-slate-500 py-4">ยังไม่มีฐานกิจกรรม</div>`;
-        return;
-      }
-
-      container.innerHTML = list.map(st => {
-        const isVacant = st.is_vacant;
-        const currentTeam = st.current_team_id ? (teams[st.current_team_id]?.name || st.current_team_id) : null;
-
-        return `
-          <div class="p-3 rounded-xl border transition-all ${isVacant ? 'bg-slate-900/80 border-slate-800' : 'bg-rose-950/30 border-rose-500/40 shadow-sm shadow-rose-900/20'}">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="text-lg">${st.icon || '🎯'}</span>
-              ${isVacant ? `
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-medium">ว่าง</span>
-              ` : `
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-medium animate-pulse">กำลังเล่น</span>
-              `}
-            </div>
-            <h5 class="text-xs font-bold text-white truncate font-heading">${st.name}</h5>
-            <p class="text-[11px] text-slate-400 truncate mb-2">⏱️ ${st.timer_minutes} นาที | 🏆 ${st.max_score} แต้ม</p>
-
-            ${!isVacant ? `
-              <div class="space-y-1.5 pt-1.5 border-t border-rose-500/20">
-                <span class="block text-[10px] text-rose-300 font-semibold truncate">กลุ่ม: ${currentTeam}</span>
-                <button onclick="forceUnlockStation('${st.id}')" class="w-full py-1 px-2 rounded-lg bg-rose-600/30 hover:bg-rose-600/50 border border-rose-500/40 text-[10px] text-rose-200 font-medium transition-all">
-                  🔓 ปลดล็อกฐาน
-                </button>
-              </div>
-            ` : ''}
-          </div>
-        `;
-      }).join('');
-    }
-
-    // Render Stations Management Grid (Stations Tab)
-    function renderStationsManageGrid(stations) {
-      const container = document.getElementById('stationsManageGrid');
-      const list = Object.values(stations || {});
-
-      if (list.length === 0) {
-        container.innerHTML = `
-          <div class="col-span-full text-center py-12 glass-card rounded-2xl border border-slate-800">
-            <p class="text-sm text-slate-400 mb-3">ยังไม่มีฐานกิจกรรมในห้องนี้</p>
-            <button onclick="loadSampleStationsPreset()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white shadow-md shadow-indigo-600/30">
-              โหลด 10 ฐานกิจกรรมตัวอย่าง
-            </button>
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = list.map((st, idx) => `
-        <div class="glass-card rounded-2xl p-5 border border-slate-800 relative flex flex-col justify-between space-y-4">
-          <div>
-            <div class="flex items-start justify-between mb-2">
-              <div class="flex items-center space-x-2">
-                <span class="text-2xl">${st.icon || '🎯'}</span>
-                <h4 class="font-bold text-base text-white font-heading">${st.name}</h4>
-              </div>
-              <span class="text-xs px-2 py-0.5 rounded-full ${st.is_vacant ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-300'} font-medium">
-                ${st.is_vacant ? 'ว่าง' : 'ไม่ว่าง'}
-              </span>
-            </div>
-            
-            <p class="text-xs text-slate-300 leading-relaxed bg-slate-900/60 p-3 rounded-xl border border-slate-800/80 mb-3 min-h-[60px]">
-              ${st.description || 'ไม่มีคำอธิบายกติกา'}
-            </p>
-
-            <div class="flex items-center space-x-4 text-xs text-slate-400">
-              <span class="flex items-center space-x-1">
-                <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
-                <span>${st.timer_minutes} นาที</span>
-              </span>
-              <span class="flex items-center space-x-1">
-                <i data-lucide="award" class="w-3.5 h-3.5 text-indigo-400"></i>
-                <span>เต็ม ${st.max_score} แต้ม</span>
-              </span>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-800">
-            <button onclick="openEditStationModal('${st.id}')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-300 hover:text-white flex items-center space-x-1">
-              <i data-lucide="pencil" class="w-3 h-3 text-indigo-400"></i>
-              <span>แก้ไข</span>
-            </button>
-            <button onclick="confirmDeleteStation('${st.id}', '${st.name}')" class="px-3 py-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/30 text-xs font-medium text-rose-300 hover:text-rose-100 flex items-center space-x-1">
-              <i data-lucide="trash" class="w-3 h-3"></i>
-              <span>ลบ</span>
-            </button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    // Handle File Upload from Computer / Canva
-    function handleBoardFileUpload(event) {
-      const file = event.target.files?.[0];
-      if (!file) return;
-
-      if (file.size > 8 * 1024 * 1024) {
-        Swal.fire('ไฟล์รูปภาพใหญ่เกินไป', 'กรุณาใช้รูปภาพขนาดไม่เกิน 8MB ครับ', 'warning');
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const base64Url = e.target.result;
-        document.getElementById('settingBoardImageUrl').value = base64Url;
-        updateBoardPreview(base64Url);
-        Swal.fire({
-          icon: 'success',
-          title: 'โหลดรูปภาพสำเร็จ!',
-          text: 'กด "บันทึกการตั้งค่ากระดาน" เพื่อนำไปใช้ในห้องเรียน',
-          timer: 1500,
-          showConfirmButton: false
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-
-    // Populate Settings Tab Inputs
-    function populateSettingsTab(config, teams) {
-      document.getElementById('settingRoomTitle').value = config.title || '';
-      document.getElementById('settingTotalTiles').value = config.total_tiles || 40;
-      document.getElementById('settingGameDuration').value = config.game_duration_minutes || 40;
-      document.getElementById('settingFinishBonus').value = config.finish_bonus || 500;
-      document.getElementById('settingBoardImageUrl').value = config.board_image_url || '';
-      updateBoardPreview(config.board_image_url || '');
-
-      // Grid Calibration
-      document.getElementById('settingGridCols').value = config.grid_cols || 'auto';
-      document.getElementById('settingGridDirection').value = config.grid_direction || 'serpentine_bottom_lr';
-      document.getElementById('settingTileDisplayMode').value = config.tile_display_mode || 'show_all';
-      document.getElementById('settingPaddingX').value = config.padding_x !== undefined ? config.padding_x : 7;
-      document.getElementById('settingPaddingY').value = config.padding_y !== undefined ? config.padding_y : 9;
-
-      // Render Snakes & Ladders Badges List
-      renderSnakesLaddersBadgesList(config.snakes_ladders || {});
-
-      // Presets
-      const presetContainer = document.getElementById('boardPresetsContainer');
-      presetContainer.innerHTML = SAMPLE_BOARD_PRESETS.map((p, idx) => `
-        <button type="button" onclick="applyFullBoardPreset(${idx})" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-left text-xs transition-all flex items-center space-x-2 cursor-pointer">
-          <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 flex-shrink-0"></span>
-          <span class="truncate font-semibold">${p.name}</span>
-        </button>
-      `).join('');
-
-      // Teams Customization inputs
-      const teamsSettingGrid = document.getElementById('teamsSettingGrid');
-      teamsSettingGrid.innerHTML = Object.keys(teams).map(key => {
-        const t = teams[key];
-        return `
-          <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-3">
-            <div class="flex items-center space-x-2">
-              <input type="text" id="teamAvatar-${key}" value="${t.avatar || '🦁'}" class="w-12 h-10 bg-slate-950 border border-slate-700 rounded-lg text-center text-lg text-white focus:outline-none focus:border-indigo-500">
-              <input type="text" id="teamName-${key}" value="${t.name || ''}" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500">
-            </div>
-            <div class="flex items-center space-x-2">
-              <label class="text-[11px] text-slate-400">สีประจำกลุ่ม:</label>
-              <input type="color" id="teamColor-${key}" value="${t.color || '#6366f1'}" class="w-8 h-8 rounded-lg bg-transparent border border-slate-700 cursor-pointer">
-              <span class="text-xs font-mono text-slate-400">${t.color}</span>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      // Admin Passcode display
-      const savedPass = localStorage.getItem('PHYGITAL_ADMIN_PASSCODE') || '1234';
-      const passLabel = document.getElementById('currentPasscodeLabel');
-      if (passLabel) passLabel.textContent = savedPass;
-      const passInput = document.getElementById('newAdminPasscodeInput');
-      if (passInput) passInput.value = savedPass;
-    }
-
-    function saveCustomAdminPasscode() {
-      const newPass = document.getElementById('newAdminPasscodeInput').value.trim();
-      if (!newPass) {
-        Swal.fire('กรุณากรอกรหัสผ่านใหม่', '', 'warning');
-        return;
-      }
-      localStorage.setItem('PHYGITAL_ADMIN_PASSCODE', newPass);
-      const passLabel = document.getElementById('currentPasscodeLabel');
-      if (passLabel) passLabel.textContent = newPass;
-      Swal.fire({
-        icon: 'success',
-        title: 'เปลี่ยนรหัสผ่านแอดมินสำเร็จ!',
-        text: `รหัสผ่านใหม่ของคุณครูคือ: ${newPass}`,
-        confirmButtonColor: '#6366f1'
-      });
-    }
-
-    function applyFullBoardPreset(index) {
-      const p = SAMPLE_BOARD_PRESETS[index];
-      if (!p) return;
-      document.getElementById('settingBoardImageUrl').value = p.url;
-      document.getElementById('settingTotalTiles').value = p.tiles || 100;
-      document.getElementById('settingGridCols').value = p.grid_cols || 'auto';
-      document.getElementById('settingGridDirection').value = p.grid_direction || 'serpentine_bottom_lr';
-      document.getElementById('settingTileDisplayMode').value = p.tile_display_mode || 'hide_numbers';
-      document.getElementById('settingPaddingX').value = p.padding_x !== undefined ? p.padding_x : 12.5;
-      document.getElementById('settingPaddingY').value = p.padding_y !== undefined ? p.padding_y : 11.5;
-      updateBoardPreview(p.url);
-      Swal.fire({
-        icon: 'info',
-        title: `เลือก "${p.name}"`,
-        text: 'กด "บันทึกการตั้งค่ากระดาน" เพื่อนำไปใช้ในห้องเรียน',
-        timer: 1500,
-        showConfirmButton: false
-      });
-    }
-
-    function setBoardSettingPreset(url, tiles) {
-      document.getElementById('settingBoardImageUrl').value = url;
-      if (tiles) document.getElementById('settingTotalTiles').value = tiles;
-      updateBoardPreview(url);
-    }
-
-    function updateBoardPreview(url) {
-      const img = document.getElementById('boardPreviewImage');
-      const empty = document.getElementById('boardPreviewEmpty');
-      if (url) {
-        img.src = url;
-        img.classList.remove('hidden');
-        empty.classList.add('hidden');
-      } else {
-        img.classList.add('hidden');
-        empty.classList.remove('hidden');
-      }
-    }
-
-    // Render Logs Feed (Logs Tab)
-    function renderLogsFeed(logs) {
-      const container = document.getElementById('logsFeed');
-      const logEntries = Object.values(logs || {}).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-
-      if (logEntries.length === 0) {
-        container.innerHTML = `<div class="text-center text-xs text-slate-500 py-8">ยังไม่มีประวัติกิจกรรม</div>`;
-        return;
-      }
-
-      container.innerHTML = logEntries.map(log => {
-        const timeStr = log.timestamp ? new Date(log.timestamp).toLocaleTimeString('th-TH') : '';
-        let typeBadge = 'bg-slate-800 text-slate-300';
-        if (log.type === 'system') typeBadge = 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30';
-        else if (log.type === 'dice') typeBadge = 'bg-blue-500/20 text-blue-300 border border-blue-500/30';
-        else if (log.type === 'score') typeBadge = 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
-        else if (log.type === 'finish') typeBadge = 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30';
-
-        return `
-          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 text-xs">
-            <div class="flex items-center space-x-3">
-              <span class="px-2 py-0.5 rounded text-[10px] font-mono ${typeBadge}">
-                ${log.type || 'info'}
-              </span>
-              <span class="text-slate-200">${log.message}</span>
-            </div>
-            <span class="text-[11px] font-mono text-slate-500 ml-4 whitespace-nowrap">${timeStr}</span>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // ================= ACTIONS & EVENT HANDLERS =================
-
-    // Switch Tabs
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.className = "tab-btn flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/80 transition-all";
-      });
-      document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.add('hidden'));
-
-      const activeBtn = document.getElementById(`tabBtn-${tabId}`);
-      const activePane = document.getElementById(`tabContent-${tabId}`);
-      
-      if (activeBtn) {
-        activeBtn.className = "tab-btn flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-indigo-600 text-white shadow-md shadow-indigo-600/30";
-      }
-      if (activePane) {
-        activePane.classList.remove('hidden');
-      }
-      lucide.createIcons();
-    }
-
-    // Game Status Controller
-    async function setRoomGameStatus(status) {
-    // Start / Pause Game Controller
-    async function setRoomGameStatus(status) {
+    // Save Room Settings
+    async function saveRoomSettings() {
       if (!currentRoomPin) return;
+      const title = document.getElementById('settingsTitleInput').value.trim();
+      const tiles = parseInt(document.getElementById('settingsTilesInput').value) || 40;
+      const duration = parseInt(document.getElementById('settingsDurationInput').value) || 40;
+      const bonus = parseInt(document.getElementById('settingsBonusInput').value) || 500;
+      const bg = document.getElementById('settingsBgInput').value.trim() || 'pirate_board_100.jpg';
+
       try {
-        const updatePayload = {
-          game_status: status,
-          updated_at: Date.now()
-        };
-        if (status === 'playing' && currentRoomData?.config?.game_status === 'finished') {
-          updatePayload.game_started_at = Date.now();
-        }
-
-        if (PhygitalDB.db) {
-          await PhygitalDB.getRoomRef(currentRoomPin).child('config').update(updatePayload);
-        }
-        const local = PhygitalDB.getLocalRoom(currentRoomPin);
-        if (local?.config) {
-          Object.assign(local.config, updatePayload);
-          PhygitalDB.saveLocalRoom(currentRoomPin, local);
-        }
-
-        await PhygitalDB.addLog(currentRoomPin, {
-          team_id: 'system',
-          type: 'system',
-          message: status === 'playing' ? '▶️ ครูผู้สอนสั่งเริ่มการแข่งขัน!' : '⏸️ ครูผู้สอนสั่งพักเกมชั่วคราว'
+        await PhygitalDB.updateRoomConfig(currentRoomPin, {
+          title,
+          total_tiles: tiles,
+          game_duration_minutes: duration,
+          finish_bonus: bonus,
+          board_image_url: bg
         });
-
-        if (status === 'playing') {
-          confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
-        }
+        Swal.fire('บันทึกสำเร็จ!', 'การตั้งค่าห้องเรียนได้รับการอัปเดตแล้ว', 'success');
       } catch (e) {
         Swal.fire('เกิดข้อผิดพลาด', e.message, 'error');
       }
     }
 
-    // Confirm Game Reset
-    async function confirmResetGame() {
-      if (!currentRoomPin) return;
-      const res = await Swal.fire({
-        title: 'ยืนยันการรีเซ็ตเกม?',
-        text: 'คะแนน ตำแหน่งช่องเดิน และสถานะฐานทั้งหมดจะถูกรีเซ็ตเป็นค่าเริ่มต้นสำหรับรอบใหม่',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#e11d48',
-        cancelButtonColor: '#334155',
-        confirmButtonText: 'ใช่, รีเซ็ตเกมเลย',
-        cancelButtonText: 'ยกเลิก'
-      });
-
-      if (res.isConfirmed) {
-        try {
-          await PhygitalDB.resetGame(currentRoomPin);
-          Swal.fire('รีเซ็ตสำเร็จ', 'ข้อมูลเกมทั้งหมดถูกรีเซ็ตเรียบร้อยแล้ว', 'success');
-        } catch (e) {
-          Swal.fire('ข้อผิดพลาด', e.message, 'error');
-        }
-      }
+    // Adjust Team Score & Tile
+    function openAdjustTeamModal(teamId) {
+      const team = currentRoomData?.teams?.[teamId];
+      if (!team) return;
+      document.getElementById('adjustTeamId').value = teamId;
+      document.getElementById('adjustTeamAvatar').textContent = team.avatar || '🦁';
+      document.getElementById('adjustTeamName').textContent = `ปรับข้อมูล ${team.name}`;
+      document.getElementById('adjustScoreInput').value = team.score || 0;
+      document.getElementById('adjustTileInput').value = team.current_tile || 0;
+      openModal('teamAdjustModal');
     }
+    function changeAdjustScore(delta) {
+      const input = document.getElementById('adjustScoreInput');
+      input.value = Math.max(0, (parseInt(input.value) || 0) + delta);
+    }
+    function changeAdjustTile(delta) {
+      const input = document.getElementById('adjustTileInput');
+      input.value = Math.max(0, (parseInt(input.value) || 0) + delta);
+    }
+    async function submitAdjustTeam() {
+      const teamId = document.getElementById('adjustTeamId').value;
+      const score = parseInt(document.getElementById('adjustScoreInput').value) || 0;
+      const tile = parseInt(document.getElementById('adjustTileInput').value) || 0;
+      if (!currentRoomPin || !teamId) return;
 
-    // Force Unlock Single Station
-    async function forceUnlockStation(stationId) {
-      if (!currentRoomPin) return;
       try {
-        await PhygitalDB.forceUnlockStation(currentRoomPin, stationId);
-        await PhygitalDB.addLog(currentRoomPin, {
-          team_id: 'system',
-          type: 'system',
-          message: `🔓 ครูผู้สอนสั่งปลดล็อกฐาน ${stationId} ให้เป็นสถานะว่าง`
-        });
-        Swal.fire({
-          icon: 'success',
-          title: 'ปลดล็อกฐานแล้ว',
-          timer: 1500,
-          showConfirmButton: false
-        });
+        await PhygitalDB.updateTeamData(currentRoomPin, teamId, { score, current_tile: tile });
+        closeModal('teamAdjustModal');
+        Swal.fire({ icon: 'success', title: 'อัปเดตข้อมูลกลุ่มสำเร็จ', timer: 1000, showConfirmButton: false });
       } catch (e) {
-        Swal.fire('ข้อผิดพลาด', e.message, 'error');
+        Swal.fire('เกิดข้อผิดพลาด', e.message, 'error');
       }
     }
 
-    // Force Unlock All Stations at once
-    async function handleUnlockAllStations() {
-      if (!currentRoomPin) return;
-      const res = await Swal.fire({
-        title: 'ปลดล็อกทุกฐานกิจกรรมให้ว่าง?',
-        text: 'ระบบจะรีเซ็ตทุกฐานที่กำลังเล่นอยู่ให้กลับมาเป็นสถานะ "ว่าง" พร้อมกันทั้งหมดทันที',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'ปลดล็อกทั้งหมด',
-        cancelButtonText: 'ยกเลิก',
-        confirmButtonColor: '#e11d48'
-      });
-
-      if (res.isConfirmed) {
-        try {
-          await PhygitalDB.unlockAllStations(currentRoomPin);
-          await PhygitalDB.addLog(currentRoomPin, {
-            team_id: 'system',
-            type: 'system',
-            message: `🔓 ครูผู้สอนสั่งปลดล็อกทุกฐานกิจกรรมให้เป็นสถานะว่างทั้งหมด`
-          });
-          Swal.fire({
-            icon: 'success',
-            title: 'ปลดล็อกทุกฐานสำเร็จ!',
-            text: 'ทุกฐานกิจกรรมกลับมาว่างพร้อมให้นักเรียนเข้าทำภารกิจแล้วครับ',
-            timer: 1500,
-            showConfirmButton: false
-          });
-        } catch (e) {
-          Swal.fire('ข้อผิดพลาด', e.message, 'error');
-        }
-      }
-    }
-
-    // Station CRUD
+    // Add / Edit Station Modal
     function openAddStationModal() {
-      document.getElementById('stationModalTitle').textContent = "เพิ่มฐานกิจกรรมใหม่";
-      document.getElementById('modalStationId').value = "";
-      document.getElementById('modalStationIcon').value = "🎯";
-      document.getElementById('modalStationName').value = "";
-      document.getElementById('modalStationDesc').value = "";
+      document.getElementById('modalStationId').value = '';
+      document.getElementById('modalStationTitle').textContent = 'เพิ่มฐานกิจกรรมใหม่';
+      document.getElementById('modalStationIcon').value = '🎯';
+      document.getElementById('modalStationName').value = '';
+      document.getElementById('modalStationDesc').value = '';
       document.getElementById('modalStationTimer').value = 3;
       document.getElementById('modalStationMaxScore').value = 100;
       openModal('stationModal');
     }
-
-    function openEditStationModal(stationId) {
-      if (!currentRoomData?.stations?.[stationId]) return;
-      const st = currentRoomData.stations[stationId];
-      
-      document.getElementById('stationModalTitle').textContent = "แก้ไขฐานกิจกรรม";
-      document.getElementById('modalStationId').value = stationId;
-      document.getElementById('modalStationIcon').value = st.icon || "🎯";
-      document.getElementById('modalStationName').value = st.name || "";
-      document.getElementById('modalStationDesc').value = st.description || "";
+    function openEditStationModal(stId) {
+      const st = currentRoomData?.stations?.[stId];
+      if (!st) return;
+      document.getElementById('modalStationId').value = stId;
+      document.getElementById('modalStationTitle').textContent = `แก้ไขฐาน: ${st.name}`;
+      document.getElementById('modalStationIcon').value = st.icon || '🎯';
+      document.getElementById('modalStationName').value = st.name || '';
+      document.getElementById('modalStationDesc').value = st.description || '';
       document.getElementById('modalStationTimer').value = st.timer_minutes || 3;
       document.getElementById('modalStationMaxScore').value = st.max_score || 100;
       openModal('stationModal');
     }
-
     async function submitSaveStation() {
-      if (!currentRoomPin) return;
-      const stationId = document.getElementById('modalStationId').value.trim() || `station_${Date.now()}`;
-      const icon = document.getElementById('modalStationIcon').value.trim() || "🎯";
+      const stId = document.getElementById('modalStationId').value || `st_${Date.now()}`;
+      const icon = document.getElementById('modalStationIcon').value.trim() || '🎯';
       const name = document.getElementById('modalStationName').value.trim();
       const description = document.getElementById('modalStationDesc').value.trim();
       const timer = parseInt(document.getElementById('modalStationTimer').value) || 3;
       const maxScore = parseInt(document.getElementById('modalStationMaxScore').value) || 100;
 
       if (!name) {
-        Swal.fire('ข้อผิดพลาด', 'กรุณาระบุชื่อฐานกิจกรรม', 'warning');
+        Swal.fire('กรุณาระบุชื่อฐานกิจกรรม', '', 'warning');
         return;
       }
-
       try {
-        const stationRef = PhygitalDB.getRoomRef(currentRoomPin).child(`stations/${stationId}`);
-        await stationRef.update({
-          id: stationId,
+        await PhygitalDB.saveStation(currentRoomPin, {
+          id: stId,
           icon,
           name,
           description,
           timer_minutes: timer,
           max_score: maxScore,
-          is_vacant: true
+          is_vacant: true,
+          current_team_id: null
         });
-
         closeModal('stationModal');
-        Swal.fire({
-          icon: 'success',
-          title: 'บันทึกฐานสำเร็จ',
-          timer: 1500,
-          showConfirmButton: false
-        });
+        Swal.fire({ icon: 'success', title: 'บันทึกฐานกิจกรรมสำเร็จ', timer: 1000, showConfirmButton: false });
       } catch (e) {
-        Swal.fire('ข้อผิดพลาด', e.message, 'error');
+        Swal.fire('เกิดข้อผิดพลาด', e.message, 'error');
       }
     }
-
-    async function confirmDeleteStation(stationId, name) {
-      if (!currentRoomPin) return;
+    async function handleDeleteStation(stId) {
+      if (!currentRoomPin || !stId) return;
       const res = await Swal.fire({
-        title: `ลบ "${name}"?`,
-        text: 'ข้อมูลฐานนี้จะถูกลบออกจากระบบทันที',
+        title: 'ยืนยันลบฐานกิจกรรมนี้?',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#e11d48',
-        cancelButtonColor: '#334155',
-        confirmButtonText: 'ใช่, ลบเลย',
+        confirmButtonText: 'ลบฐาน',
         cancelButtonText: 'ยกเลิก'
       });
-
       if (res.isConfirmed) {
         try {
-          await PhygitalDB.getRoomRef(currentRoomPin).child(`stations/${stationId}`).remove();
-          Swal.fire('ลบเรียบร้อย', '', 'success');
+          await PhygitalDB.removeStation(currentRoomPin, stId);
+          Swal.fire({ icon: 'success', title: 'ลบฐานสำเร็จ', timer: 1000, showConfirmButton: false });
         } catch (e) {
-          Swal.fire('ข้อผิดพลาด', e.message, 'error');
+          Swal.fire('เกิดข้อผิดพลาด', e.message, 'error');
         }
       }
     }
 
-    async function loadSampleStationsPreset() {
+    // QR Code Modal & Copy Direct URL
+    function openQrModal() {
       if (!currentRoomPin) return;
-      const res = await Swal.fire({
-        title: 'โหลด 10 ฐานกิจกรรม Active Learning?',
-        text: 'ระบบจะสร้างฐานตัวอย่างวิชาคณิต วิทย์ ภาษา ศิลปะ ทักษะชีวิต ครบ 10 ฐาน',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'โหลดเลย',
-        cancelButtonText: 'ยกเลิก'
-      });
-
-      if (res.isConfirmed) {
-        try {
-          const stationsObj = {};
-          SAMPLE_ACTIVE_LEARNING_STATIONS.forEach((st, idx) => {
-            const stId = `station_${idx + 1}`;
-            stationsObj[stId] = { ...st, id: stId, is_vacant: true };
-          });
-          await PhygitalDB.getRoomRef(currentRoomPin).child('stations').set(stationsObj);
-          Swal.fire('สำเร็จ', 'โหลด 10 ฐานกิจกรรมเรียบร้อยแล้ว', 'success');
-        } catch (e) {
-          Swal.fire('ข้อผิดพลาด', e.message, 'error');
-        }
-      }
-    }
-
-    // Render Snakes & Ladders Badge List in Settings
-    function renderSnakesLaddersBadgesList(snakesLadders = {}) {
-      const container = document.getElementById('snakesLaddersBadgesList');
-      if (!container) return;
-
-      const keys = Object.keys(snakesLadders).sort((a, b) => parseInt(a) - parseInt(b));
-      if (keys.length === 0) {
-        container.innerHTML = `<span class="text-[10px] text-slate-500 italic p-1">ไม่มีจุดบันไดและงู</span>`;
-        return;
-      }
-
-      container.innerHTML = keys.map(fromTile => {
-        const item = snakesLadders[fromTile];
-        const isLadder = item.type === 'ladder';
-        return `
-          <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold ${isLadder ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40' : 'bg-rose-950/80 text-rose-300 border border-rose-500/40'} shadow-sm">
-            <span>${isLadder ? '🧗‍♂️' : '🐍'}</span>
-            <span>ช่อง ${fromTile} ➔ ${item.to}</span>
-          </span>
-        `;
-      }).join('');
-    }
-
-    // Randomize Snakes & Ladders on Demand (Re-Roll)
-    async function randomizeCurrentRoomSnakes() {
-      if (!currentRoomPin) return;
-      const totalTiles = parseInt(document.getElementById('settingTotalTiles')?.value) || currentRoomData?.config?.total_tiles || 40;
-      
-      const newSnakesLadders = PhygitalDB.generateDynamicSnakesAndLadders(totalTiles);
-      
-      try {
-        // Update Local Store
-        const local = PhygitalDB.getLocalRoom(currentRoomPin);
-        if (local) {
-          if (!local.config) local.config = {};
-          local.config.snakes_ladders = newSnakesLadders;
-          local.config.total_tiles = totalTiles;
-          PhygitalDB.saveLocalRoom(currentRoomPin, local);
-        }
-
-        // Update Firebase
-        if (PhygitalDB.db) {
-          await PhygitalDB.getRoomRef(currentRoomPin).child('config').update({
-            snakes_ladders: newSnakesLadders,
-            total_tiles: totalTiles,
-            updated_at: Date.now()
-          });
-        }
-
-        if (currentRoomData?.config) {
-          currentRoomData.config.snakes_ladders = newSnakesLadders;
-        }
-
-        renderSnakesLaddersBadgesList(newSnakesLadders);
-
-        Swal.fire({
-          icon: 'success',
-          title: `สุ่มจุดบันไดและงูใหม่สำเร็จ!`,
-          text: `คำนวณสมดุลกระจายตัวตามจำนวน ${totalTiles} ช่องเรียบร้อยแล้ว`,
-          timer: 1500,
-          showConfirmButton: false
-        });
-      } catch (e) {
-        renderSnakesLaddersBadgesList(newSnakesLadders);
-        Swal.fire('สุ่มจุดสำเร็จ', 'อัปเดตในเครื่องเรียบร้อยแล้ว', 'success');
-      }
-    }
-
-    // Save Board Settings
-    async function saveBoardSettings() {
-      if (!currentRoomPin) return;
-      const title = document.getElementById('settingRoomTitle').value.trim();
-      const totalTiles = parseInt(document.getElementById('settingTotalTiles').value) || 40;
-      const gameDuration = parseInt(document.getElementById('settingGameDuration').value) || 40;
-      const finishBonus = parseInt(document.getElementById('settingFinishBonus').value) || 500;
-      const boardBg = document.getElementById('settingBoardImageUrl').value.trim();
-
-      const gridCols = document.getElementById('settingGridCols').value;
-      const gridDirection = document.getElementById('settingGridDirection').value;
-      const tileDisplayMode = document.getElementById('settingTileDisplayMode').value;
-      const paddingX = parseFloat(document.getElementById('settingPaddingX').value) || 7;
-      const paddingY = parseFloat(document.getElementById('settingPaddingY').value) || 9;
-
-      const matchedPreset = SAMPLE_BOARD_PRESETS.find(p => p.url === boardBg);
-      const snakesLadders = matchedPreset ? (matchedPreset.snakes_ladders || {}) : (currentRoomData?.config?.snakes_ladders || {});
-
-      const updatePayload = {
-        title,
-        total_tiles: totalTiles,
-        game_duration_minutes: gameDuration,
-        finish_bonus: finishBonus,
-        board_image_url: boardBg,
-        grid_cols: gridCols,
-        grid_direction: gridDirection,
-        tile_display_mode: tileDisplayMode,
-        padding_x: paddingX,
-        padding_y: paddingY,
-        snakes_ladders: snakesLadders,
-        updated_at: Date.now()
-      };
-
-      try {
-        // Update Local Store
-        const local = PhygitalDB.getLocalRoom(currentRoomPin);
-        if (local) {
-          local.config = { ...local.config, ...updatePayload };
-          PhygitalDB.saveLocalRoom(currentRoomPin, local);
-        }
-
-        // Update Firebase
-        if (PhygitalDB.db) {
-          await PhygitalDB.getRoomRef(currentRoomPin).child('config').update(updatePayload);
-        }
-
-        Swal.fire('บันทึกสำเร็จ', 'อัปเดตการตั้งค่ากระดานและตำแหน่งตารางเรียบร้อยแล้ว', 'success');
-      } catch (e) {
-        Swal.fire('บันทึกเรียบร้อย', 'อัปเดตการตั้งค่ากระดานในเครื่องแล้ว', 'success');
-      }
-    }
-
-    // Save Teams Customization Settings
-    async function saveTeamsSettings() {
-      if (!currentRoomPin || !currentRoomData?.teams) return;
-      const updates = {};
-      Object.keys(currentRoomData.teams).forEach(key => {
-        const avatar = document.getElementById(`teamAvatar-${key}`)?.value.trim() || '🦁';
-        const name = document.getElementById(`teamName-${key}`)?.value.trim() || `กลุ่ม ${key}`;
-        const color = document.getElementById(`teamColor-${key}`)?.value || '#6366f1';
-        
-        updates[`teams/${key}/avatar`] = avatar;
-        updates[`teams/${key}/name`] = name;
-        updates[`teams/${key}/color`] = color;
-      });
-
-      try {
-        await PhygitalDB.getRoomRef(currentRoomPin).update(updates);
-        Swal.fire('บันทึกสำเร็จ', 'อัปเดตข้อมูล 6 กลุ่มเรียบร้อยแล้ว', 'success');
-      } catch (e) {
-        Swal.fire('ข้อผิดพลาด', e.message, 'error');
-      }
-    }
-
-    // Team Adjustment Modal
-    function openAdjustTeamModal(teamId, name, avatar, score, tile) {
-      document.getElementById('adjustTeamId').value = teamId;
-      document.getElementById('adjustTeamName').textContent = name;
-      document.getElementById('adjustTeamAvatar').textContent = avatar;
-      document.getElementById('adjustScoreInput').value = score;
-      document.getElementById('adjustTileInput').value = tile;
-      openModal('teamAdjustModal');
-    }
-
-    function changeAdjustScore(delta) {
-      const input = document.getElementById('adjustScoreInput');
-      input.value = Math.max(0, (parseInt(input.value) || 0) + delta);
-    }
-
-    function changeAdjustTile(delta) {
-      const input = document.getElementById('adjustTileInput');
-      input.value = Math.max(0, (parseInt(input.value) || 0) + delta);
-    }
-
-    async function submitAdjustTeam() {
-      if (!currentRoomPin) return;
-      const teamId = document.getElementById('adjustTeamId').value;
-      const score = parseInt(document.getElementById('adjustScoreInput').value) || 0;
-      const tile = parseInt(document.getElementById('adjustTileInput').value) || 0;
-
-      try {
-        await PhygitalDB.updateTeamData(currentRoomPin, teamId, {
-          score,
-          current_tile: tile
-        });
-        await PhygitalDB.addLog(currentRoomPin, {
-          team_id: teamId,
-          type: 'score',
-          message: `ครูผู้สอนปรับข้อมูลทีม ${teamId}: คะแนน = ${score} แต้ม, ช่อง = ${tile}`
-        });
-
-        closeModal('teamAdjustModal');
-        Swal.fire({
-          icon: 'success',
-          title: 'ปรับปรุงข้อมูลเรียบร้อย',
-          timer: 1500,
-          showConfirmButton: false
-        });
-      } catch (e) {
-        Swal.fire('ข้อผิดพลาด', e.message, 'error');
-      }
-    }
-
-    // QR Code Modal & Link Copying
-    function showQRCodeModal() {
-      if (!currentRoomPin) return;
-      const url = getStudentAppUrl();
-      const container = document.getElementById('qrCanvasContainer');
-      container.innerHTML = '';
-      
-      new QRCode(container, {
-        text: url,
-        width: 200,
-        height: 200,
-        colorDark: "#0f172a",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-      });
-
-      document.getElementById('qrPinLabel').textContent = `PIN: ${currentRoomPin}`;
+      const qrContainer = document.getElementById('qrCanvasContainer');
+      qrContainer.innerHTML = '';
+      const url = `${window.location.origin}${window.location.pathname.replace('admin.html', 'index.html')}?pin=${currentRoomPin}`;
+      new QRCode(qrContainer, { text: url, width: 180, height: 180 });
       openModal('qrModal');
     }
-
-    function getStudentAppUrl() {
-      const loc = window.location;
-      const baseUrl = loc.href.substring(0, loc.href.lastIndexOf('/'));
-      return `${baseUrl}/student.html?pin=${currentRoomPin}`;
-    }
-
     function copyRoomLink() {
       if (!currentRoomPin) return;
-      const url = getStudentAppUrl();
-      navigator.clipboard.writeText(url).then(() => {
-        Swal.fire({
-          icon: 'success',
-          title: 'คัดลอกลิงก์แล้ว!',
-          text: `ส่งลิงก์นี้นักเรียนจะเข้าห้อง ${currentRoomPin} ได้ทันที`,
-          timer: 2000,
-          showConfirmButton: false
-        });
-      });
+      const url = `${window.location.origin}${window.location.pathname.replace('admin.html', 'index.html')}?pin=${currentRoomPin}`;
+      navigator.clipboard.writeText(url);
+      Swal.fire({ icon: 'success', title: 'คัดลอกลิงก์สำเร็จ!', text: url, timer: 1500, showConfirmButton: false });
     }
 
-    // Export Logs to CSV
+    // Firebase Modal Actions
+    function openFirebaseConfigModal() {
+      const stored = PhygitalDB.getStoredConfig();
+      document.getElementById('firebaseConfigTextarea').value = stored ? JSON.stringify(stored, null, 2) : '';
+      openModal('firebaseModal');
+    }
+    function loadSampleFirebaseConfig() {
+      document.getElementById('firebaseConfigTextarea').value = JSON.stringify(SAMPLE_FIREBASE_CONFIG, null, 2);
+    }
+    function saveFirebaseConfigFromModal() {
+      const raw = document.getElementById('firebaseConfigTextarea').value.trim();
+      if (!raw) return;
+      try {
+        const parsed = JSON.parse(raw);
+        PhygitalDB.saveConfig(parsed);
+        initFirebaseApp();
+        closeModal('firebaseModal');
+        Swal.fire('สำเร็จ', 'บันทึกการเชื่อมต่อ Firebase แล้ว', 'success');
+      } catch (e) {
+        Swal.fire('รูปแบบ JSON ไม่ถูกต้อง', e.message, 'error');
+      }
+    }
+
+    // Logs Actions
     function exportLogsToCSV() {
       if (!currentRoomData?.logs) {
         Swal.fire('ไม่มีข้อมูล', 'ยังไม่มีประวัติกิจกรรมให้ Export', 'info');
@@ -2109,14 +1460,12 @@
         const time = l.timestamp ? new Date(l.timestamp).toLocaleString('th-TH') : '';
         csv += `${idx + 1},"${time}","${l.type || ''}","${(l.message || '').replace(/"/g, '""')}"\n`;
       });
-
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = `Game_Logs_${currentRoomPin}_${Date.now()}.csv`;
       link.click();
     }
-
     async function clearRoomLogs() {
       if (!currentRoomPin) return;
       const res = await Swal.fire({
@@ -2124,10 +1473,9 @@
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#e11d48',
-        cancelButtonText: 'ยกเลิก',
-        confirmButtonText: 'ล้างประวัติ'
+        confirmButtonText: 'ล้างประวัติ',
+        cancelButtonText: 'ยกเลิก'
       });
-
       if (res.isConfirmed) {
         await PhygitalDB.getRoomRef(currentRoomPin).child('logs').remove();
         Swal.fire('ล้างเรียบร้อย', '', 'success');
