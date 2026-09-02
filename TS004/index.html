@@ -220,9 +220,15 @@
         </div>
       </div>
 
-      <!-- Right Action Controls (Admin + Leaderboard) -->
+      <!-- Right Action Controls (Home + Leaderboard + Admin) -->
       <div class="flex items-center space-x-2">
         
+        <!-- Home / Back Button -->
+        <button onclick="handleBackToHome()" title="กลับสู่หน้าแรก" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 hover:text-white flex items-center space-x-1.5 transition-all cursor-pointer">
+          <i data-lucide="home" class="w-3.5 h-3.5 text-indigo-400"></i>
+          <span class="hidden sm:inline">หน้าแรก</span>
+        </button>
+
         <!-- Live Leaderboard Button -->
         <button onclick="openLeaderboardModal()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-amber-400 hover:text-white flex items-center space-x-1.5 transition-all">
           <i data-lucide="trophy" class="w-3.5 h-3.5 text-amber-400"></i>
@@ -299,8 +305,32 @@
         </p>
       </div>
 
+      <!-- Active Game Resume Banner (หากมีเกมที่เล่นค้างอยู่) -->
+      <div id="landingResumeCard" class="hidden max-w-sm mx-auto p-3.5 rounded-2xl border border-indigo-500/50 bg-indigo-950/80 shadow-2xl text-left space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold text-indigo-300 flex items-center space-x-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>มีเกมที่เล่นค้างอยู่ (เซฟอัตโนมัติ)</span>
+          </span>
+          <span id="landingResumePin" class="text-xs font-mono font-bold text-amber-400">PIN: 999999</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2.5">
+            <span id="landingResumeAvatar" class="text-2xl">🦁</span>
+            <div>
+              <h4 id="landingResumeTeamName" class="text-xs font-black text-white">กลุ่ม 1</h4>
+              <p id="landingResumeScore" class="text-[10px] text-slate-300">คะแนนสะสม: 0 แต้ม</p>
+            </div>
+          </div>
+          <button onclick="resumeSavedGameSession()" class="py-2 px-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md shadow-emerald-600/30 flex items-center space-x-1 cursor-pointer">
+            <i data-lucide="play" class="w-3.5 h-3.5"></i>
+            <span>เล่นต่อทันที</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Main Action Buttons -->
-      <div class="max-w-sm mx-auto space-y-2.5 pt-2">
+      <div class="max-w-sm mx-auto space-y-2.5 pt-1">
         <button onclick="goToJoinStage()" class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-black font-heading text-base sm:text-lg shadow-xl shadow-indigo-600/40 hover:shadow-indigo-500/60 active:scale-95 transition-all flex items-center justify-center space-x-2.5">
           <i data-lucide="play" class="w-5 h-5 fill-current"></i>
           <span>เข้าร่วมเล่นเกม (Enter Room PIN)</span>
@@ -907,16 +937,81 @@
     }
 
     // Stage Navigation (Landing ➔ Join ➔ Gameplay)
-    function goToLandingStage() {
-      localStorage.removeItem('STUDENT_ROOM_PIN');
-      localStorage.removeItem('STUDENT_TEAM_ID');
-      currentRoomPin = null;
+    function goToLandingStage(keepSession = false) {
+      if (!keepSession) {
+        localStorage.removeItem('STUDENT_ROOM_PIN');
+        localStorage.removeItem('STUDENT_TEAM_ID');
+      }
       currentTeamId = null;
       document.getElementById('topTeamBadge').classList.add('hidden');
       document.getElementById('topRoomPinText').textContent = 'เกมบันไดงูฐานกิจกรรม';
       document.getElementById('stage-landing').classList.remove('hidden');
       document.getElementById('stage-join').classList.add('hidden');
       document.getElementById('stage-gameplay').classList.add('hidden');
+      checkAndRenderLandingResumeCard();
+    }
+
+    // ปุ่มย้อนกลับหน้าแรก (พร้อมแจ้งเตือนความปลอดภัยของข้อมูลกลุ่ม)
+    async function handleBackToHome() {
+      if (currentTeamId && roomData?.teams?.[currentTeamId]) {
+        const myTeam = roomData.teams[currentTeamId];
+        const res = await Swal.fire({
+          title: 'ออกจากเกมชั่วคราว?',
+          html: `
+            <div class="text-left text-xs text-slate-300 space-y-2 py-1 bg-slate-900/80 p-3 rounded-xl border border-slate-700">
+              <p>👥 กลุ่ม: <b class="text-white">${myTeam.name}</b> (${myTeam.avatar || '🦁'})</p>
+              <p>🏆 คะแนนสะสม: <b class="text-amber-400 font-bold font-mono text-sm">${myTeam.score || 0} แต้ม</b> (ช่องที่ ${myTeam.current_tile || 0})</p>
+              <p class="text-emerald-400 font-bold">✅ ข้อมูลทั้งหมดถูกเซฟไว้อย่างปลอดภัย</p>
+              <p class="text-slate-400 text-[11px]">คุณสามารถกลับเข้าห้องนี้เพื่อเล่นต่อได้ตลอดเวลาโดยไม่ต้องเริ่มใหม่ครับ</p>
+            </div>
+          `,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#6366f1',
+          cancelButtonColor: '#64748b',
+          confirmButtonText: '🏠 ยืนยันกลับหน้าแรก',
+          cancelButtonText: 'เล่นเกมต่อ'
+        });
+        if (res.isConfirmed) {
+          goToLandingStage(true); // เก็บ session ไว้เพื่อให้กดปุ่ม "เล่นต่อทันที" ได้
+        }
+      } else {
+        goToLandingStage(false);
+      }
+    }
+
+    // ตรวจสอบและแสดงการ์ด "เล่นต่อทันที" บนหน้าแรก
+    function checkAndRenderLandingResumeCard() {
+      const savedPin = localStorage.getItem('STUDENT_ROOM_PIN') || localStorage.getItem('PHYGITAL_CURRENT_ROOM_PIN');
+      const savedTeam = localStorage.getItem('STUDENT_TEAM_ID');
+      const resumeCard = document.getElementById('landingResumeCard');
+      if (!resumeCard) return;
+
+      if (savedPin && savedTeam) {
+        const room = PhygitalDB.getLocalRoom(savedPin);
+        const team = room?.teams?.[savedTeam];
+        if (team) {
+          document.getElementById('landingResumePin').textContent = `PIN: ${savedPin}`;
+          document.getElementById('landingResumeAvatar').textContent = team.avatar || '🦁';
+          document.getElementById('landingResumeTeamName').textContent = team.name;
+          document.getElementById('landingResumeScore').textContent = `คะแนนสะสม: ${team.score || 0} แต้ม (ช่องที่ ${team.current_tile || 0})`;
+          resumeCard.classList.remove('hidden');
+          return;
+        }
+      }
+      resumeCard.classList.add('hidden');
+    }
+
+    // กดปุ่มเล่นต่อทันทีจากหน้าแรก
+    function resumeSavedGameSession() {
+      const savedPin = localStorage.getItem('STUDENT_ROOM_PIN') || localStorage.getItem('PHYGITAL_CURRENT_ROOM_PIN');
+      const savedTeam = localStorage.getItem('STUDENT_TEAM_ID');
+      if (savedPin && savedTeam) {
+        document.getElementById('joinPinInput').value = savedPin;
+        goToJoinStage();
+        checkAndLoadRoom(savedTeam);
+        playFanfare();
+      }
     }
 
     function goToJoinStage() {
@@ -962,6 +1057,7 @@
         document.getElementById('stage-landing').classList.remove('hidden');
         document.getElementById('stage-join').classList.add('hidden');
         document.getElementById('stage-gameplay').classList.add('hidden');
+        checkAndRenderLandingResumeCard();
       }
     });
 
@@ -1391,19 +1487,7 @@
     }
 
     async function confirmLeaveTeam() {
-      const res = await Swal.fire({
-        title: 'ออกจากกลุ่ม หรือกลับหน้าหลัก?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'กลับหน้าหลัก',
-        cancelButtonText: 'ยกเลิก'
-      });
-      if (res.isConfirmed) {
-        currentTeamId = null;
-        localStorage.removeItem('STUDENT_TEAM_ID');
-        document.getElementById('topTeamBadge').classList.add('hidden');
-        goToLandingStage();
-      }
+      return handleBackToHome();
     }
 
     // Board Fullscreen / Expand Toggle
